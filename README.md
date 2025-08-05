@@ -1,4 +1,4 @@
-![header](https://capsule-render.vercel.app/api?type=venom&color=FFB6C1&height=300&section=header&text=PIUM&fontSize=90&fontColor=FFFFFF)
+![header](https://capsule-render.vercel.app/api?type=venom&color=FFB6C1&height=300&section=header&text=PIUM&fontSize=90&fontColor=EDF2F7)
 
 # 🌸 피움 (PIUM)
 
