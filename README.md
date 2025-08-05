@@ -45,11 +45,19 @@
 
 **🦁 사자달려** - 지역 경제 활성화를 위한 AI 솔루션 개발
 
+<!--
 | 역할 | 구성원 | 담당 |
 |------|--------|------|
-| Frontend | 이영수, 김태연 | React, TypeScript, UI/UX |
-| Backend | 오인화, 김다빈, 정상원 | FastAPI, MongoDB, API |
+| Frontend | 이영수 김태연 | React, TypeScript, UI/UX |
+| Backend | 오인화 김다빈 정상원 | FastAPI, MongoDB, API |
 | Design | 정시연 | UI/UX, 브랜딩 |
+-->
+
+| 역할 | 구성원 | 담당 |
+|------|--------|------|
+| Frontend | ![이영수](https://img.shields.io/badge/chaechae--04-100000?style=for-the-badge&logo=github&logoColor=white) ![김태연](https://img.shields.io/badge/gomdollgun-100000?style=for-the-badge&logo=github&logoColor=white) | React, TypeScript, UI/UX |
+| Backend | ![오인화](https://img.shields.io/badge/farmercodel-100000?style=for-the-badge&logo=github&logoColor=white) ![김다빈](https://img.shields.io/badge/i3inni-100000?style=for-the-badge&logo=github&logoColor=white) ![정상원](https://img.shields.io/badge/sangwon--jung--cell-100000?style=for-the-badge&logo=github&logoColor=white) | FastAPI, MongoDB, API |
+| Design | ![정시연](https://img.shields.io/badge/siyeon0473-100000?style=for-the-badge&logo=github&logoColor=white) | UI/UX, 브랜딩 |
 
 <br>
 
