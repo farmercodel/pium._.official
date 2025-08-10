@@ -23,15 +23,15 @@ read -p "선택 (1-4): " choice
 case $choice in
     1)
         echo "🌐 Frontend 로그를 보여줍니다..."
-        docker-compose logs -f frontend
+        docker-compose logs frontend
         ;;
     2)
         echo "🔧 Backend 로그를 보여줍니다..."
-        docker-compose logs -f backend
+        docker-compose logs backend
         ;;
     3)
         echo "📊 모든 서비스 로그를 보여줍니다..."
-        docker-compose logs -f
+        docker-compose logs
         ;;
     4)
         echo "📝 사용 가능한 서비스:"
@@ -40,7 +40,7 @@ case $choice in
         read -p "서비스 이름을 입력하세요: " service_name
         if docker-compose ps | grep -q "$service_name"; then
             echo "📋 $service_name 로그를 보여줍니다..."
-            docker-compose logs -f "$service_name"
+            docker-compose logs "$service_name"
         else
             echo "❌ '$service_name' 서비스를 찾을 수 없습니다."
         fi

@@ -24,13 +24,13 @@ set /p choice="선택 (1-4): "
 
 if "%choice%"=="1" (
     echo 🌐 Frontend 로그를 보여줍니다...
-    docker-compose logs -f frontend
+    docker-compose logs frontend
 ) else if "%choice%"=="2" (
     echo 🔧 Backend 로그를 보여줍니다...
-    docker-compose logs -f backend
+    docker-compose logs backend
 ) else if "%choice%"=="3" (
     echo 📊 모든 서비스 로그를 보여줍니다...
-    docker-compose logs -f
+    docker-compose logs
 ) else if "%choice%"=="4" (
     echo 📝 사용 가능한 서비스:
     docker-compose ps --services
