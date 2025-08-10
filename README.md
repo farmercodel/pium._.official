@@ -41,6 +41,20 @@
 
 <br>
 
+## 📁 프로젝트 구조
+```bash
+pium._.ofiicial/            # 프로젝트 루트 폴더
+├── frontend/               # React + TypeScript 프론트엔드
+├── backend/                # FastAPI 백엔드 서버
+├── database/               # Database 관련 파일
+├── docs/                   # 문서 폴더
+├── docker-compose.yml      # Docker 컨테이너 설정
+└── *.sh/*.bat              # 실행 스크립트
+```
+
+
+<br>
+
 ## 🐳 Docker 로 실행하기
 
 ### 💻 Mac/Linux
