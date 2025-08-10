@@ -13,4 +13,17 @@ services:
     environment:
       - NODE_ENV=development
     stdin_open: true
-    tty: true 
+    tty: true
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - frontend 
