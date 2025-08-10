@@ -22,6 +22,43 @@
 
 <br>
 
+## 🐳 Docker 로 실행하기
+
+### 💻 Mac/Linux
+```bash
+# 초기 셋팅 (처음 1회만)
+./setup.sh
+
+# Docker 컨테이너 실행
+./start-dev.sh
+
+# log 확인
+./logs.sh
+
+# Docker 컨테이너 종료
+./stop.sh
+```
+
+<br>
+
+### 💻 Windows
+```PowerShell
+# 초기 셋팅 (처음 1회만)
+.\setup.bat
+
+# Docker 컨테이너 실행
+.\start-dev.bat
+
+# log 확인
+.\logs.bat
+
+# Docker 컨테이너 종료
+.\stop.bat
+```
+
+
+<br>
+
 ## 🛠️ 기술 스택
 
 <!-- 
