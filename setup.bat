@@ -39,11 +39,7 @@ if %errorlevel% neq 0 (
 
 echo ✅ Docker 서비스가 정상적으로 실행 중입니다.
 
-REM 프로젝트 시작
-echo.
-echo 🎯 프로젝트를 시작합니다...
-call start.bat
-
+REM 명령어 설명
 echo.
 echo 🎉 초기 설정이 완료되었습니다!
 echo.
