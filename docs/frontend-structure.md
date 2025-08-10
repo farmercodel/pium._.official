@@ -1,21 +1,20 @@
-# 📂 FRONTEND FILE STURCTURE
+# 📂 Frontend File Structure
 
 ```bash
-frontend/               # FE 루트 폴더
+frontend/                   # FE 루트 폴더
 ├── src/
-    ├── components/     # 컴포넌트 요소 관리용 폴더
-        ├── common/     # 흔하게 재사용하는 요소 관리용 폴더
-        ├── layout/     # Header, Layout, Footer 관리용 폴더
-        └── pageName/   # 각 페이지별 요소 관리용 폴더 (폴더 이름을 main, profile 등으로 작성)
-    ├── constants/      # 상수 관리 (페이지 텍스트 등)
-    ├── hooks/          # 
-    ├── pages/          #
-    ├── types/          #
-    ├── utils/          #
-    ├── App.tsx         # 라우팅 설정    
-    ├── index.css       # Tailwind CSS 설정
-    └── main.tsx        # 웹 진입지점
-├── index.html          # 클라이언트에게 보이는 화면
-└── .*                  # FE 설정 파일(node_module, tsconfig.json, package.json 등)
- 
+│   ├── components/         # 재사용 가능한 컴포넌트
+│   │   ├── common/         # 공통 컴포넌트 (Button, Input 등)
+│   │   ├── layout/         # 레이아웃 컴포넌트 (Header, Footer, Sidebar)
+│   │   └── pageName/       # 페이지별 전용 컴포넌트
+│   ├── constants/          # 상수 정의 (API URL, 텍스트 등)
+│   ├── hooks/              # 커스텀 React 훅
+│   ├── pages/              # 페이지 컴포넌트
+│   ├── types/              # TypeScript 타입 정의
+│   ├── utils/              # 유틸리티 함수
+│   ├── App.tsx             # 메인 앱 컴포넌트 및 라우팅
+│   ├── index.css           # 글로벌 스타일 (Tailwind CSS 포함)
+│   └── main.tsx            # 애플리케이션 진입점
+├── index.html              # HTML 템플릿
+└── .*                      # 설정 파일 (package.json, tsconfig.json 등)
 ```
