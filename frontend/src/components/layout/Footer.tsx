@@ -1,8 +1,10 @@
 function Footer() {
     return (
-        <div>
-            <h1>Footer</h1>
-        </div>
+        <footer className="w-full bg-green-300 text-black py-6">
+            <div className="w-full px-4 text-center">
+                Footer
+            </div>
+        </footer>
     )
 }
 
