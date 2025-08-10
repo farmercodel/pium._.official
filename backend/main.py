@@ -6,7 +6,7 @@ app = FastAPI(title="Pium API", version="1.0.0")
 # CORS 미들웨어 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 프로덕션에서는 특정 도메인으로 제한하세요
+    allow_origins=["*"],  # 프로덕션에서는 특정 도메인 제한
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
