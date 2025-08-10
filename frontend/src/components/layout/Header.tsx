@@ -1,8 +1,10 @@
 function Header() {
     return (
-        <div>
-            <h1>Header</h1>
-        </div>
+        <header className="w-full bg-white shadow-sm fixed top-0 z-50">
+            <div className="w-full px-4 py-4">
+                header
+            </div>
+        </header>
     )
 }
 
