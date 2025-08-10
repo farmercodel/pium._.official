@@ -1,5 +1,8 @@
 # 📂 Frontend File Structure
 
+## 📋 개요
+프론트엔드 폴더 구조를 보여주는 문서입니다.
+
 ## 👀 폴더 구조 한눈에 보기
 
 ```bash
