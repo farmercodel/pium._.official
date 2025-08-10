@@ -18,7 +18,8 @@
 | `setup.sh` | 초기 설정 (1회만) | `./setup.sh` |
 | `start-dev.sh` | 개발 컨테이너 실행 | `./start-dev.sh` |
 | `logs.sh` | 로그 확인 | `./logs.sh` → 1~4 선택 |
-| `stop.sh` | 컨테이너 중지 | `./stop.sh` |
+| `stop-dev.sh` | 컨테이너 중지 | `./stop-dev.sh` |
+| `clean-docker.sh` | Docker 이미지/캐시 정리 | `./clean-docker.sh` |
 
 <br>
 
@@ -35,7 +36,8 @@
 | `setup.bat` | 초기 설정 (1회만) | `.\setup.bat` |
 | `start-dev.bat` | 개발 컨테이너 실행 | `.\start-dev.bat` |
 | `logs.bat` | 로그 확인 | `.\logs.bat` → 1~4 선택 |
-| `stop.bat` | 컨테이너 중지 | `.\stop.bat` |
+| `stop-dev.bat` | 컨테이너 중지 | `.\stop-dev.bat` |
+| `clean-docker.bat` | Docker 이미지/캐시 정리 | `.\clean-docker.bat` |
 
 <br>
 
@@ -67,4 +69,19 @@ docker info
 
 # Windows
 .\logs.bat
+```
+
+### Docker 정리 (이미지/캐시 삭제)
+```bash
+# Mac/Linux
+./clean-docker.sh
+
+# Windows
+.\clean-docker.bat
+```
+
+### Docker 상태 확인
+```bash
+docker images
+docker system df
 ```
