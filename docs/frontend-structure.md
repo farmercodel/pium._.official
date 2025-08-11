@@ -47,3 +47,58 @@ frontend/                   # FE 루트 폴더
 |src/main.tsx|애플리케이션 진입점||
 |frontend/index.html|HTML 템플릿||
 |frontend/.*|설정파일|package.json, tsconfig.json 등|
+
+<br>
+
+***
+
+### 폴더 구조간의 관계도
+
+```mermaid
+graph TD
+  Header.tsx -->|네비게이션 포함| Layout.tsx
+  MainPage.tsx -->|메인 콘텐츠| Layout.tsx
+  Footer.tsx -->|푸터 정보| Layout.tsx
+
+  Layout.tsx -->|레이아웃 래핑| App.tsx
+
+  PageLayout.tsx -->|페이지 구조 정의| MainPage.tsx
+  pageLayout.ts -->|타입 정의| PageLayout.tsx
+  
+  Button.tsx -->|재사용 가능한 버튼| MainPage.tsx
+  Image.tsx -->|이미지 컴포넌트| MainPage.tsx
+  
+  headerConstant.ts -->|헤더 메뉴 상수| Header.tsx
+  useNavigation.ts -->|라우팅 로직| Header.tsx
+
+  subgraph Layout_section ["Layout 구조"]
+    subgraph Header_section ["Header 영역"]
+      Header.tsx
+    end
+
+    subgraph content_section ["content 영역"]
+      style content_section stroke-dasharray: 5 5
+      MainPage.tsx
+    end
+
+    subgraph Footer_section ["Footer 영역"]
+      Footer.tsx
+    end
+  end
+```
+
+### 데이터의 흐름도
+```mermaid
+graph LR
+  headerConstant.ts -->|MAIN_NAVIGATION_ITEMS| Header.tsx
+  headerConstant.ts -->|POPUP_NAVIGATION_ITEMS| Header.tsx
+  
+  useNavigation.ts -->|goToMain 등 라우팅 함수| Header.tsx
+  
+  Header.tsx -->|네비게이션 이벤트| Layout.tsx
+  MainPage.tsx -->|페이지 콘텐츠| Layout.tsx
+  
+  Layout.tsx -->|전체 구조| App.tsx
+```
+
+
