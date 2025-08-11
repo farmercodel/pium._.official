@@ -52,13 +52,15 @@ frontend/                   # FE 루트 폴더
 
 ***
 
-### 폴더 구조간의 관계도
+<br>
+
+## 🔗 컴포넌트 관계도
 
 ```mermaid
 graph TD
-  Header.tsx -->|네비게이션 포함| Layout.tsx
+  Header.tsx -->|Header 정보| Layout.tsx
   MainPage.tsx -->|메인 콘텐츠| Layout.tsx
-  Footer.tsx -->|푸터 정보| Layout.tsx
+  Footer.tsx -->|Footer 정보| Layout.tsx
 
   Layout.tsx -->|레이아웃 래핑| App.tsx
 
@@ -95,7 +97,7 @@ graph TD
   end
 ```
 
-### 데이터의 흐름도
+## 🌊 데이터의 흐름도
 ```mermaid
 graph LR
   headerConstant.ts -->|MAIN_NAVIGATION_ITEMS| Header.tsx
