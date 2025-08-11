@@ -11,6 +11,7 @@ class BusinessHours(BaseModel):
 ToneEnum = Literal["Casual","professional","Witty","emotional","urgent","luxury"]
 
 class GenerateAdRequest(BaseModel):
+    session_id: Optional[str] = None  # FE에서 uuid 생성해 넣어오기
     # 필수
     store_name: str
     area_keywords: List[str]

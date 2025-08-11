@@ -1,5 +1,6 @@
 # backend/app/services/GA_Service.py
 import os, re
+import uuid
 from typing import List, Optional, Iterable, Dict, Any
 from anyio import to_thread
 from openai import OpenAI, OpenAIError
@@ -149,7 +150,7 @@ def _parse_variants(text: str) -> List[Dict[str, Any]]:
         
         body = _clean_caption_title(body)  # ← 여기서 '캡션 1:' 제거
         content = body if not hashtag_line else (body.rstrip() + "\n\n" + hashtag_line)
-        variants.append({"content": content})
+        variants.append({"id": str(uuid.uuid4()), "content": content})
     return variants
 
 
