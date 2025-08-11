@@ -1,5 +1,7 @@
+# backend\app\main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api import generate_ad
 
 app = FastAPI(title="Pium API", version="1.0.0")
 
@@ -20,6 +22,8 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+app.include_router(generate_ad.router, prefix="/gpt", tags=["GPT"])
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run(app, host="0.0.0.0", port=8000)
