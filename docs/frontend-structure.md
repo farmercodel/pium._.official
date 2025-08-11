@@ -65,11 +65,19 @@ graph TD
   PageLayout.tsx -->|페이지 구조 정의| MainPage.tsx
   pageLayout.ts -->|타입 정의| PageLayout.tsx
   
-  Button.tsx -->|재사용 가능한 버튼| MainPage.tsx
-  Image.tsx -->|이미지 컴포넌트| MainPage.tsx
-  
+  components -->|Header, content, Footer 에 포함| Layout_section
+
   headerConstant.ts -->|헤더 메뉴 상수| Header.tsx
   useNavigation.ts -->|라우팅 로직| Header.tsx
+
+  subgraph components ["재사용 가능한 컴포넌트"]
+    Button.tsx
+    Image.tsx
+    subgraph anotherComponents_section ["Input.tsx Card.tsx 등"]
+      style anotherComponents_section stroke-dasharray: 5 5
+      anotherComponents
+    end
+  end
 
   subgraph Layout_section ["Layout 구조"]
     subgraph Header_section ["Header 영역"]
