@@ -5,6 +5,57 @@ from typing import Optional, List
 import os
 import httpx
 import json
+from datetime import datetime, timezone
+import hmac, hashlib
+from typing import Union
+
+S3_BUCKET = os.getenv("S3_BUCKET")
+S3_REGION = os.getenv("S3_REGION", "kr-standard")
+S3_ENDPOINT = os.getenv("S3_ENDPOINT", "https://kr.object.ncloudstorage.com")
+S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
+S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
+
+def _sign(key: bytes, msg: str) -> bytes:
+    return hmac.new(key, msg.encode(), hashlib.sha256).digest()
+
+def _presigned_get_url(key: str, expires: int = 900) -> str:
+    """NCP(Object Storage) presigned GET URL 생성. key = 'uploads/.../file.png'"""
+    service = "s3"
+    algorithm = "AWS4-HMAC-SHA256"
+    now = datetime.now(timezone.utc)
+    amz_date = now.strftime("%Y%m%dT%H%M%SZ")
+    date_stamp = now.strftime("%Y%m%d")
+    credential_scope = f"{date_stamp}/{S3_REGION}/{service}/aws4_request"
+    host = S3_ENDPOINT.replace("https://","").replace("http://","")
+    path = f"/{S3_BUCKET}/{key}"
+
+    qs = {
+        "X-Amz-Algorithm": algorithm,
+        "X-Amz-Credential": f"{S3_ACCESS_KEY}/{credential_scope}",
+        "X-Amz-Date": amz_date,
+        "X-Amz-Expires": str(expires),
+        "X-Amz-SignedHeaders": "host",
+    }
+    import urllib.parse
+    canonical_query = "&".join(
+        f"{urllib.parse.quote(k, safe='~')}={urllib.parse.quote(v, safe='~')}"
+        for k, v in sorted(qs.items())
+    )
+    canonical_headers = f"host:{host}\n"
+    signed_headers = "host"
+    payload_hash = "UNSIGNED-PAYLOAD"
+    canonical_request = f"GET\n{path}\n{canonical_query}\n{canonical_headers}\n{signed_headers}\n{payload_hash}"
+    string_to_sign = (
+        f"{algorithm}\n{amz_date}\n{credential_scope}\n"
+        f"{hashlib.sha256(canonical_request.encode()).hexdigest()}"
+    )
+    k_date = _sign(("AWS4" + S3_SECRET_KEY).encode(), date_stamp)
+    k_region = _sign(k_date, S3_REGION)
+    k_service = _sign(k_region, service)
+    k_signing = _sign(k_service, "aws4_request")
+    signature = hmac.new(k_signing, string_to_sign.encode(), hashlib.sha256).hexdigest()
+    final_qs = canonical_query + f"&X-Amz-Signature={signature}"
+    return f"{S3_ENDPOINT}{path}?{final_qs}"
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_session
@@ -23,18 +74,11 @@ if not IG_USER_ID or not IG_ACCESS_TOKEN:
     raise RuntimeError("IG_USER_ID/IG_ACCESS_TOKEN 환경변수를 설정하세요 (.env).")
 
 class PublishRequest(BaseModel):
-    # 1) 바로 캡션 주는 방식
     caption: Optional[str] = None
-    # 2) 사용자가 고른 것을 DB에서 가져오는 방식
     session_id: Optional[str] = None
-
-    # 이미지 URL
-    image_url: HttpUrl
-
-    # 테스트용
+    image_urls: Optional[List[HttpUrl]] = None
+    image_keys: Optional[List[str]] = None
     dry_run: bool = False
-
-    # 콜라보 계정 username 리스트
     collaborators: Optional[List[str]] = None
 
     @field_validator("collaborators")
@@ -44,15 +88,7 @@ class PublishRequest(BaseModel):
             return v
         if len(v) > 3:
             raise ValueError("collaborators는 최대 3명까지 가능합니다.")
-        cleaned = []
-        for u in v:
-            u = u.strip()
-            if u.startswith("@"):
-                u = u[1:]
-            if not u:
-                raise ValueError("빈 username은 허용되지 않습니다.")
-            cleaned.append(u)
-        return cleaned
+        return [u.lstrip("@").strip() for u in v if u.strip()]
 
 async def _resolve_caption(db: AsyncSession, req: PublishRequest) -> str:
     if req.caption:
@@ -69,85 +105,92 @@ async def _resolve_caption(db: AsyncSession, req: PublishRequest) -> str:
 async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session)):
     caption = await _resolve_caption(db, req)
 
-    # (1) 컨테이너 생성 -> (2) 발행 -> (3) (옵션) 콜라보 상태 조회/폴백
+    if not req.image_urls and not req.image_keys:
+        raise HTTPException(status_code=400, detail="image_urls 또는 image_keys 중 하나는 필요합니다.")
+
+    # 이미지 URL 생성
+    if req.image_urls:
+        img_urls = [str(u) for u in req.image_urls]
+    else:
+        img_urls = [_presigned_get_url(k, expires=900) for k in req.image_keys]
+
     async with httpx.AsyncClient(timeout=60) as client:
-        # 1) media 컨테이너 생성
-        params = {
-            "image_url": str(req.image_url),
-            "caption": caption,
-            "access_token": IG_ACCESS_TOKEN,
-        }
+        creation_ids = []
+        # 1장씩 media 생성
+        for img_url in img_urls:
+            params = {
+                "image_url": img_url,
+                "access_token": IG_ACCESS_TOKEN
+            }
+            if len(img_urls) == 1:
+                params["caption"] = caption
+                if req.collaborators:
+                    params["collaborators"] = json.dumps(req.collaborators)
+            else:
+                params["is_carousel_item"] = "true"
 
-        # collaborators를 지원하는 환경이면 생성 단계에서 함께 전달
-        if req.collaborators:
-            # Graph API는 JSON 문자열 배열 형식을 기대하므로 dump
-            params["collaborators"] = json.dumps(req.collaborators)
+            r = await client.post(f"{GRAPH_BASE}/{IG_USER_ID}/media", params=params)
+            if r.status_code >= 400:
+                raise HTTPException(status_code=502, detail=f"IG media 생성 실패: {r.text}")
+            creation_ids.append(r.json()["id"])
 
-        r1 = await client.post(f"{GRAPH_BASE}/{IG_USER_ID}/media", params=params)
-        if r1.status_code >= 400:
-            raise HTTPException(status_code=502, detail=f"IG media 생성 실패: {r1.text}")
-        creation_id = r1.json().get("id")
-        if not creation_id:
-            raise HTTPException(status_code=502, detail="IG creation_id 응답 누락")
+        # 캐러셀 parent 생성
+        if len(creation_ids) > 1:
+            params = {
+                "media_type": "CAROUSEL",
+                "children": json.dumps(creation_ids),
+                "caption": caption,
+                "access_token": IG_ACCESS_TOKEN,
+            }
+            if req.collaborators:
+                params["collaborators"] = json.dumps(req.collaborators)
 
-        if req.dry_run:
-            return {"ok": True, "creation_id": creation_id, "published": False}
+            r = await client.post(f"{GRAPH_BASE}/{IG_USER_ID}/media", params=params)
+            if r.status_code >= 400:
+                raise HTTPException(status_code=502, detail=f"IG carousel 생성 실패: {r.text}")
+            parent_creation_id = r.json()["id"]
+        else:
+            parent_creation_id = creation_ids[0]
 
-        # 2) 발행
-        r2 = await client.post(
+        # 발행
+        r_pub = await client.post(
             f"{GRAPH_BASE}/{IG_USER_ID}/media_publish",
-            params={"creation_id": creation_id, "access_token": IG_ACCESS_TOKEN},
+            params={"creation_id": parent_creation_id, "access_token": IG_ACCESS_TOKEN},
         )
-        if r2.status_code >= 400:
-            raise HTTPException(status_code=502, detail=f"IG 게시 실패: {r2.text}")
-        media_id = r2.json().get("id")
+        if r_pub.status_code >= 400:
+            raise HTTPException(status_code=502, detail=f"IG 게시 실패: {r_pub.text}")
+
+        media_id = r_pub.json()["id"]
+
+        # 폴백 공동소유자 설정
+        collaborators_status = None
+        if req.collaborators:
+            usernames_str = ",".join(req.collaborators)
+            r_c = await client.post(
+                f"{GRAPH_BASE}/{media_id}/collaborators",
+                params={
+                    "access_token": IG_ACCESS_TOKEN,
+                    "usernames": usernames_str,
+                },
+            )
+            if r_c.status_code < 400:
+                collaborators_status = r_c.json()
+
+
 
         # permalink 조회
         permalink = None
-        if media_id:
-            r3 = await client.get(
-                f"{GRAPH_BASE}/{media_id}",
-                params={"fields": "permalink", "access_token": IG_ACCESS_TOKEN},
-            )
-            if r3.status_code < 400:
-                permalink = r3.json().get("permalink")
-
-        # 3) (옵션) 콜라보 확인 및 폴백
-        collaborators_status = None
-        if media_id and req.collaborators:
-            # 우선 초대 현황 조회
-            r4 = await client.get(
-                f"{GRAPH_BASE}/{media_id}/collaborators",
-                params={"access_token": IG_ACCESS_TOKEN},
-            )
-            if r4.status_code < 400:
-                collaborators_status = r4.json().get("data", [])
-
-            # 생성단계 전달이 미반영(빈 배열 등)인 경우 폴백으로 POST 시도
-            need_fallback = not collaborators_status
-            if need_fallback:
-                r5 = await client.post(
-                    f"{GRAPH_BASE}/{media_id}/collaborators",
-                    params={
-                        "access_token": IG_ACCESS_TOKEN,
-                        # usernames 파라미터(JSON 배열 문자열) 사용
-                        "usernames": json.dumps(req.collaborators),
-                    },
-                )
-                # 실패하더라도 본문은 성공적으로 퍼블리시되었으니 오류로 치진 않음
-                if r5.status_code < 400:
-                    # 다시 상태 조회
-                    r6 = await client.get(
-                        f"{GRAPH_BASE}/{media_id}/collaborators",
-                        params={"access_token": IG_ACCESS_TOKEN},
-                    )
-                    if r6.status_code < 400:
-                        collaborators_status = r6.json().get("data", [])
+        r_link = await client.get(
+            f"{GRAPH_BASE}/{media_id}",
+            params={"fields": "permalink", "access_token": IG_ACCESS_TOKEN},
+        )
+        if r_link.status_code < 400:
+            permalink = r_link.json().get("permalink")
 
         return {
             "ok": True,
             "media_id": media_id,
             "permalink": permalink,
             "collaborators": req.collaborators or [],
-            "collaborators_status": collaborators_status,  # [{"id","username","invite_status"}...]
+            "collaborators_status": collaborators_status,
         }
