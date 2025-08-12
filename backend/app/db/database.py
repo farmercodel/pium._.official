@@ -11,7 +11,7 @@ engine = create_async_engine(
     future=True,
     connect_args={
         "server_settings": {
-            "client_encoding": "UTF8",   # ← 핵심
+            "client_encoding": "UTF8",
         }
     },
 )

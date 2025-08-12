@@ -1,7 +1,9 @@
 # backend\app\main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import generate_ad
+from app.api import generate_ad, instagram, files
+from fastapi.staticfiles import StaticFiles
+import os
 
 app = FastAPI(title="Pium API", version="1.0.0")
 
@@ -22,7 +24,18 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
-app.include_router(generate_ad.router, prefix="/gpt", tags=["GPT"])
+
+# 정적 파일 경로 (로컬)
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", r"F:/pium._.official/backend/app/img")
+os.makedirs(MEDIA_ROOT, exist_ok=True)
+
+# /img 경로로 정적 서빙
+app.mount("/img", StaticFiles(directory=MEDIA_ROOT), name="img")
+
+# 라우터
+app.include_router(files.router, prefix="/api", tags=["files"])
+app.include_router(generate_ad.router, prefix="/api", tags=["GPT"])
+app.include_router(instagram.router, prefix="/api", tags=["instagram"])
 
 if __name__ == "__main__":
     import uvicorn
