@@ -1,9 +1,11 @@
 import {
+    DocumentChartBarIcon,
+    BookOpenIcon,
+/*
     ArrowPathIcon,
-    ChartPieIcon,
-    CursorArrowRaysIcon,
     FingerPrintIcon,
     SquaresPlusIcon,
+*/
 } from '@heroicons/react/24/outline'
 
 import { PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
@@ -17,7 +19,7 @@ const LOGO_ITEMS = {
 
 const MAIN_NAVIGATION_ITEMS = [
     {
-        name: 'Product',
+        name: 'AI',
         navigationIndex: 0,
     },
     {
@@ -30,23 +32,24 @@ const MAIN_NAVIGATION_ITEMS = [
     },
     {
         name: 'About',
-        navigationIndex: 0,
+        navigationIndex: 4,
     },
 ] as const
 
 const POPUP_NAVIGATION_ITEMS = [
     {
-        name: 'Analytics', 
-        description: 'Get a better understanding of your traffic', 
-        navigationIndex: 0, 
-        icon: ChartPieIcon
+        name: '마케팅 생성', 
+        description: '마케팅 관련 콘텐츠 생성', 
+        navigationIndex: 1, 
+        icon: DocumentChartBarIcon
     },
     { 
-        name: 'Engagement', 
-        description: 'Speak directly to your customers', 
-        navigationIndex: 0, 
-        icon: CursorArrowRaysIcon 
+        name: '가이드', 
+        description: 'Product 사용 가이드', 
+        navigationIndex: 5, 
+        icon: BookOpenIcon 
     },
+/*
     {
          name: 'Security', 
          description: 'Your customers’ data will be safe and secure', 
@@ -65,6 +68,7 @@ const POPUP_NAVIGATION_ITEMS = [
         navigationIndex: 0, 
         icon: ArrowPathIcon 
     },
+*/
 ] as const
 
 const POPUP_ACTION_ITEMS = [

@@ -8,6 +8,7 @@ import SurveyPage from './pages/SurveyPage'
 import GenerationPage from './pages/GenerationPage'
 import ResultPage from './pages/ResultPage'
 import AboutPage from './pages/AboutPage'
+import GuidePage from './pages/GuidePage'
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
           <Route path="/generation" element={<GenerationPage />} />
           <Route path="/result" element={<ResultPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/guide" element={<GuidePage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

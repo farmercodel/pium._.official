@@ -8,6 +8,7 @@ const useNavigation = () => {
     const goToGeneration = () => navigate("/generation")
     const goToResult = () => navigate("/result")
     const goToAbout = () => navigate("/about")
+    const goToGuide = () => navigate("/guide")
 
     return {
         goToMain,
@@ -15,6 +16,7 @@ const useNavigation = () => {
         goToGeneration,
         goToResult,
         goToAbout,
+        goToGuide,
     }
     
 }
