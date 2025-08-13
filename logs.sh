@@ -14,6 +14,7 @@ fi
 echo "🔍 로그를 볼 서비스를 선택하세요:"
 echo "1) Frontend 로그"
 echo "2) Backend 로그"
+echo "3) Postgres 로그"
 echo "3) 모든 서비스 로그"
 echo "4) 특정 서비스 로그 (직접 입력)"
 echo ""
@@ -30,10 +31,14 @@ case $choice in
         docker-compose logs backend
         ;;
     3)
+        echo "🔍 Postgres 로그를 보여줍니다..."
+        docker-compose logs postgres
+        ;;
+    4)
         echo "📊 모든 서비스 로그를 보여줍니다..."
         docker-compose logs
         ;;
-    4)
+    5)
         echo "📝 사용 가능한 서비스:"
         docker-compose ps --services
         echo ""
