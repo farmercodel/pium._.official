@@ -21,7 +21,7 @@ echo 4) 모든 서비스 로그
 echo 5) 특정 서비스 로그 (직접 입력)
 echo.
 
-set /p choice="선택 (1-4): "
+set /p choice="선택 (1-5): "
 
 if "%choice%"=="1" (
     echo 🌐 Frontend 로그를 보여줍니다...
@@ -30,9 +30,12 @@ if "%choice%"=="1" (
     echo 🔧 Backend 로그를 보여줍니다...
     docker-compose logs backend
 ) else if "%choice%"=="3" (
+    echo 🔍 Postgres 로그를 보여줍니다...
+    docker-compose logs postgres
+) else if "%choice%"=="4" (
     echo 📊 모든 서비스 로그를 보여줍니다...
     docker-compose logs
-) else if "%choice%"=="4" (
+) else if "%choice%"=="5" (
     echo 📝 사용 가능한 서비스:
     docker-compose ps --services
     echo.
