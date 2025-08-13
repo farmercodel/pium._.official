@@ -31,9 +31,27 @@ import Button from '../common/Button'
 
 function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { goToMain, goToSurvey, goToGeneration, goToResult, goToAbout, goToGuide } = useNavigation()
+    const { 
+        goToMain, 
+        goToPreview, 
+        goToEmpty,
+        goToAbout, 
+        goToSurvey, 
+        goToGeneration, 
+        goToResult, 
+        goToGuide 
+    } = useNavigation()
 
-    const navigationHandlers = [goToMain, goToSurvey, goToGeneration, goToResult, goToAbout, goToGuide]
+    const navigationHandlers = [
+        goToMain, 
+        goToPreview,
+        goToEmpty,
+        goToAbout, 
+        goToSurvey, 
+        goToGeneration, 
+        goToResult, 
+        goToGuide
+    ]
 
     const handleNavigationClick = (index: number, close: () => void) => {
         if (navigationHandlers[index]) {

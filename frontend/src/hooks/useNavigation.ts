@@ -4,18 +4,22 @@ const useNavigation = () => {
     const navigate = useNavigate()
 
     const goToMain = () => navigate("/")
+    const goToPreview = () => navigate("/preview")
+    const goToEmpty = () => navigate("/")
+    const goToAbout = () => navigate("/about")
     const goToSurvey = () => navigate("/survey")
     const goToGeneration = () => navigate("/generation")
     const goToResult = () => navigate("/result")
-    const goToAbout = () => navigate("/about")
     const goToGuide = () => navigate("/guide")
 
     return {
         goToMain,
+        goToPreview,
+        goToEmpty,
+        goToAbout,
         goToSurvey,
         goToGeneration,
         goToResult,
-        goToAbout,
         goToGuide,
     }
     
