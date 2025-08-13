@@ -1,7 +1,7 @@
 # backend\app\main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import generate_ad, instagram, files
+from app.api import generate_ad, instagram, files, compose
 from fastapi.staticfiles import StaticFiles
 import os
 
@@ -36,6 +36,7 @@ app.mount("/img", StaticFiles(directory=MEDIA_ROOT), name="img")
 app.include_router(files.router, prefix="/api", tags=["files"])
 app.include_router(generate_ad.router, prefix="/api", tags=["GPT"])
 app.include_router(instagram.router, prefix="/api", tags=["instagram"])
+app.include_router(compose.router, prefix="/api", tags=["compose"])
 
 if __name__ == "__main__":
     import uvicorn

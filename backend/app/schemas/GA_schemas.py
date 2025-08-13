@@ -11,7 +11,7 @@ class BusinessHours(BaseModel):
 ToneEnum = Literal["Casual","professional","Witty","emotional","urgent","luxury"]
 
 class GenerateAdRequest(BaseModel):
-    session_id: Optional[str] = None  # FE에서 uuid 생성해 넣어오기
+    session_id: Optional[str] = None
     # 필수
     store_name: str
     area_keywords: List[str]
@@ -28,7 +28,6 @@ class GenerateAdRequest(BaseModel):
     target_customers: Optional[List[str]] = None
     instagram_id: Optional[str] = None
     promotions: Optional[List[str]] = None
-    thumbnail_image: Optional[HttpUrl] = None
     image_urls: Optional[List[HttpUrl]] = None
     hashtag_limit: int = Field(default=15, ge=1, le=30)
 

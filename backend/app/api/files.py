@@ -125,12 +125,10 @@ async def upload_files(
 
     return {"ok": True, "files": saved}
 
-# ----- presigned GET (비공개 버킷에서도 열람용 임시 URL 발급) -----
 import urllib.parse
 
 @router.get("/files/presigned-get")
 def presigned_get(key: str, expires: int = 600):
-    # key 예: "uploads/no-session/xxxx.png"  (응답의 'rel' 값을 그대로 넘기면 됨)
     if not all([S3_BUCKET, S3_REGION, S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY]):
         raise HTTPException(500, "S3 env not set")
 
@@ -143,7 +141,6 @@ def presigned_get(key: str, expires: int = 600):
     host = S3_ENDPOINT.replace("https://","").replace("http://","")
     path = f"/{S3_BUCKET}/{key}"
 
-    # 정렬된 쿼리
     qs = {
         "X-Amz-Algorithm": algorithm,
         "X-Amz-Credential": f"{S3_ACCESS_KEY}/{credential_scope}",
