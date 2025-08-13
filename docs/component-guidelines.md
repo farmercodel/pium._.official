@@ -79,6 +79,12 @@ graph TD
 | **type**     | `'button'` / `'submit'` / `'reset'` | HTML 버튼 타입 |
 | **fullWidth**| `boolean` | 버튼의 가로 길이를 100%로 설정 |
 
+> 추가할만한 Props <br>
+> hover | `boolean` | false = 호버 X / true = 지정된 hover action <br>
+> shadow | `'none'` / `'small'` / `'medium'` / `'large'` | shadow 크기 <br>
+> 등
+
+
 ---
 
 ### 💻 코드 예시
