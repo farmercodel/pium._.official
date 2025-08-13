@@ -32,6 +32,7 @@ import Button from '../common/Button'
 function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const { 
+        goToAdmin,
         goToMain, 
         goToPreview, 
         goToEmpty,
@@ -43,6 +44,7 @@ function Header() {
     } = useNavigation()
 
     const navigationHandlers = [
+        goToAdmin,
         goToMain, 
         goToPreview,
         goToEmpty,
@@ -73,7 +75,7 @@ function Header() {
                     {/** Logo */}
                     <div
                         className="m-1.5 p-1.5 cursor-pointer"
-                        onClick={() => handleNavigationClick(0, close)}
+                        onClick={() => handleNavigationClick(1, close)}
                     >
                         <img src={LOGO_ITEMS.url} alt={LOGO_ITEMS.alt} className="h-10 w-auto" />
                     </div>
@@ -170,7 +172,7 @@ function Header() {
                         {/** Logo */}
                         <div
                             className="m-1.5 p-1.5 cursor-pointer"
-                            onClick={() => handleNavigationClick(0, () => setMobileMenuOpen(false))}
+                            onClick={() => handleNavigationClick(1, () => setMobileMenuOpen(false))}
                         >
                             <img src={LOGO_ITEMS.url} alt={LOGO_ITEMS.alt} className="h-10 w-auto" />
                         </div>

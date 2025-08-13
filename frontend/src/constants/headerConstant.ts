@@ -24,15 +24,15 @@ const MAIN_NAVIGATION_ITEMS = [
     },
     {
         name: 'Preview',
-        navigationIndex: 1,
-    },
-    {
-        name: 'Marketplace',
         navigationIndex: 2,
     },
     {
-        name: 'About',
+        name: 'Marketplace',
         navigationIndex: 3,
+    },
+    {
+        name: 'About',
+        navigationIndex: 4,
     },
 ] as const
 
@@ -40,13 +40,13 @@ const POPUP_NAVIGATION_ITEMS = [
     {
         name: '마케팅 생성', 
         description: '마케팅 관련 콘텐츠 생성', 
-        navigationIndex: 4, 
+        navigationIndex: 5, 
         icon: DocumentChartBarIcon
     },
     { 
         name: '가이드', 
         description: 'Product 사용 가이드', 
-        navigationIndex: 7, 
+        navigationIndex: 8, 
         icon: BookOpenIcon 
     },
 /*

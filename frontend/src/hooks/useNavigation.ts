@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 const useNavigation = () => {
     const navigate = useNavigate()
 
+    const goToAdmin = () => navigate("/admin")
     const goToMain = () => navigate("/")
     const goToPreview = () => navigate("/preview")
     const goToEmpty = () => navigate("/")
@@ -13,6 +14,7 @@ const useNavigation = () => {
     const goToGuide = () => navigate("/guide")
 
     return {
+        goToAdmin,
         goToMain,
         goToPreview,
         goToEmpty,
