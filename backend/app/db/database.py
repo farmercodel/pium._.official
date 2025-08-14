@@ -18,6 +18,11 @@ engine = create_async_engine(
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 Base = declarative_base()
 
+async def init_models():
+    from app.models.ad import AdRequest, AdVariant, AdSelection  
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 async def get_session():
     async with AsyncSessionLocal() as session:
         yield session

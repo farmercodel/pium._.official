@@ -105,6 +105,22 @@ async def _resolve_caption(db: AsyncSession, req: PublishRequest) -> str:
 async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session)):
     caption = await _resolve_caption(db, req)
 
+    if req.dry_run:
+        if not req.image_urls and not req.image_keys:
+            raise HTTPException(status_code=400, detail="image_urls 또는 image_keys 중 하나는 필요합니다.")
+        if req.image_urls:
+            img_urls = [str(u) for u in req.image_urls]
+        else:
+            img_urls = [_presigned_get_url(k, expires=900) for k in req.image_keys]
+        return {
+            "ok": True,
+            "dry_run": True,
+            "caption": caption,
+            "image_urls": img_urls,
+            "collaborators": req.collaborators or [],
+            "note": "No call to Instagram Graph API (dry-run)."
+        }
+
     if not req.image_urls and not req.image_keys:
         raise HTTPException(status_code=400, detail="image_urls 또는 image_keys 중 하나는 필요합니다.")
 

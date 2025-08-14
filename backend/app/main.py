@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import generate_ad, instagram, files, compose
 from fastapi.staticfiles import StaticFiles
 import os
+from app.db.database import init_models
 
 app = FastAPI(title="Pium API", version="1.0.0")
 
@@ -15,6 +16,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def _startup():
+    await init_models()
 
 @app.get("/")
 async def root():

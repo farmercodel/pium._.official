@@ -70,7 +70,7 @@ def _compose_card_v2(
 
     # ── 조정용 상수 ───────────────────────────────
     pad = 72
-    TITLE_TOP_OFFSET = 110
+    TITLE_TOP_OFFSET = 50
     line_gap = 12
     slot_w, slot_h = 860, 600
     MIN_GAP = 10
@@ -105,7 +105,7 @@ def _compose_card_v2(
 
     cap_top_y = H - CAPTION_SAFE_MARGIN
     slot_x = (W - slot_w) // 2
-    slot_y = cap_top_y - slot_h - 115
+    slot_y = cap_top_y - slot_h - 145
 
     if slot_y < title_bottom + MIN_GAP:
         overlap = (title_bottom + MIN_GAP) - slot_y

@@ -5,6 +5,7 @@ from typing import List, Optional, Iterable, Dict, Any
 from anyio import to_thread
 from openai import OpenAI, OpenAIError
 from dotenv import load_dotenv
+import httpx
 
 load_dotenv()
 
