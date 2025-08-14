@@ -11,7 +11,7 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
 if not api_key:
-    raise RuntimeError("OPENAI_API_KEY가 설정되어 있지 않습니다. backend/.env 또는 환경변수를 확인하세요.")
+    raise RuntimeError("OPENAI_API_KEY가 설정되어 있지 않습니다.")
 
 client = OpenAI(api_key=api_key)
 
@@ -24,7 +24,7 @@ TONE_STYLE = {
     "luxury": "절제된 어휘, 고급스러운 톤, 불필요한 감탄사 금지",
 }
 
-DELIM = "\n<<<VARIANT_END>>>\n"  # 모델 출력 분할용 명확한 구분자
+DELIM = "\n<<<VARIANT_END>>>\n" 
 
 def _safe_join(items: Optional[Iterable], sep: str) -> str:
     if not items:
@@ -55,9 +55,7 @@ def _call_openai(prompt: str) -> str:
         )
         return resp.choices[0].message.content.strip()
     except OpenAIError as e:
-        # 콘솔에 상세 원인 출력
         print(f"[OpenAIError] {type(e).__name__}: {e}")
-        # 라우터에서 500 detail로 보이게
         raise RuntimeError(f"OpenAI 호출 실패: {e}")
 
 
@@ -72,9 +70,7 @@ def _build_prompt(req) -> str:
 
     img_links = []
     if req.image_urls:
-        img_links.extend([str(u) for u in req.image_urls])  # str 캐스팅
-    if req.thumbnail_image:
-        img_links.append(str(req.thumbnail_image))
+        img_links.extend([str(u) for u in req.image_urls])
 
     img_hint = ("\n- 참고 이미지 링크: " + ", ".join(img_links)) if img_links else ""
 
@@ -82,10 +78,8 @@ def _build_prompt(req) -> str:
 
     avoid = ""
     if req.avoid_texts:
-        # 모델에게 피해야 할 문구/컨셉 힌트 제공
         avoid = "\n[피해야 할 문구/컨셉]\n- " + "\n- ".join(req.avoid_texts[:10])
 
-    # num_variants개 생성 + DELIM으로 분리 지시
     return f"""
 [목표]
 인스타그램 피드용 광고 캡션 {req.num_variants}개를 작성한다.
@@ -132,7 +126,6 @@ def _build_prompt(req) -> str:
 """
 
 def _clean_caption_title(text: str) -> str:
-    # '캡션 1:' 또는 '캡션1:' 같은 패턴 제거
     return re.sub(r"^캡션\s*\d+\s*:\s*", "", text.strip())
 
 def _parse_variants(text: str) -> List[Dict[str, Any]]:

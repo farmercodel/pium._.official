@@ -63,18 +63,19 @@ def _compose_card_v2(
     thumb_bytes: bytes,
     store_name: str,
     district: str,
-    district_color: str = "#FF8601",   # ← 추가: 상권명 포인트 색
+    district_color: str = "#FF8601", 
 ) -> bytes:
     _ensure_font()
     W, H = 1080, 1350
 
     # ── 조정용 상수 ───────────────────────────────
     pad = 72
-    TITLE_TOP_OFFSET = 50
+    TITLE_TOP_OFFSET = 110
     line_gap = 12
     slot_w, slot_h = 860, 600
-    MIN_GAP = 30
+    MIN_GAP = 10
     CAPTION_SAFE_MARGIN = 150
+    CAPTION_GAP = 20   
     # ────────────────────────────────────────────
 
     canvas = Image.new("RGB", (W, H), "#000000")
@@ -84,21 +85,17 @@ def _compose_card_v2(
     canvas.paste(bg, (0, 0))
     draw = ImageDraw.Draw(canvas)
 
-    # 제목(두 줄)
     title_w = W - pad * 2
     district_font = _fit_font(district, title_w, 160, FONT_PATH_BOLD, 128, 32)
     store_font    = _fit_font(store_name, title_w, 200, FONT_PATH_BOLD, 128, 32)
 
     slot_x = (W - slot_w) // 2
-    tx = slot_x
+    tx = (W - slot_w) // 2
     ty = pad + TITLE_TOP_OFFSET
 
-    # ✔ 상권명만 포인트 색 적용
     draw.text(
         (tx, ty), district, font=district_font,
         fill=district_color,
-        # 필요시 외곽선으로 가독성 보강:
-        # stroke_width=2, stroke_fill=(0,0,0)
     )
 
     ty2 = ty + _text_wh(district_font, district)[1] + line_gap
@@ -107,12 +104,14 @@ def _compose_card_v2(
     title_bottom = ty2 + _text_wh(store_font, store_name)[1]
 
     cap_top_y = H - CAPTION_SAFE_MARGIN
-    available = cap_top_y - title_bottom - slot_h
-    gap = max(MIN_GAP, available // 2) if available > 0 else MIN_GAP
+    slot_x = (W - slot_w) // 2
+    slot_y = cap_top_y - slot_h - 115
 
-    slot_y = title_bottom + gap
-    if slot_y + slot_h > cap_top_y:
-        slot_y = max(title_bottom + MIN_GAP, cap_top_y - slot_h)
+    if slot_y < title_bottom + MIN_GAP:
+        overlap = (title_bottom + MIN_GAP) - slot_y
+        ty -= overlap
+        ty2 = ty + _text_wh(district_font, district)[1] + line_gap
+        title_bottom = ty2 + _text_wh(store_font, store_name)[1]
 
     thumb = Image.open(io.BytesIO(thumb_bytes))
     thumb = ImageOps.exif_transpose(thumb)
@@ -125,8 +124,7 @@ def _compose_card_v2(
 
 
 class ComposeCardV2(BaseModel):
-    bg_key: str              # 배경 이미지 S3 key (ex: assets/bg/gradient.jpg)
-    image_key: str           # 썸네일 원본 S3 key (업로드 응답의 rel)
+    image_key: str          
     store_name: str
     area_keywords: List[str]
     session_id: Optional[str] = None
@@ -136,15 +134,17 @@ def _format_district(area_keywords: List[str]) -> str:
     if not area_keywords:
         return "상권 정보"
     top = [kw.strip() for kw in area_keywords if kw.strip()]
-    return " · ".join(top[:1])   # 필요하면 [:2]로 확장
+    return " · ".join(top[:1])  
 
 # ---- 엔드포인트 ----
 @router.post("/compose/card")
 def compose_card_v2(payload: ComposeCardV2 = Body(...)):
     _ensure_font()
 
+    bg_key = "uploads/common/f465a025e7f540d1a850521bd9fc989e.jpg"
+
     # 원본 배경/썸네일 presigned GET
-    bg_url    = _presigned_get_url(payload.bg_key)
+    bg_url    = _presigned_get_url(bg_key)
     thumb_url = _presigned_get_url(payload.image_key)
 
     rb = requests.get(bg_url, timeout=20)

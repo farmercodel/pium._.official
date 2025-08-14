@@ -16,7 +16,7 @@ S3_REGION = os.getenv("S3_REGION", "kr-standard")
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "https://kr.object.ncloudstorage.com")
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
-MEDIA_BASE_URL = os.getenv("MEDIA_BASE_URL")  # 공개 버킷이면 https://kr.object.../bucket
+MEDIA_BASE_URL = os.getenv("MEDIA_BASE_URL") 
 
 def _chk_env():
     missing = [k for k in ["S3_BUCKET","S3_ENDPOINT","S3_ACCESS_KEY","S3_SECRET_KEY"] if not os.getenv(k)]
