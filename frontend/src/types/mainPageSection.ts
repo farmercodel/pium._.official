@@ -8,6 +8,7 @@ interface FeatureSectionProps {
 }
 
 interface UserFlowSectionProps {
+    onGuideClick: () => void
     className?: string
 }
 
