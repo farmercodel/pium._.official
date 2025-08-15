@@ -18,7 +18,6 @@ const MainPage = () => {
         const navigationFn = navigationMap[itemName as keyof typeof navigationMap]
         if (navigationFn) {
             navigationFn()
-            close()
         } else {
             console.log("Unknown navigation item:", itemName)
         }
