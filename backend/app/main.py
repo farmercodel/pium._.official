@@ -1,25 +1,69 @@
 # backend\app\main.py
+import os
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import generate_ad, instagram, files, compose
 from fastapi.staticfiles import StaticFiles
-import os
+from sqlalchemy.exc import OperationalError
+from app.api import generate_ad, instagram, files, compose
 from app.db.database import init_models
+from app.util.database import Base, engine, SessionLocal
+from app.controller.auth_controller import router as auth_router
+from app.service.auth_service import AuthService
+from app.repository.user_repository import UserRepository
+
 
 app = FastAPI(title="Pium API", version="1.0.0")
 
 # CORS 미들웨어 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 프로덕션에서는 특정 도메인 제한
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+def _seed_sync_with_retry():
+    """
+    sync 엔진으로 테이블 생성 + 관리자 계정 생성 (재시도 포함)
+    FastAPI 이벤트 루프를 막지 않으려고 run_in_executor로 호출함.
+    """
+    max_attempts = 10
+    for attempt in range(1, max_attempts + 1):
+        try:
+            # 테이블 생성
+            Base.metadata.create_all(bind=engine)
+            print("(sync) DB 테이블 생성 완료")
+
+            # 관리자 계정 시드
+            db = SessionLocal()
+            try:
+                user_repo = UserRepository(db)
+                admin_user = user_repo.get_by_email("admin")
+                if not admin_user:
+                    auth_service = AuthService(db)
+                    auth_service.register_user(email="admin", password="admin", is_admin=True)
+                    print("(sync) 관리자 계정(admin) 생성 완료")
+            finally:
+                db.close()
+
+            break
+        except OperationalError as e:
+            if attempt == max_attempts:
+                print("DB 연결 실패: 재시도 한도 초과")
+                raise
+            print(f"DB 연결 실패, 재시도 {attempt}/{max_attempts} (2초 대기) - {e}")
+            import time
+            time.sleep(2)
+
 @app.on_event("startup")
-async def _startup():
+async def on_startup():
     await init_models()
+    print("(async) init_models 완료")
+
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, _seed_sync_with_retry)
 
 @app.get("/")
 async def root():
@@ -29,15 +73,7 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
-
-# 정적 파일 경로 (로컬)
-MEDIA_ROOT = os.getenv("MEDIA_ROOT", r"F:/pium._.official/backend/app/img")
-os.makedirs(MEDIA_ROOT, exist_ok=True)
-
-# /img 경로로 정적 서빙
-app.mount("/img", StaticFiles(directory=MEDIA_ROOT), name="img")
-
-# 라우터
+app.include_router(auth_router)
 app.include_router(files.router, prefix="/api", tags=["files"])
 app.include_router(generate_ad.router, prefix="/api", tags=["GPT"])
 app.include_router(instagram.router, prefix="/api", tags=["instagram"])
