@@ -23,8 +23,8 @@ const HeroSection = ({ onCTAClick, className }: HeroSectionProps) => {
                 {/* Left: Text */}
                 <div className="flex-1 text-white space-y-4 sm:space-y-6 text-center lg:text-left">
                     <div className="bg-black/10 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
-                        <h2 className="text-3xl sm:text-4xl font-bold">{HERO_CONTENT.title}</h2>
-                        <p className="text-base sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0">
+                        <h2 className="text-3xl sm:text-4xl font-bold pb-2">{HERO_CONTENT.title}</h2>
+                        <p className="text-base sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 pb-4">
                             {HERO_CONTENT.description}
                         </p>
 
@@ -63,15 +63,15 @@ const HeroSection = ({ onCTAClick, className }: HeroSectionProps) => {
                     <img
                         src={HERO_CONTENT.img[0].src}
                         alt={HERO_CONTENT.img[0].alt}
-                        className="rounded-xl shadow-2xl w-64 sm:w-72 lg:w-80 relative z-20
-             transform rotate-1 hover:rotate-0 hover:scale-105 transition-transform duration-300"
+                        className="rounded-xl shadow-2xl w-64 sm:w-72 lg:w-80 relative bottom-6 lg:bottom-3 z-20
+             transform -rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300"
                     />
 
                     {/* Right Bottom Image (Overlapping) */}
                     <img
                         src={HERO_CONTENT.img[1].src}
                         alt={HERO_CONTENT.img[1].alt}
-                        className="rounded-xl shadow-xl w-64 sm:w-72 lg:w-80 absolute -bottom-6 -right-6 z-10
+                        className="rounded-xl shadow-xl w-64 sm:w-72 lg:w-80 absolute lg:-bottom-3 -right-6 z-10
              transform rotate-6 hover:rotate-3 hover:scale-105 hover:z-25 transition-transform duration-300"
                     />
                 </div>
