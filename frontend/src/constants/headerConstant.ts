@@ -13,7 +13,7 @@ import { PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 const LOGO_ITEMS = {
     name: 'LOGO',
     // 임시 uiia cat image
-    url: 'https://oiiai.cat/cat.png',
+    url: 'assets/logo.png',
     alt: 'PIUM_LOGO'
 } as const
 
