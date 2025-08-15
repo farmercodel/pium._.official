@@ -9,7 +9,8 @@ import Button from "../common/Button"
 
 const HeroSection = ({ onCTAClick, className }: HeroSectionProps) => {
     return (
-        <section className={`relative w-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 p-4 sm:p-6 lg:p-10 lg:px-35 shadow-lg ${className}`}>
+        // <section className={`relative w-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 p-4 sm:p-6 lg:p-10 lg:px-35 shadow-lg ${className}`}>
+        <section className={`relative w-full bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 p-4 sm:p-6 lg:p-10 lg:px-35 shadow-lg ${className}`}>
             {/* 모바일: 세로 배치, 데스크톱: 가로 배치 */}
             <motion.div 
                 className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12"
