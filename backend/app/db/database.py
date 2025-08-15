@@ -1,25 +1,24 @@
 # backend/app/db/database.py
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+from app.models.base import Base
+
+ASYNC_DATABASE_URL = os.getenv("ASYNC_DATABASE_URL") or os.getenv("DATABASE_URL")
+if ASYNC_DATABASE_URL and "+asyncpg" not in ASYNC_DATABASE_URL:
+    ASYNC_DATABASE_URL = ASYNC_DATABASE_URL.replace("+psycopg2", "+asyncpg")
 
 engine = create_async_engine(
-    DATABASE_URL,
+    ASYNC_DATABASE_URL,
     echo=False,
     future=True,
-    connect_args={
-        "server_settings": {
-            "client_encoding": "UTF8",
-        }
-    },
+    connect_args={"server_settings": {"client_encoding": "UTF8"}},
 )
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-Base = declarative_base()
 
 async def init_models():
-    from app.models.ad import AdRequest, AdVariant, AdSelection  
+    from app.models.ad import AdRequest, AdVariant, AdSelection
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

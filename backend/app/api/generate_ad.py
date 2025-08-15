@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.GA_schemas import GenerateAdRequest
 from app.services.GA_Service import generate_ad_copy
 from app.db.database import get_session
-from app.repositories.ad_repo import AdRepo
+from app.repository.ad_repo import AdRepo
 from app.api.instagram import ig_publish as ig_publish_route
 from app.api.instagram import PublishRequest as IgPublishRequest
 from app.api.compose import compose_card_v2 as compose_card_route

@@ -8,8 +8,8 @@ from sqlalchemy.exc import OperationalError
 from app.api import generate_ad, instagram, files, compose
 from app.db.database import init_models
 from app.util.database import Base, engine, SessionLocal
-from app.controller.auth_controller import router as auth_router
-from app.service.auth_service import AuthService
+from app.api.auth_controller import router as auth_router
+from app.services.auth_service import AuthService
 from app.repository.user_repository import UserRepository
 
 

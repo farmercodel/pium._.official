@@ -5,7 +5,7 @@ UserRepository: 사용자 조회/생성 등 데이터 접근 계층
 from __future__ import annotations
 from typing import Optional
 from sqlalchemy.orm import Session
-from app.model.user import User
+from app.models.user import User
 
 
 class UserRepository:

@@ -8,6 +8,12 @@ import json
 from datetime import datetime, timezone
 import hmac, hashlib
 from typing import Union
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.database import get_session
+from app.repository.ad_repo import AdRepo
+from dotenv import load_dotenv
+
+load_dotenv()
 
 S3_BUCKET = os.getenv("S3_BUCKET")
 S3_REGION = os.getenv("S3_REGION", "kr-standard")
@@ -56,13 +62,6 @@ def _presigned_get_url(key: str, expires: int = 900) -> str:
     signature = hmac.new(k_signing, string_to_sign.encode(), hashlib.sha256).hexdigest()
     final_qs = canonical_query + f"&X-Amz-Signature={signature}"
     return f"{S3_ENDPOINT}{path}?{final_qs}"
-
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.database import get_session
-from app.repositories.ad_repo import AdRepo
-from dotenv import load_dotenv
-
-load_dotenv()
 
 router = APIRouter()
 
