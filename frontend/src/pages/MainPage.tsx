@@ -9,9 +9,10 @@ import UserFlowSection from "../components/main/UserFlowSection"
 {/** 메인 페이지 */}
 const MainPage = () => {
 
-    const { goToSurvey } = useNavigation()
+    const { goToSurvey, goToGuide } = useNavigation()
     const navigationMap = {
-        '지금 시작하기': goToSurvey,
+        'survey': goToSurvey,
+        'guide': goToGuide,
     }
 
     const handleItemClick = (itemName: string) => {
@@ -25,9 +26,9 @@ const MainPage = () => {
 
     return (
         <PageLayout>
-            <HeroSection onCTAClick={() => handleItemClick('지금 시작하기')}/>
-            <FeatureSection className="my-5 border-b border-gray-200"/>
-            <UserFlowSection className="my-5 border-b border-gray-200"/>
+            <HeroSection onCTAClick={() => handleItemClick('survey')}/>
+            <FeatureSection />
+            <UserFlowSection onGuideClick={() => handleItemClick('guide')}/>
         </PageLayout>
     )
 }
