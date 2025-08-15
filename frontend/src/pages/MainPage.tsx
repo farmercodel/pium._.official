@@ -4,6 +4,7 @@ import useNavigation from "../hooks/useNavigation"
 
 import HeroSection from "../components/main/HeroSection"
 import FeatureSection from "../components/main/FeatureSection"
+import UserFlowSection from "../components/main/UserFlowSection"
 
 {/** 메인 페이지 */}
 const MainPage = () => {
@@ -26,7 +27,8 @@ const MainPage = () => {
     return (
         <PageLayout>
             <HeroSection onCTAClick={() => handleItemClick('지금 시작하기')}/>
-            <FeatureSection />
+            <FeatureSection className="my-5 border-b border-gray-200"/>
+            <UserFlowSection className="my-5 border-b border-gray-200"/>
         </PageLayout>
     )
 }

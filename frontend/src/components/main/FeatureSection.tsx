@@ -1,6 +1,4 @@
-interface FeatureSectionProps {
-    className?: string
-}
+import type { FeatureSectionProps } from "../../types/mainPageSection"
 
 {/** 샘플 문구 예시 , 이미지 Before/After, 생성된 해시태그 예시  */}
 const FeatureSection = ({ className }: FeatureSectionProps) => {

@@ -1,14 +1,11 @@
-import { ArrowRightIcon } from "@heroicons/react/24/outline"
+import type { HeroSectionProps } from "../../types/mainPageSection"
 import { HERO_CONTENT } from "../../constants/mainConstant"
+
+import { ArrowRightIcon } from "@heroicons/react/24/outline"
 
 import { motion } from "framer-motion"
 
 import Button from "../common/Button"
-
-interface HeroSectionProps {
-    onCTAClick: () => void
-    className?: string
-}
 
 const HeroSection = ({ onCTAClick, className }: HeroSectionProps) => {
     return (
