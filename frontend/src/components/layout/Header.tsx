@@ -176,6 +176,7 @@ function Header() {
                         >
                             <img src={LOGO_ITEMS.url} alt={LOGO_ITEMS.alt} className="h-10 w-auto" />
                         </div>
+                        
                         <button
                             type="button"
                             onClick={() => setMobileMenuOpen(false)}
