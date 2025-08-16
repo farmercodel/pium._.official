@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLocation } from 'react-router-dom'
 import Header from './Header.tsx'
 import Footer from './Footer.tsx'
 
@@ -7,11 +8,13 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-    
+    const location = useLocation()
+    const isAuthPage = location.pathname.includes('/login') || location.pathname.includes('/signup')
+
     return (
         <div className="min-h-screen flex flex-col">
             {/* Header */}
-            <Header />
+            {!isAuthPage && <Header />}
 
             {/* Main */}
             <main className="flex-1">
@@ -19,7 +22,7 @@ const Layout = ({ children }: LayoutProps) => {
             </main>
 
             {/* Footer */}
-            <Footer />
+            {!isAuthPage && <Footer />}
         </div>
     )
 }
