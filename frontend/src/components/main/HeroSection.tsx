@@ -61,7 +61,7 @@ const HeroSection = ({ onCTAClick, className }: HeroSectionProps) => {
                     <img
                         src={HERO_CONTENT.img[0].src}
                         alt={HERO_CONTENT.img[0].alt}
-                        className="rounded-xl shadow-2xl w-64 sm:w-72 lg:w-80 relative bottom-6 lg:bottom-3 z-20
+                        className="rounded-xl shadow-2xl w-96 sm:w-102 lg:w-110 relative bottom-6 lg:bottom-3 z-20
              transform -rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300"
                     />
 
@@ -69,7 +69,7 @@ const HeroSection = ({ onCTAClick, className }: HeroSectionProps) => {
                     <img
                         src={HERO_CONTENT.img[1].src}
                         alt={HERO_CONTENT.img[1].alt}
-                        className="rounded-xl shadow-xl w-64 sm:w-72 lg:w-80 absolute lg:-bottom-3 -right-6 z-10
+                        className="rounded-xl shadow-xl w-96 sm:w-102 lg:w-110 absolute lg:-bottom-3 -right-6 z-10
              transform rotate-6 hover:rotate-3 hover:scale-105 hover:z-25 transition-transform duration-300"
                     />
                 </div>

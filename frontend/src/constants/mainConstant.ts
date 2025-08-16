@@ -18,11 +18,11 @@ const HERO_CONTENT = {
     cta: '지금 시작하기',
     img: [
         {
-            src: 'assets/logo.png',
+            src: 'assets/example01.png',
             alt: 'PIUM Preview left',
         },
         {
-            src: 'assets/logo.png',
+            src: 'assets/example01.png',
             alt: 'PIUM Preview right',
         },
     ]
