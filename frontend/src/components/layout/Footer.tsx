@@ -11,7 +11,7 @@ function Footer() {
                         <img src="/assets/logo.png" alt="PIUM Logo" className="w-10 h-10" />
                     </div> */}
                     
-                    {/* Email */}
+                    {/* Emai: 임시 이메일 주소 사용 */}
                     <a href="mailto:team@pium.com" className="hover:text-white transition flex items-center space-x-2">
                         <FaEnvelope className="w-5 h-5" />
                         <span>Email</span>
