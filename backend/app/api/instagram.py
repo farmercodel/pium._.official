@@ -89,20 +89,21 @@ class PublishRequest(BaseModel):
             raise ValueError("collaborators는 최대 3명까지 가능합니다.")
         return [u.lstrip("@").strip() for u in v if u.strip()]
 
-async def _resolve_caption(db: AsyncSession, req: PublishRequest) -> str:
-    if req.caption:
+# instagram.py
+async def _resolve_caption(db: AsyncSession, req: PublishRequest, *, user_id: int | None = None) -> str:
+    if req.caption and req.caption.strip():
         return req.caption.strip()
 
-    if req.session_id:
-        row = await AdRepo.get_choice(db, req.session_id)
+    if user_id is not None:
+        row = await AdRepo.get_choice(db, user_id=user_id)
         if row and row.content:
             return row.content.strip()
-        raise HTTPException(status_code=400, detail="해당 session_id로 저장된 사용자의 선택본이 없습니다.")
+        
     raise HTTPException(status_code=400, detail="caption 또는 session_id 중 하나는 필요합니다.")
 
-@router.post("/ig/publish")
-async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session)):
-    caption = await _resolve_caption(db, req)
+
+async def ig_publish_core(req: PublishRequest, db: AsyncSession):
+    caption = req.caption.strip() if (req.caption and req.caption.strip()) else await _resolve_caption(db, req)
 
     if req.dry_run:
         if not req.image_urls and not req.image_keys:
@@ -123,7 +124,6 @@ async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session
     if not req.image_urls and not req.image_keys:
         raise HTTPException(status_code=400, detail="image_urls 또는 image_keys 중 하나는 필요합니다.")
 
-    # 이미지 URL 생성
     if req.image_urls:
         img_urls = [str(u) for u in req.image_urls]
     else:
@@ -131,12 +131,8 @@ async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session
 
     async with httpx.AsyncClient(timeout=60) as client:
         creation_ids = []
-        # 1장씩 media 생성
         for img_url in img_urls:
-            params = {
-                "image_url": img_url,
-                "access_token": IG_ACCESS_TOKEN
-            }
+            params = {"image_url": img_url, "access_token": IG_ACCESS_TOKEN}
             if len(img_urls) == 1:
                 params["caption"] = caption
                 if req.collaborators:
@@ -149,7 +145,6 @@ async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session
                 raise HTTPException(status_code=502, detail=f"IG media 생성 실패: {r.text}")
             creation_ids.append(r.json()["id"])
 
-        # 캐러셀 parent 생성
         if len(creation_ids) > 1:
             params = {
                 "media_type": "CAROUSEL",
@@ -167,7 +162,6 @@ async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session
         else:
             parent_creation_id = creation_ids[0]
 
-        # 발행
         r_pub = await client.post(
             f"{GRAPH_BASE}/{IG_USER_ID}/media_publish",
             params={"creation_id": parent_creation_id, "access_token": IG_ACCESS_TOKEN},
@@ -177,23 +171,16 @@ async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session
 
         media_id = r_pub.json()["id"]
 
-        # 폴백 공동소유자 설정
         collaborators_status = None
         if req.collaborators:
             usernames_str = ",".join(req.collaborators)
             r_c = await client.post(
                 f"{GRAPH_BASE}/{media_id}/collaborators",
-                params={
-                    "access_token": IG_ACCESS_TOKEN,
-                    "usernames": usernames_str,
-                },
+                params={"access_token": IG_ACCESS_TOKEN, "usernames": usernames_str},
             )
             if r_c.status_code < 400:
                 collaborators_status = r_c.json()
 
-
-
-        # permalink 조회
         permalink = None
         r_link = await client.get(
             f"{GRAPH_BASE}/{media_id}",
@@ -209,3 +196,7 @@ async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session
             "collaborators": req.collaborators or [],
             "collaborators_status": collaborators_status,
         }
+
+@router.post("/ig/publish")
+async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session)):
+    return await ig_publish_core(req, db)

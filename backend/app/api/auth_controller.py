@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 # 내부 서비스, 유틸
 from app.services.auth_service import AuthService           # 회원가입/로그인 로직을 처리하는 서비스 계층
 from app.util.database import get_db                       # DB 세션 주입 함수
-from app.util.auth import get_current_user                 # JWT 토큰으로 현재 사용자 정보 가져오는 함수
+from app.api.auth import get_current_user                 # JWT 토큰으로 현재 사용자 정보 가져오는 함수
 
 # ----------------------
 # 라우터 생성

@@ -38,28 +38,14 @@ class AuthService:
         start_dt: Optional[str] = None,
         p_nm: Optional[str] = None
     ) -> Tuple[int, str]:
-        """
-        새로운 사용자를 생성하고, 즉시 JWT 액세스 토큰을 발급.
 
-        Parameters
-        ----------
-        - email: 로그인용 이메일
-        - password: 평문 비밀번호 (함수 내부에서 해싱)
-        - is_admin: 관리자 여부
-        - business_registration_number: 사업자등록번호 (일반 사용자 필수)
-        - start_dt: 개업일자 (YYYYMMDD 형식, 일반 사용자 필수)
-        - p_nm: 대표자 성명 (일반 사용자 필수)
-
-        Returns
-        -------
-        (user_id, access_token) 튜플
-        """
-        # 1. 이메일 중복 체크
         existing = self.user_repo.get_by_email(email)
         if existing:
             raise ValueError("이미 사용 중인 이메일입니다.")
 
-        # 2. 일반 사용자는 사업자등록번호, 개업일자, 대표자 성명 필수
+        # 개발/테스트에서 사업자 검증 스킵 옵션 (NTS_VALIDATE=false)
+        validate_flag = os.getenv("NTS_VALIDATE", "true").lower() not in {"0", "false", "no"}
+
         if not is_admin:
             if not business_registration_number or business_registration_number.strip() == "":
                 raise ValueError("사업자등록번호는 필수입니다.")
@@ -68,51 +54,48 @@ class AuthService:
             if not p_nm or p_nm.strip() == "":
                 raise ValueError("대표자 성명은 필수입니다.")
 
-            # 2-1. 국세청 API를 통한 사업자등록번호 진위확인
-            nts_api_key = os.getenv("NTS_API_KEY")
-            if not nts_api_key:
-                raise ValueError("NTS API 키가 설정되지 않았습니다. 환경 변수를 확인해주세요.")
-            
-            try:
-                verification_result = verify_business_registration(
-                    business_no=business_registration_number,
-                    start_date=start_dt,
-                    representative_name=p_nm,
-                    api_key=nts_api_key
-                )
-                
-                if verification_result.get('valid') == '01':
-                    active_status = True  # 검증 성공 시 즉시 활성화
-                else:
-                    # API 응답에서 유효하지 않다고 판단한 경우
-                    valid_msg = verification_result.get('valid_msg', '알 수 없는 오류')
-                    raise ValueError(f"사업자등록번호 진위확인 실패: {valid_msg}")
+            if validate_flag:
+                # 검증 실행
+                nts_api_key = os.getenv("NTS_API_KEY")
+                if not nts_api_key:
+                    raise ValueError("NTS API 키가 설정되지 않았습니다. 환경 변수를 확인해주세요.")
 
-            except Exception as e:
-                # API 호출 또는 응답 처리 중 오류 발생
-                raise ValueError(f"사업자등록번호 검증 중 오류 발생: {e}")
+                try:
+                    verification_result = verify_business_registration(
+                        business_no=business_registration_number,
+                        start_date=start_dt,           # "YYYY-MM-DD" or "YYYYMMDD" 모두 허용되는 구현이라 가정
+                        representative_name=p_nm,
+                        api_key=nts_api_key,
+                    )
+
+                    if isinstance(verification_result, tuple):
+                        ok, info = verification_result
+                    else:
+                        info = verification_result
+                        ok = (info.get("valid") == "01")
+
+                    if not ok:
+                        msg = info.get("valid_msg") or info.get("message") or "유효하지 않은 사업자등록번호입니다."
+                        raise ValueError(f"사업자등록번호 진위확인 실패: {msg}")
+
+                    active_status = True  
+
+                except Exception as e:
+                    raise ValueError(f"사업자등록번호 검증 중 오류 발생: {e}")
+            else:
+                active_status = True
         else:
-            # 관리자는 즉시 활성화
             active_status = True
 
-        # 3. 비밀번호 해싱
         hashed = hash_password(password)
-
-        # 4. 사용자 생성 (DB 반영)
         user = self.user_repo.create(
             email=email,
             hashed_password=hashed,
             is_admin=is_admin,
             business_registration_number=business_registration_number,
-            is_active=active_status
+            is_active=active_status,
         )
-
-        # 5. JWT 발급
-        token = create_access_token(
-            subject=str(user.id),
-            extra_claims={"email": user.email}
-        )
-
+        token = create_access_token(subject=str(user.id), extra_claims={"email": user.email})
         return user.id, token
 
     

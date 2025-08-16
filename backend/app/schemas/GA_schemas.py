@@ -11,7 +11,6 @@ class BusinessHours(BaseModel):
 ToneEnum = Literal["Casual","professional","Witty","emotional","urgent","luxury"]
 
 class GenerateAdRequest(BaseModel):
-    session_id: Optional[str] = None
     store_name: str
     area_keywords: List[str]
     address: str

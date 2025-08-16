@@ -1,10 +1,12 @@
 # backend/app/api/files.py
-import os, uuid, hmac, hashlib, mimetypes
+import os, uuid, hmac, hashlib, mimetypes, re
 from datetime import datetime, timezone
 import requests
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from typing import List, Optional
 import urllib.parse
+
+from app.api.auth import get_current_user
 
 router = APIRouter()
 
@@ -16,7 +18,9 @@ S3_REGION = os.getenv("S3_REGION", "kr-standard")
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "https://kr.object.ncloudstorage.com")
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
-MEDIA_BASE_URL = os.getenv("MEDIA_BASE_URL") 
+MEDIA_BASE_URL = os.getenv("MEDIA_BASE_URL")
+
+SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9._-]+$")  # 폴더 세그먼트 화이트리스트
 
 def _chk_env():
     missing = [k for k in ["S3_BUCKET","S3_ENDPOINT","S3_ACCESS_KEY","S3_SECRET_KEY"] if not os.getenv(k)]
@@ -35,8 +39,19 @@ def _ext(filename: Optional[str], content_type: str) -> str:
     ext = mimetypes.guess_extension(content_type) or ".jpg"
     return ext if ext.startswith(".") else "." + ext
 
+def _sanitize_subdir(subdir: Optional[str]) -> Optional[str]:
+    if not subdir:
+        return None
+    # 슬래시 단위 세그먼트 검사
+    parts = [p for p in subdir.split("/") if p and p != "." and p != ".."]
+    safe = []
+    for p in parts:
+        if not SAFE_SEGMENT.match(p):
+            raise HTTPException(400, f"허용되지 않는 폴더 이름: {p}")
+        safe.append(p)
+    return "/".join(safe) if safe else None
+
 def _aws_v4_sign(path: str, body: bytes, content_type: str):
-    """NCP 경로형(endpoint/bucket/key) 기준 서명 헤더 생성"""
     service = "s3"
     algorithm = "AWS4-HMAC-SHA256"
     now = datetime.now(timezone.utc)
@@ -60,7 +75,8 @@ def _aws_v4_sign(path: str, body: bytes, content_type: str):
     )
 
     def _sign(key: bytes, msg: str) -> bytes:
-        return hmac.new(key, msg.encode(), hashlib.sha256).digest()
+        import hmac as _hmac
+        return _hmac.new(key, msg.encode(), hashlib.sha256).digest()
 
     k_date = _sign(("AWS4" + S3_SECRET_KEY).encode(), date_stamp)
     k_region = _sign(k_date, S3_REGION)
@@ -82,13 +98,17 @@ def _aws_v4_sign(path: str, body: bytes, content_type: str):
 @router.post("/files/upload")
 async def upload_files(
     files: List[UploadFile] = File(...),
-    session_id: Optional[str] = None,
-    subdir: Optional[str] = None,
+    subdir: Optional[str] = None,                               # ⬅️ session_id 제거
+    current_user = Depends(get_current_user),                    # ⬅️ 인증 필수
 ):
     _chk_env()
     saved = []
 
-    key_prefix = f"{subdir or 'uploads'}/{session_id or 'common'}".strip("/")
+    today = datetime.now(timezone.utc)
+    user_root = f"user-{current_user.id}/{today:%Y/%m/%d}"
+
+    subdir = _sanitize_subdir(subdir)
+    key_prefix = f"{user_root}/{subdir}" if subdir else user_root
 
     for f in files:
         _ensure_allowed(f.content_type)
@@ -125,12 +145,14 @@ async def upload_files(
 
     return {"ok": True, "files": saved}
 
-import urllib.parse
-
 @router.get("/files/presigned-get")
-def presigned_get(key: str, expires: int = 600):
+def presigned_get(key: str, expires: int = 600, current_user = Depends(get_current_user)):
     if not all([S3_BUCKET, S3_REGION, S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY]):
         raise HTTPException(500, "S3 env not set")
+
+    user_prefix = f"user-{current_user.id}/"
+    if not key.startswith(user_prefix):
+        raise HTTPException(403, "권한이 없습니다.")
 
     service = "s3"
     algorithm = "AWS4-HMAC-SHA256"

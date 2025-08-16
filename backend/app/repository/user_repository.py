@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 
 
+
 class UserRepository:
     """
     사용자(User) 엔터티에 대한 **데이터 접근 레이어(Repository)**.
@@ -36,7 +37,7 @@ class UserRepository:
         - 존재하지 않으면 None 반환.
         """
         return self.db.query(User).filter(User.id == user_id).first()
-
+    
     def create(
         self,
         email: str,
