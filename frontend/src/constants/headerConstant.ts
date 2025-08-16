@@ -20,19 +20,19 @@ const LOGO_ITEMS = {
 const MAIN_NAVIGATION_ITEMS = [
     {
         name: 'AI',
-        navigationIndex: 0,
+        navigationText: 'ai',
     },
     {
         name: 'Preview',
-        navigationIndex: 2,
+        navigationText: 'preview',
     },
     {
         name: 'Marketplace',
-        navigationIndex: 3,
+        navigationText: 'main',
     },
     {
         name: 'About',
-        navigationIndex: 4,
+        navigationText: 'about',
     },
 ] as const
 
@@ -40,46 +40,26 @@ const POPUP_NAVIGATION_ITEMS = [
     {
         name: '마케팅 생성', 
         description: '마케팅 관련 콘텐츠 생성', 
-        navigationIndex: 5, 
+        navigationText: 'survey', 
         icon: DocumentChartBarIcon
     },
     { 
         name: '가이드', 
         description: 'Product 사용 가이드', 
-        navigationIndex: 8, 
+        navigationText: 'guide', 
         icon: BookOpenIcon 
     },
-/*
-    {
-         name: 'Security', 
-         description: 'Your customers’ data will be safe and secure', 
-         navigationIndex: 0, 
-         icon: FingerPrintIcon 
-    },
-    { 
-        name: 'Integrations', 
-        description: 'Connect with third-party tools', 
-        navigationIndex: 0, 
-        icon: SquaresPlusIcon 
-    },
-    { 
-        name: 'Automations', 
-        description: 'Build strategic funnels that will convert', 
-        navigationIndex: 0, 
-        icon: ArrowPathIcon 
-    },
-*/
 ] as const
 
 const POPUP_ACTION_ITEMS = [
     { 
         name: 'Watch demo', 
-        navigationIndex: 0, 
+        navigationText: 'main', 
         icon: PlayCircleIcon 
     },
     { 
         name: 'Contact sales', 
-        navigationIndex: 0, 
+        navigationText: 'main', 
         icon: PhoneIcon 
     },
 ] as const

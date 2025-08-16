@@ -35,7 +35,6 @@ function Header() {
         goToAdmin,
         goToMain,
         goToPreview,
-        goToEmpty,
         goToAbout,
         goToSurvey,
         goToGeneration,
@@ -44,22 +43,20 @@ function Header() {
     } = useNavigation()
 
     const navigationMap = {
-        'Logo': goToMain,
-        '마케팅 생성': goToSurvey,
-        'Preview': goToPreview,
-        'Marketplace': goToEmpty,
-        'About': goToAbout,
-        '가이드': goToGuide,
-        'Admin': goToAdmin,
-        'Generation': goToGeneration,
-        'Result': goToResult,
+        'main': goToMain,
+        'survey': goToSurvey,
+        'preview': goToPreview,
+        'about': goToAbout,
+        'guide': goToGuide,
+        'admin': goToAdmin,
+        'generation': goToGeneration,
+        'result': goToResult,
     }
 
     const handleItemClick = (itemName: string) => {
         const navigationFn = navigationMap[itemName as keyof typeof navigationMap]
         if (navigationFn) {
             navigationFn()
-            close()
         } else {
             console.log("Unknown navigation item:", itemName)
         }
@@ -75,7 +72,7 @@ function Header() {
                         {/** Logo */}
                         <div
                             className="mx-1.5 px-1.5 cursor-pointer"
-                            onClick={() => handleItemClick('Logo')}
+                            onClick={() => handleItemClick('main')}
                         >
                             <img src={LOGO_ITEMS.url} alt={LOGO_ITEMS.alt} className="h-15 w-auto" />
                         </div>
@@ -116,7 +113,7 @@ function Header() {
                                             </div>
                                             <div className="flex-auto">
                                                 <div
-                                                    onClick={() => handleItemClick(item.name)}
+                                                    onClick={() => handleItemClick(item.navigationText)}
                                                     className="block font-semibold text-gray-900 cursor-pointer"
                                                 >
                                                     {item.name}
@@ -131,7 +128,7 @@ function Header() {
                                     {POPUP_ACTION_ITEMS.map((item) => (
                                         <div
                                             key={item.name}
-                                            onClick={() => handleItemClick(item.name)}
+                                            onClick={() => handleItemClick(item.navigationText)}
                                             className="flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100"
                                         >
                                             <item.icon aria-hidden="true" className="size-5 flex-none text-gray-400" />
@@ -143,19 +140,19 @@ function Header() {
                         </Popover>
 
                         <div
-                            onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[1].name)}
+                            onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[1].navigationText)}
                             className="text-sm/6 font-semibold text-gray-900 cursor-pointer"
                         >
                             {MAIN_NAVIGATION_ITEMS[1].name}
                         </div>
                         <div
-                            onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[2].name)}
+                            onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[2].navigationText)}
                             className="text-sm/6 font-semibold text-gray-900 cursor-pointer"
                         >
                             {MAIN_NAVIGATION_ITEMS[2].name}
                         </div>
                         <div
-                            onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[3].name)}
+                            onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[3].navigationText)}
                             className="text-sm/6 font-semibold text-gray-900 cursor-pointer"
                         >
                             {MAIN_NAVIGATION_ITEMS[3].name}
@@ -173,7 +170,7 @@ function Header() {
                             <div
                                 className="m-1.5 p-1.5 cursor-pointer"
                                 onClick={() => {
-                                    handleItemClick('Logo')
+                                    handleItemClick('main')
                                     setMobileMenuOpen(false)
                                 }}
                             >
@@ -203,7 +200,7 @@ function Header() {
                                                     key={item.name}
                                                     as="a"
                                                     onClick={() => {
-                                                        handleItemClick(item.name)
+                                                        handleItemClick(item.navigationText)
                                                         setMobileMenuOpen(false)
                                                     }}
                                                     className="block rounded-lg py-2 pr-3 pl-6 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50"
@@ -215,7 +212,7 @@ function Header() {
                                     </Disclosure>
                                     <div
                                         onClick={() => {
-                                            handleItemClick(MAIN_NAVIGATION_ITEMS[1].name)
+                                            handleItemClick(MAIN_NAVIGATION_ITEMS[1].navigationText)
                                             setMobileMenuOpen(false)
                                         }}
                                         className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 cursor-pointer"
@@ -224,7 +221,7 @@ function Header() {
                                     </div>
                                     <div
                                         onClick={() => {
-                                            handleItemClick(MAIN_NAVIGATION_ITEMS[1].name)
+                                            handleItemClick(MAIN_NAVIGATION_ITEMS[1].navigationText)
                                             setMobileMenuOpen(false)
                                         }}
                                         className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 cursor-pointer"
@@ -233,7 +230,7 @@ function Header() {
                                     </div>
                                     <div
                                         onClick={() => {
-                                            handleItemClick(MAIN_NAVIGATION_ITEMS[1].name)
+                                            handleItemClick(MAIN_NAVIGATION_ITEMS[1].navigationText)
                                             setMobileMenuOpen(false)
                                         }}
                                         className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 cursor-pointer"
