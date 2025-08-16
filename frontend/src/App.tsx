@@ -10,6 +10,8 @@ import SurveyPage from './pages/SurveyPage'
 import GenerationPage from './pages/GenerationPage'
 import ResultPage from './pages/ResultPage'
 import GuidePage from './pages/GuidePage'
+import LoginPage from './pages/LoginPage'
+import SignUpPage from './pages/SignUpPage'
 
 function App() {
 
@@ -24,6 +26,8 @@ function App() {
           <Route path="/generation" element={<GenerationPage />} />
           <Route path="/result" element={<ResultPage />} />
           <Route path="/guide" element={<GuidePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

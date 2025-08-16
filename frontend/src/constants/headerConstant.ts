@@ -34,6 +34,14 @@ const MAIN_NAVIGATION_ITEMS = [
         name: 'About',
         navigationText: 'about',
     },
+    {
+        name: 'Login',
+        navigationText: 'login',
+    },
+    {
+        name: 'Sign Up',
+        navigationText: 'sign up',
+    },
 ] as const
 
 const POPUP_NAVIGATION_ITEMS = [

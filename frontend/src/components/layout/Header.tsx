@@ -39,7 +39,9 @@ function Header() {
         goToSurvey,
         goToGeneration,
         goToResult,
-        goToGuide
+        goToGuide,
+        goToLogin,
+        goToSignUp,
     } = useNavigation()
 
     const navigationMap = {
@@ -51,6 +53,8 @@ function Header() {
         'admin': goToAdmin,
         'generation': goToGeneration,
         'result': goToResult,
+        'login': goToLogin,
+        'sign up': goToSignUp,
     }
 
     const handleItemClick = (itemName: string) => {
@@ -158,7 +162,14 @@ function Header() {
                             {MAIN_NAVIGATION_ITEMS[3].name}
                         </div>
                     </PopoverGroup>
-                    <div className="hidden lg:flex lg:flex-1"></div>
+                    <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+                        <div onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[4].navigationText)} className="text-md font-semibold text-black mr-8 hover:text-green-400 cursor-pointer transition-all duration-300 ease-in-out hover:drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]">
+                            {MAIN_NAVIGATION_ITEMS[4].name}
+                        </div>
+                        <div onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[5].navigationText)} className="text-md font-semibold text-gray-500 hover:text-green-400 cursor-pointer transition-all duration-300 ease-in-out hover:drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]">
+                            {MAIN_NAVIGATION_ITEMS[5].name}
+                        </div>
+                    </div>
                 </nav>
 
                 {/** Mobile Menu */}
