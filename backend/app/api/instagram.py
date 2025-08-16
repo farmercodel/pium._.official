@@ -108,10 +108,7 @@ async def ig_publish_core(req: PublishRequest, db: AsyncSession):
     if req.dry_run:
         if not req.image_urls and not req.image_keys:
             raise HTTPException(status_code=400, detail="image_urls 또는 image_keys 중 하나는 필요합니다.")
-        if req.image_urls:
-            img_urls = [str(u) for u in req.image_urls]
-        else:
-            img_urls = [_presigned_get_url(k, expires=900) for k in req.image_keys]
+        img_urls = [str(u) for u in req.image_urls] if req.image_urls else [_presigned_get_url(k, expires=900) for k in req.image_keys]
         return {
             "ok": True,
             "dry_run": True,
@@ -124,10 +121,7 @@ async def ig_publish_core(req: PublishRequest, db: AsyncSession):
     if not req.image_urls and not req.image_keys:
         raise HTTPException(status_code=400, detail="image_urls 또는 image_keys 중 하나는 필요합니다.")
 
-    if req.image_urls:
-        img_urls = [str(u) for u in req.image_urls]
-    else:
-        img_urls = [_presigned_get_url(k, expires=900) for k in req.image_keys]
+    img_urls = [str(u) for u in req.image_urls] if req.image_urls else [_presigned_get_url(k, expires=900) for k in req.image_keys]
 
     async with httpx.AsyncClient(timeout=60) as client:
         creation_ids = []
@@ -154,7 +148,6 @@ async def ig_publish_core(req: PublishRequest, db: AsyncSession):
             }
             if req.collaborators:
                 params["collaborators"] = json.dumps(req.collaborators)
-
             r = await client.post(f"{GRAPH_BASE}/{IG_USER_ID}/media", params=params)
             if r.status_code >= 400:
                 raise HTTPException(status_code=502, detail=f"IG carousel 생성 실패: {r.text}")
@@ -166,7 +159,72 @@ async def ig_publish_core(req: PublishRequest, db: AsyncSession):
             f"{GRAPH_BASE}/{IG_USER_ID}/media_publish",
             params={"creation_id": parent_creation_id, "access_token": IG_ACCESS_TOKEN},
         )
+
         if r_pub.status_code >= 400:
+            # ⚠️ 여기부터 보완: code=4(앱 레이트리밋)이면 실제로 올라갔는지 최근 피드에서 확인
+            err = {}
+            try:
+                err = r_pub.json().get("error", {})
+            except Exception:
+                pass
+
+            if err.get("code") == 4:  # Application request limit reached
+                # 최근 게시물 조회해서 방금 캡션과 일치하면 "성공"으로 간주
+                r_recent = await client.get(
+                    f"{GRAPH_BASE}/{IG_USER_ID}/media",
+                    params={
+                        "fields": "id,caption,permalink,timestamp",
+                        "limit": "10",
+                        "access_token": IG_ACCESS_TOKEN,
+                    },
+                )
+                if r_recent.status_code < 400:
+                    data = (r_recent.json() or {}).get("data", [])
+                    from datetime import datetime, timezone, timedelta
+                    now = datetime.now(timezone.utc)
+                    matched = None
+                    for item in data:
+                        cap = (item.get("caption") or "").strip()
+                        if cap == caption:
+                            # 15분 이내 게시물로 한 번 더 필터
+                            ts = item.get("timestamp")
+                            try:
+                                t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                            except Exception:
+                                t = None
+                            if not t or (now - t) <= timedelta(minutes=15):
+                                matched = item
+                                break
+                    if matched:
+                        media_id = matched["id"]
+                        # 협업자 추가(있을 때)
+                        collaborators_status = None
+                        if req.collaborators:
+                            usernames_str = ",".join(req.collaborators)
+                            r_c = await client.post(
+                                f"{GRAPH_BASE}/{media_id}/collaborators",
+                                params={"access_token": IG_ACCESS_TOKEN, "usernames": usernames_str},
+                            )
+                            if r_c.status_code < 400:
+                                collaborators_status = r_c.json()
+
+                        permalink = None
+                        r_link = await client.get(
+                            f"{GRAPH_BASE}/{media_id}",
+                            params={"fields": "permalink", "access_token": IG_ACCESS_TOKEN},
+                        )
+                        if r_link.status_code < 400:
+                            permalink = r_link.json().get("permalink")
+
+                        return {
+                            "ok": True,
+                            "media_id": media_id,
+                            "permalink": permalink,
+                            "collaborators": req.collaborators or [],
+                            "collaborators_status": collaborators_status,
+                            "note": "media_publish=rate_limited(code=4), but verified via recent feed",
+                        }
+
             raise HTTPException(status_code=502, detail=f"IG 게시 실패: {r_pub.text}")
 
         media_id = r_pub.json()["id"]
@@ -196,7 +254,3 @@ async def ig_publish_core(req: PublishRequest, db: AsyncSession):
             "collaborators": req.collaborators or [],
             "collaborators_status": collaborators_status,
         }
-
-@router.post("/ig/publish")
-async def ig_publish(req: PublishRequest, db: AsyncSession = Depends(get_session)):
-    return await ig_publish_core(req, db)

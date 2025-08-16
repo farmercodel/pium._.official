@@ -10,7 +10,7 @@ from app.services.GA_Service import generate_ad_copy
 from app.db.database import get_session
 from app.repository.ad_repo import AdRepo
 from app.api.compose import compose_card_v2_core as compose_card_core, ComposeCardV2 as ComposeInput
-from app.api.instagram import ig_publish_core, PublishRequest as IgPublishRequest
+from app.api.instagram import PublishRequest as IgPublishRequest, ig_publish_core
 from app.api.auth import get_current_user
 
 router = APIRouter()
@@ -154,6 +154,6 @@ async def choose_and_publish(
         image_keys=final_image_keys,
         collaborators=auto_collabs,
         dry_run=bool(req.dry_run),
-        caption=content
+        caption=content,
     )
     return await ig_publish_core(ig_req, db)
