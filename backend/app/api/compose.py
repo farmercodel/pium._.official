@@ -1,0 +1,206 @@
+# backend/app/api/compose.py
+import os, io, math, uuid, requests
+from fastapi import APIRouter, HTTPException, Form
+from typing import Optional
+from PIL import Image, ImageDraw, ImageFont, ImageOps, ImageFilter
+from datetime import datetime, timezone
+from fastapi import Body
+from pydantic import BaseModel
+from typing import List
+from .files import _aws_v4_sign
+
+router = APIRouter()
+
+S3_BUCKET = os.getenv("S3_BUCKET", "pium-dev")
+S3_REGION = os.getenv("S3_REGION", "kr-standard")
+S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "")
+S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "")
+S3_ENDPOINT = os.getenv("S3_ENDPOINT", "https://kr.object.ncloudstorage.com")
+MEDIA_BASE_URL = os.getenv("MEDIA_BASE_URL") 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
+FONT_PATH_BOLD = os.path.join(UPLOADS_DIR, "BMDOHYEON_ttf.ttf")
+FONT_PATH_REG  = os.path.join(UPLOADS_DIR, "BMDOHYEON_ttf.ttf")
+
+
+def _ensure_font():
+    if not os.path.exists(FONT_PATH_BOLD):
+        raise HTTPException(500, f"폰트 파일이 없습니다: {FONT_PATH_BOLD}")
+
+def _text_wh(font: ImageFont.FreeTypeFont, text: str):
+    x0, y0, x1, y1 = font.getbbox(text)
+    return (x1 - x0, y1 - y0)
+
+def _fit_font(text, max_w, max_h, font_path, max_size, min_size=18):
+    size = max_size
+    while size >= min_size:
+        font = ImageFont.truetype(font_path, size=size)
+        w, h = _text_wh(font, text)
+        if w <= max_w and h <= max_h:
+            return font
+        size -= 2
+    return ImageFont.truetype(font_path, size=min_size)
+
+def _presigned_get_url(key: str, expires: int = 600) -> str:
+    service = "s3"
+    algorithm = "AWS4-HMAC-SHA256"
+    now = datetime.now(timezone.utc)
+    amz_date = now.strftime("%Y%m%dT%H%M%SZ")
+    date_stamp = now.strftime("%Y%m%d")
+    credential_scope = f"{date_stamp}/{S3_REGION}/{service}/aws4_request"
+    host = S3_ENDPOINT.replace("https://","").replace("http://","")
+    path = f"/{S3_BUCKET}/{key}"
+
+    import urllib.parse, hashlib, hmac
+    qs = {
+        "X-Amz-Algorithm": algorithm,
+        "X-Amz-Credential": f"{S3_ACCESS_KEY}/{credential_scope}",
+        "X-Amz-Date": amz_date,
+        "X-Amz-Expires": str(expires),
+        "X-Amz-SignedHeaders": "host",
+    }
+    canonical_query = "&".join(
+        f"{urllib.parse.quote(k, safe='~')}={urllib.parse.quote(v, safe='~')}"
+        for k, v in sorted(qs.items())
+    )
+    canonical_headers = f"host:{host}\n"
+    signed_headers = "host"
+    payload_hash = "UNSIGNED-PAYLOAD"
+
+    canonical_request = (
+        f"GET\n{path}\n{canonical_query}\n{canonical_headers}\n{signed_headers}\n{payload_hash}"
+    )
+
+    cr_hash = hashlib.sha256(canonical_request.encode()).hexdigest()
+    string_to_sign = f"{algorithm}\n{amz_date}\n{credential_scope}\n{cr_hash}"
+
+    def _sign(key: bytes, msg: str) -> bytes:
+        return hmac.new(key, msg.encode(), hashlib.sha256).digest()
+
+    k_date = _sign(("AWS4" + S3_SECRET_KEY).encode(), date_stamp)
+    k_region = _sign(k_date, S3_REGION)
+    k_service = _sign(k_region, service)
+    k_signing = _sign(k_service, "aws4_request")
+    signature = hmac.new(k_signing, string_to_sign.encode(), hashlib.sha256).hexdigest()
+
+    final_qs = canonical_query + f"&X-Amz-Signature={signature}"
+    return f"{S3_ENDPOINT}{path}?{final_qs}"
+
+def _rounded_mask(w, h, r):
+    m = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(m)
+    d.rounded_rectangle((0,0,w,h), r, fill=255)
+    return m
+
+def _resize_cover(img: Image.Image, target_w: int, target_h: int) -> Image.Image:
+    iw, ih = img.size
+    scale = max(target_w / iw, target_h / ih)
+    rs = img.resize((math.ceil(iw * scale), math.ceil(ih * scale)), Image.Resampling.LANCZOS)
+    rw, rh = rs.size
+    left = (rw - target_w) // 2
+    top  = (rh - target_h) // 2
+    return rs.crop((left, top, left + target_w, top + target_h))
+
+# ---- v2 레이아웃 합성 (시안 스타일) ----
+def _compose_card_v2(
+    bg_bytes: bytes,
+    thumb_bytes: bytes,
+    store_name: str,
+    district: str,
+    district_color: str = "#FF8601", 
+) -> bytes:
+    _ensure_font()
+    W, H = 1080, 1350
+    pad = 72
+    TITLE_TOP_OFFSET = 50
+    line_gap = 12
+    slot_w, slot_h = 860, 600
+    MIN_GAP = 10
+    CAPTION_SAFE_MARGIN = 150
+
+    canvas = Image.new("RGB", (W, H), "#000000")
+    bg = Image.open(io.BytesIO(bg_bytes))
+    bg = ImageOps.exif_transpose(bg)
+    bg = _resize_cover(bg, W, H)
+    canvas.paste(bg, (0, 0))
+    draw = ImageDraw.Draw(canvas)
+
+    title_w = W - pad * 2
+    district_font = _fit_font(district, title_w, 160, FONT_PATH_BOLD, 128, 32)
+    store_font    = _fit_font(store_name, title_w, 200, FONT_PATH_BOLD, 128, 32)
+
+    tx = (W - slot_w) // 2
+    ty = pad + TITLE_TOP_OFFSET
+    ty2 = ty + _text_wh(district_font, district)[1] + line_gap
+    title_bottom = ty2 + _text_wh(store_font, store_name)[1]
+
+    cap_top_y = H - CAPTION_SAFE_MARGIN
+    slot_x = (W - slot_w) // 2
+    slot_y = cap_top_y - slot_h - 145
+
+    if slot_y < title_bottom + MIN_GAP:
+        overlap = (title_bottom + MIN_GAP) - slot_y
+        ty -= overlap
+        ty2 = ty + _text_wh(district_font, district)[1] + line_gap
+        title_bottom = ty2 + _text_wh(store_font, store_name)[1]
+
+    draw.text((tx, ty), district, font=district_font, fill=district_color,
+              stroke_width=2, stroke_fill="#000000")  # 외곽선 추가하면 더 잘 보임
+    draw.text((tx, ty2), store_name, font=store_font, fill="#ffffff",
+              stroke_width=2, stroke_fill="#000000")
+
+    thumb = Image.open(io.BytesIO(thumb_bytes))
+    thumb = ImageOps.exif_transpose(thumb)
+    thumb = _resize_cover(thumb, slot_w, slot_h)
+    canvas.paste(thumb, (slot_x, slot_y))
+
+    out = io.BytesIO()
+    canvas.save(out, "WEBP", quality=92, method=6)
+    return out.getvalue()
+
+class ComposeCardV2(BaseModel):
+    image_key: str
+    store_name: str
+    area_keywords: List[str]
+    session_id: Optional[str] = None
+
+def compose_card_v2_core(payload: ComposeCardV2) -> dict:
+    """의존성(Depends) 없이 동작하는 순수 합성 함수"""
+    _ensure_font()
+
+    bg_key = "uploads/common/f465a025e7f540d1a850521bd9fc989e.jpg"
+    bg_url    = _presigned_get_url(bg_key)
+    thumb_url = _presigned_get_url(payload.image_key)
+
+    rb = requests.get(bg_url, timeout=20)
+    if rb.status_code != 200:
+        raise HTTPException(502, f"배경 이미지 다운로드 실패: {rb.status_code}")
+    rt = requests.get(thumb_url, timeout=20)
+    if rt.status_code != 200:
+        raise HTTPException(502, f"썸네일 이미지 다운로드 실패: {rt.status_code}")
+
+    district = _format_district(payload.area_keywords)
+    composed = _compose_card_v2(rb.content, rt.content, payload.store_name.strip(), district)
+
+    key_prefix = f"composed_v2/{payload.session_id or 'common'}".strip("/")
+    out_key  = f"{key_prefix}/{uuid.uuid4().hex}.webp"
+    path = f"/{S3_BUCKET}/{out_key}"
+    url  = f"{S3_ENDPOINT}{path}"
+    headers = _aws_v4_sign(path, composed, "image/webp")
+    pu = requests.put(url, data=composed, headers=headers, timeout=20)
+    if pu.status_code not in (200, 201):
+        raise HTTPException(500, f"S3 업로드 실패: {pu.status_code} {pu.text}")
+
+    presigned_url = _presigned_get_url(out_key, expires=600)
+    return {"ok": True, "rel": out_key, "url": presigned_url}
+
+@router.post("/compose/card")
+def compose_card_v2(payload: ComposeCardV2 = Body(...)):
+    return compose_card_v2_core(payload)
+
+
+def _format_district(area_keywords: List[str]) -> str:
+    if not area_keywords:
+        return "상권 정보"
+    top = [kw.strip() for kw in area_keywords if kw.strip()]
+    return " · ".join(top[:2])  

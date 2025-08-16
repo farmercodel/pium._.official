@@ -176,3 +176,5 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/ 
+# Environment variables
+.env
