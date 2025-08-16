@@ -1,9 +1,11 @@
 import {
+    DocumentChartBarIcon,
+    BookOpenIcon,
+/*
     ArrowPathIcon,
-    ChartPieIcon,
-    CursorArrowRaysIcon,
     FingerPrintIcon,
     SquaresPlusIcon,
+*/
 } from '@heroicons/react/24/outline'
 
 import { PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
@@ -11,71 +13,61 @@ import { PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 const LOGO_ITEMS = {
     name: 'LOGO',
     // 임시 uiia cat image
-    url: 'https://oiiai.cat/cat.png',
+    url: 'assets/logo.png',
     alt: 'PIUM_LOGO'
 } as const
 
 const MAIN_NAVIGATION_ITEMS = [
     {
-        name: 'Product',
-        navigationIndex: 0,
+        name: 'AI',
+        navigationText: 'ai',
     },
     {
-        name: 'Features',
-        navigationIndex: 0,
+        name: 'Preview',
+        navigationText: 'preview',
     },
     {
         name: 'Marketplace',
-        navigationIndex: 0,
+        navigationText: 'main',
     },
     {
         name: 'About',
-        navigationIndex: 0,
+        navigationText: 'about',
+    },
+    {
+        name: 'Login',
+        navigationText: 'login',
+    },
+    {
+        name: 'Sign Up',
+        navigationText: 'sign up',
     },
 ] as const
 
 const POPUP_NAVIGATION_ITEMS = [
     {
-        name: 'Analytics', 
-        description: 'Get a better understanding of your traffic', 
-        navigationIndex: 0, 
-        icon: ChartPieIcon
+        name: '마케팅 생성', 
+        description: '마케팅 관련 콘텐츠 생성', 
+        navigationText: 'survey', 
+        icon: DocumentChartBarIcon
     },
     { 
-        name: 'Engagement', 
-        description: 'Speak directly to your customers', 
-        navigationIndex: 0, 
-        icon: CursorArrowRaysIcon 
-    },
-    {
-         name: 'Security', 
-         description: 'Your customers’ data will be safe and secure', 
-         navigationIndex: 0, 
-         icon: FingerPrintIcon 
-    },
-    { 
-        name: 'Integrations', 
-        description: 'Connect with third-party tools', 
-        navigationIndex: 0, 
-        icon: SquaresPlusIcon 
-    },
-    { 
-        name: 'Automations', 
-        description: 'Build strategic funnels that will convert', 
-        navigationIndex: 0, 
-        icon: ArrowPathIcon 
+        name: '가이드', 
+        description: 'Product 사용 가이드', 
+        navigationText: 'guide', 
+        icon: BookOpenIcon 
     },
 ] as const
 
 const POPUP_ACTION_ITEMS = [
     { 
         name: 'Watch demo', 
-        navigationIndex: 0, 
+        navigationText: 'main', 
         icon: PlayCircleIcon 
     },
     { 
         name: 'Contact sales', 
-        navigationIndex: 0, 
+        navigationText: 'main', 
         icon: PhoneIcon 
     },
 ] as const

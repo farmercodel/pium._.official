@@ -1,12 +1,12 @@
 import PageLayout from "../components/common/PageLayout"
 
-{/** 팀, 웹 소개 페이지 */}
-const AboutPage = () => {
+{/** 관리자 페이지 */}
+const AdminPage = () => {
     return (
         <PageLayout>
-            <h1>AboutPage</h1>
+            <h1>AdminPage</h1>
         </PageLayout>
     )
 }
 
-export default AboutPage
+export default AdminPage

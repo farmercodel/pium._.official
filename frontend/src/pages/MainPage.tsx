@@ -1,10 +1,34 @@
 import PageLayout from "../components/common/PageLayout"
 
+import useNavigation from "../hooks/useNavigation"
+
+import HeroSection from "../components/main/HeroSection"
+import FeatureSection from "../components/main/FeatureSection"
+import UserFlowSection from "../components/main/UserFlowSection"
+
 {/** 메인 페이지 */}
 const MainPage = () => {
+
+    const { goToSurvey, goToGuide } = useNavigation()
+    const navigationMap = {
+        'survey': goToSurvey,
+        'guide': goToGuide,
+    }
+
+    const handleItemClick = (itemName: string) => {
+        const navigationFn = navigationMap[itemName as keyof typeof navigationMap]
+        if (navigationFn) {
+            navigationFn()
+        } else {
+            console.log("Unknown navigation item:", itemName)
+        }
+    }
+
     return (
         <PageLayout>
-            <h1>MainPage</h1>
+            <HeroSection onCTAClick={() => handleItemClick('survey')}/>
+            <FeatureSection />
+            <UserFlowSection onGuideClick={() => handleItemClick('guide')}/>
         </PageLayout>
     )
 }
