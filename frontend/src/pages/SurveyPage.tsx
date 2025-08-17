@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import PageLayout from "../components/common/PageLayout"
 import InputSection from "../components/survey/InputSection"
 import PreviewCardSection from "../components/survey/PreviewCardSection"
+import useNavigation from "../hooks/useNavigation"
 
 {/** 질문지 답변 입력 페이지 */}
 const SurveyPage = () => {
@@ -9,15 +10,7 @@ const SurveyPage = () => {
     
     // 모든 입력 데이터를 하나의 객체로 관리
     const [formData, setFormData] = useState<Record<string, string>>(() => {
-        // 로컬 스토리지에서 기존 데이터 불러오기
-        const saved = localStorage.getItem('surveyFormData')
-        if (saved) {
-            try {
-                return JSON.parse(saved)
-            } catch {
-                return {}
-            }
-        }
+        // SurveyPage에 처음 진입할 때는 항상 초기화
         return {}
     })
 
@@ -31,11 +24,19 @@ const SurveyPage = () => {
         })
     }
 
+    // 폼 초기화 함수
+    const resetForm = () => {
+        setFormData({})
+        localStorage.removeItem('surveyFormData')
+    }
+
     // 로컬 스토리지에 자동 저장
     useEffect(() => {
         localStorage.setItem('surveyFormData', JSON.stringify(formData))
     }, [formData])
 
+    const { goToGeneration } = useNavigation()
+    
     return (
         <PageLayout className="h-[calc(100vh-72px-132px)] overflow-hidden">
             {/* 모바일 탭 헤더 */}
@@ -68,7 +69,11 @@ const SurveyPage = () => {
                     formData={formData}
                     onInputChange={handleInputChange}
                 />
-                <PreviewCardSection formData={formData} />
+                <PreviewCardSection 
+                    formData={formData} 
+                    onReset={resetForm}
+                    onSubmit={goToGeneration}
+                />
             </div>
 
             {/* 모바일 탭 콘텐츠 */}
@@ -79,7 +84,11 @@ const SurveyPage = () => {
                         onInputChange={handleInputChange}
                     />
                 ) : (
-                    <PreviewCardSection formData={formData} />
+                    <PreviewCardSection 
+                        formData={formData} 
+                        onReset={resetForm}
+                        onSubmit={goToGeneration}
+                    />
                 )}
             </div>
         </PageLayout>
