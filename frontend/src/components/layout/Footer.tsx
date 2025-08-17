@@ -18,7 +18,7 @@ function Footer() {
                     </a>
                     
                     {/* Instagram */}
-                    <a href="https://www.instagram.com/pium_official/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center space-x-2">
+                    <a href="https://www.instagram.com/pium._.official/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center space-x-2">
                         <FaInstagram className="w-5 h-5" />
                         <span>Instagram</span>
                     </a>
