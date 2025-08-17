@@ -26,7 +26,7 @@ const InputBox = ({
     }
     
     return <div className="flex flex-col">
-        {title && <p className="text-sm text-gray-500">{title}{required && <span className="text-red-500">*</span>}</p>}
+        {title && <p className="text-sm text-gray-500">{title}{required && <span className="text-red-500"> *</span>}</p>}
         <input type="text" placeholder={placeholder} value={value} onChange={(e) => onChange?.(e.target.value)} className={`${baseClasses} ${borderClasses[border]} ${className}`} />
     </div>
 }
