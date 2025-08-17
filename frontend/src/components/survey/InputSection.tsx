@@ -3,7 +3,7 @@ import { INPUT_SECTION_CONTENT } from "../../constants/surveyConstant"
 
 const InputSection = () => {
     return (
-        <div className="col-span-5 md:col-span-3 p-6 w-full gap-2 flex flex-col overflow-y-auto">
+        <div className="row-span-3 md:row-span-5 md:col-span-3 p-6 w-full gap-2 flex flex-col overflow-y-auto">
             <p className="text-sm text-gray-500"><span className="text-red-500">*</span> 표시는 필수 항목입니다.</p>
             {INPUT_SECTION_CONTENT.filter((item) => item.required).map((item) => (
                 <InputBox key={item.title} placeholder={item.placeholder} title={item.title} required={item.required} />
