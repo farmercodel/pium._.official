@@ -1,38 +1,66 @@
+// src/components/survey/InputSection.tsx
 import InputBox from "../common/InputBox"
+import ToneRadio from "../survey/ToneRadio"
+import ImageUpload from "../survey/ImageUpload"
 import { INPUT_SECTION_CONTENT } from "../../constants/surveyConstant"
 
 interface InputSectionProps {
-    formData: Record<string, string>
-    onInputChange: (title: string, value: string) => void
+  formData: Record<string, string>
+  onInputChange: (title: string, value: string) => void
+  onImagesUploaded: (urls: string[]) => void
+  uploadedImageURLs: string[]            // ✅ 추가: 현재 이미지 목록
 }
 
-const InputSection = ({ formData, onInputChange }: InputSectionProps) => {
+const InputSection = ({ formData, onInputChange, onImagesUploaded, uploadedImageURLs }: InputSectionProps) => {
+  const renderItem = (item: { title: string; placeholder: string; required: boolean }) => {
+    if (item.title === "답변 톤") {
+      return (
+        <ToneRadio
+          key={item.title}
+          value={(formData["답변 톤"] as any) || "Casual"}
+          onChange={(v) => onInputChange("답변 톤", v)}
+          required={item.required}
+        />
+      )
+    }
+
+    if (item.title === "이미지 URL(들)" || item.title === "이미지 파일") {
+      return (
+        <ImageUpload
+          key={item.title}
+          value={uploadedImageURLs}                                  // ✅ 현재 리스트 표시
+          onUploaded={(urls) => {
+            onImagesUploaded(urls)                                   // ✅ 부모 상태 갱신
+            onInputChange(item.title, urls.join("\n"))               // 프리뷰에 표시용(선택)
+          }}
+          subdir="ads/images"
+          maxCount={10}
+        />
+      )
+    }
+
     return (
-        <div className="col-span-1 md:col-span-3 p-6 w-full gap-2 flex flex-col overflow-y-auto">
-            <p className="text-sm text-gray-500"><span className="text-red-500">*</span> 표시는 필수 항목입니다.</p>
-            {INPUT_SECTION_CONTENT.filter((item) => item.required).map((item) => (
-                <InputBox 
-                    key={item.title} 
-                    placeholder={item.placeholder} 
-                    title={item.title} 
-                    required={item.required}
-                    value={formData[item.title] || ''}
-                    onChange={(value) => onInputChange(item.title, value)}
-                />
-            ))}
-            <div className="border-b border-b-3 border-gray-300 w-full my-4"></div>
-            {INPUT_SECTION_CONTENT.filter((item) => !item.required).map((item) => (
-                <InputBox 
-                    key={item.title} 
-                    placeholder={item.placeholder} 
-                    title={item.title} 
-                    required={item.required}
-                    value={formData[item.title] || ''}
-                    onChange={(value) => onInputChange(item.title, value)}
-                />
-            ))}
-        </div>
+      <InputBox
+        key={item.title}
+        placeholder={item.placeholder}
+        title={item.title}
+        required={item.required}
+        value={formData[item.title] || ""}
+        onChange={(value) => onInputChange(item.title, value)}
+      />
     )
+  }
+
+  return (
+    <div className="col-span-1 md:col-span-3 p-6 w-full gap-2 flex flex-col overflow-y-auto">
+      <p className="text-sm text-gray-500">
+        <span className="text-red-500">*</span> 표시는 필수 항목입니다.
+      </p>
+      {INPUT_SECTION_CONTENT.filter(i => i.required).map(renderItem)}
+      <div className="border-b border-b-3 border-gray-300 w-full my-4" />
+      {INPUT_SECTION_CONTENT.filter(i => !i.required).map(renderItem)}
+    </div>
+  )
 }
 
 export default InputSection

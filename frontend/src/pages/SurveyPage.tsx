@@ -1,98 +1,96 @@
+// src/pages/SurveyPage.tsx
 import { useState, useEffect } from "react"
 import PageLayout from "../components/common/PageLayout"
 import InputSection from "../components/survey/InputSection"
 import PreviewCardSection from "../components/survey/PreviewCardSection"
 import useNavigation from "../hooks/useNavigation"
+import { toGenerateAdPayload } from "../types/SurveymapFormData"
+import { api } from "../api/api"
 
-{/** 질문지 답변 입력 페이지 */}
 const SurveyPage = () => {
-    const [activeTab, setActiveTab] = useState<'input' | 'preview'>('input')
-    
-    // 모든 입력 데이터를 하나의 객체로 관리
-    const [formData, setFormData] = useState<Record<string, string>>(() => {
-        // SurveyPage에 처음 진입할 때는 항상 초기화
-        return {}
+  const [activeTab, setActiveTab] = useState<'input' | 'preview'>('input')
+  const [formData, setFormData] = useState<Record<string, string>>({ "답변 톤": "Casual" })
+  const [uploadedImageURLs, setUploadedImageURLs] = useState<string[]>([])
+  const [submitting, setSubmitting] = useState(false) // 중복 클릭 방지(선택)
+
+  const handleInputChange = (title: string, value: string) => {
+    setFormData(prev => {
+      const newData = { ...prev, [title]: value }
+      localStorage.setItem('surveyFormData', JSON.stringify(newData))
+      return newData
     })
+  }
 
-    // 입력 데이터 변경 핸들러
-    const handleInputChange = (title: string, value: string) => {
-        setFormData(prev => {
-            const newData = { ...prev, [title]: value }
-            // 로컬 스토리지에 저장
-            localStorage.setItem('surveyFormData', JSON.stringify(newData))
-            return newData
-        })
+  const resetForm = () => {
+    setFormData({ "답변 톤": "Casual" })
+    setUploadedImageURLs([])
+    localStorage.removeItem('surveyFormData')
+  }
+
+  useEffect(() => {
+    localStorage.setItem('surveyFormData', JSON.stringify(formData))
+  }, [formData])
+
+  const { goToGeneration } = useNavigation()
+
+  const handleSubmit = async () => {
+    if (submitting) return;
+    try {
+      setSubmitting(true)
+      const payload = toGenerateAdPayload(formData, uploadedImageURLs)
+
+      const { data } = await api.post("/api/generate", payload)
+
+      goToGeneration(data)
+      
+    } catch (e: any) {
+      console.error(e)
+      alert(`생성 실패: ${e?.message ?? e}`)
+    } finally {
+      setSubmitting(false)
     }
+  }
 
-    // 폼 초기화 함수
-    const resetForm = () => {
-        setFormData({})
-        localStorage.removeItem('surveyFormData')
-    }
+  return (
+    <PageLayout className="h-[calc(100vh-72px-132px)] overflow-hidden">
+      {/* ...중략(탭 헤더 동일) */}
 
-    // 로컬 스토리지에 자동 저장
-    useEffect(() => {
-        localStorage.setItem('surveyFormData', JSON.stringify(formData))
-    }, [formData])
+      {/* 데스크톱 */}
+      <div className="hidden md:grid md:grid-cols-5 gap-6 w-[95%] lg:w-[80%] mx-auto h-full pt-4">
+        <InputSection
+          formData={formData}
+          onInputChange={handleInputChange}
+          onImagesUploaded={setUploadedImageURLs}
+          uploadedImageURLs={uploadedImageURLs}
+        />
+        <PreviewCardSection
+          formData={formData}
+          onReset={resetForm}
+          onSubmit={handleSubmit}
+          uploadedImageURLs={uploadedImageURLs}
+        />
+      </div>
 
-    const { goToGeneration } = useNavigation()
-    
-    return (
-        <PageLayout className="h-[calc(100vh-72px-132px)] overflow-hidden">
-            {/* 모바일 탭 헤더 */}
-            <div className="md:hidden flex border-b border-gray-200 bg-white sticky top-0 z-10">
-                <button
-                    onClick={() => setActiveTab('input')}
-                    className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                        activeTab === 'input'
-                            ? 'text-green-600 border-b-2 border-green-600'
-                            : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                    질문지
-                </button>
-                <button
-                    onClick={() => setActiveTab('preview')}
-                    className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                        activeTab === 'preview'
-                            ? 'text-green-600 border-b-2 border-green-600'
-                            : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                    프리뷰
-                </button>
-            </div>
-
-            {/* 데스크톱 레이아웃 */}
-            <div className="hidden md:grid md:grid-cols-5 gap-6 w-[95%] lg:w-[80%] mx-auto h-full pt-4">
-                <InputSection 
-                    formData={formData}
-                    onInputChange={handleInputChange}
-                />
-                <PreviewCardSection 
-                    formData={formData} 
-                    onReset={resetForm}
-                    onSubmit={goToGeneration}
-                />
-            </div>
-
-            {/* 모바일 탭 콘텐츠 */}
-            <div className="grid grid-cols-1 md:hidden w-[90%] mx-auto h-[calc(100vh-72px-132px-60px)] pt-4">
-                {activeTab === 'input' ? (
-                    <InputSection 
-                        formData={formData}
-                        onInputChange={handleInputChange}
-                    />
-                ) : (
-                    <PreviewCardSection 
-                        formData={formData} 
-                        onReset={resetForm}
-                        onSubmit={goToGeneration}
-                    />
-                )}
-            </div>
-        </PageLayout>
-    )
+      {/* 모바일 */}
+      <div className="grid grid-cols-1 md:hidden w-[90%] mx-auto h-[calc(100vh-72px-132px-60px)] pt-4">
+        {activeTab === 'input' ? (
+          <InputSection
+            formData={formData}
+            onInputChange={handleInputChange}
+            onImagesUploaded={setUploadedImageURLs}
+            uploadedImageURLs={uploadedImageURLs}
+          />
+        ) : (
+          <PreviewCardSection
+            formData={formData}
+            onReset={resetForm}
+            onSubmit={handleSubmit}
+            uploadedImageURLs={uploadedImageURLs}
+          />
+        )}
+      </div>
+    </PageLayout>
+  )
 }
 
 export default SurveyPage

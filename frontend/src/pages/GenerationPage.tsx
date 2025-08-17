@@ -1,12 +1,19 @@
-import PageLayout from "../components/common/PageLayout"
+// src/pages/GenerationPage.tsx
+import { useLocation, Navigate } from "react-router-dom";
 
-{/** AI 기반 답변 생성 페이지 */}
-const GenerationPage = () => {
-    return (
-        <PageLayout>
-            <h1>GenerationPage</h1>
-        </PageLayout>
-    )
+export default function GenerationPage() {
+  const { state } = useLocation() as { state?: any };
+
+  const data = state;
+
+  if (!data) {
+    return <Navigate to="/survey" replace />;
+  }
+
+  return (
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-4">생성 결과</h1>
+      <pre className="text-sm bg-gray-50 p-3 rounded">{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
 }
-
-export default GenerationPage
