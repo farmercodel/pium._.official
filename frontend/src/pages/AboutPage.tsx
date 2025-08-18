@@ -14,7 +14,8 @@ const teamMember = [
     name: "이영수",
     role: "Frontend, 채채주인",
     email: "leeys4903@naver.com",
-    description: "텅장 시간부자 vs 통장 시간거지"
+    description: "텅장 시간부자 vs 통장 시간거지",
+    photo : "/public/TeamMember/chaechae.jpg"
   },
   {
     name: "김태연",
