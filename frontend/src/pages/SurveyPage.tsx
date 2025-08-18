@@ -1,5 +1,5 @@
 // src/pages/SurveyPage.tsx
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import PageLayout from "../components/common/PageLayout"
 import InputSection from "../components/survey/InputSection"
 import PreviewCardSection from "../components/survey/PreviewCardSection"
@@ -39,7 +39,7 @@ const SurveyPage = () => {
       setSubmitting(true)
       const payload = toGenerateAdPayload(formData, uploadedImageURLs)
 
-      const { data } = await api.post("/api/generate", payload)
+      const { data } = await api.post("/api/generate", payload, { timeout:60000 })
 
       goToGeneration(data)
       

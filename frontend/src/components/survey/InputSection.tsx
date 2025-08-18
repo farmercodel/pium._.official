@@ -24,20 +24,26 @@ const InputSection = ({ formData, onInputChange, onImagesUploaded, uploadedImage
       )
     }
 
-    if (item.title === "이미지 URL(들)" || item.title === "이미지 파일") {
-      return (
-        <ImageUpload
-          key={item.title}
-          value={uploadedImageURLs}                                  // ✅ 현재 리스트 표시
-          onUploaded={(urls) => {
-            onImagesUploaded(urls)                                   // ✅ 부모 상태 갱신
-            onInputChange(item.title, urls.join("\n"))               // 프리뷰에 표시용(선택)
-          }}
-          subdir="ads/images"
-          maxCount={10}
-        />
-      )
-    }
+      if (item.title === "이미지 URL(들)" || item.title === "이미지 파일") {
+        return (
+          <div key={item.title} className="flex flex-col gap-2">
+            <label className="text-sm text-gray-700">
+              {item.title}
+              {item.required && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            <ImageUpload
+              value={uploadedImageURLs}
+              onUploaded={(urls) => {
+                onImagesUploaded(urls)
+                onInputChange(item.title, urls.join("\n"))
+              }}
+              subdir="ads/images"
+              maxCount={10}
+            />
+          </div>
+        )
+      }
+
 
     return (
       <InputBox
