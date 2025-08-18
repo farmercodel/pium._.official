@@ -84,8 +84,8 @@ const AboutPage = () => {
             />
             <h5 className="font-semibold text-lg">{member.name}</h5>
             <p className="text-sm text-gray-500">{member.role}</p>
-            <p className="text-center text-sm mt-2">{member.description}</p>
             <p className="text-center text-sm mt-2">{member.email}</p>
+            <p className="text-center text-sm mt-2">{member.description}</p>
           </div>
         ))}
       </div>
