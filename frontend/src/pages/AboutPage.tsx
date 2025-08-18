@@ -77,8 +77,6 @@ const AboutPage = () => {
             className="w-[600px] lg:w-[450px] h-[500px] object-cover mt-[60px]"
           />
         </div>
-
-        {/* 팀원 소개 섹션 (업데이트 카드 스타일) */}
         <h4 className="text-[40px] font-bold mt-20 mb-10 ml-85">
           Team member introduction
         </h4>
@@ -88,7 +86,6 @@ const AboutPage = () => {
               key={i}
               className="bg-white rounded-2xl shadow-md hover:shadow-lg transition transform hover:scale-105 p-6 flex flex-col items-center"
             >
-              {/* 프로필 사진 동그랗게 */}
               <div className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden bg-gray-100 mb-4">
                 {member.photo ? (
                   <img
