@@ -6,23 +6,27 @@ const teamMember = [
     name : "오인화",
     role : "Backend, King",
     description : "아무것도 잘 풀리지 않지만 허공을 향해 따봉을 날리는 따봉도치",
-    photo : "/public/TeamMember/Inwha.jpg"
+    email : "cordelia04@gmail.com",
+    photo : "/public/TeamMember/Inwha.jpg",
   },
   {
     name : "이영수",
     role : "Frontend , 채채주인",
+    email : "leeys4903@naver.com",
     description: "텅장 시간부자 vs 통장 시간거지"
   },
   {
     name : "김태연",
     role : "Frontend , OTAKU",
     description : "여름 너무 더워 에어 컨을 틀어",
+    email : "kty20040308@gmail.com",
     photo : "/public/TeamMember/Teayeon.jpg"
   },
   {
     name : "김다빈",
     role : "Backend , 한교동",
-    description : "",
+    description : "커피와 코드로 세상을 디버깅하는 개발자",
+    email : "fkdl4862@naver.com",
     photo : "/public/TeamMember/dabin.png"
   },
   {
@@ -81,6 +85,7 @@ const AboutPage = () => {
             <h5 className="font-semibold text-lg">{member.name}</h5>
             <p className="text-sm text-gray-500">{member.role}</p>
             <p className="text-center text-sm mt-2">{member.description}</p>
+            <p className="text-center text-sm mt-2">{member.email}</p>
           </div>
         ))}
       </div>
