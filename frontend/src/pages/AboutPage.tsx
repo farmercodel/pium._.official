@@ -19,7 +19,7 @@ const teamMember = [
   {
     name: "김태연",
     role: "Frontend, OTAKU",
-    description: "여름 너무 더워 에어 컨을 틀어",
+    description: "듀 가나디 듀 가나디 듀 가나디",
     email: "kty20040308@gmail.com",
     photo: "/public/TeamMember/Teayeon.jpg"
   },
@@ -56,7 +56,6 @@ const AboutPage = () => {
       />
       {/* About 페이지 전체 폰트 적용 */}
       <div className="font-sans">
-        {/* 프로젝트 소개 섹션 */}
         <div className="flex flex-col lg:flex-row items-stretch justify-center gap-y-8 gap-x-14 max-w-[1100px] mx-auto">
           <div className="max-w-[500px] text-center lg:text-left h-[500px] flex flex-col justify-center">
             <h1 className="text-[50px] font-bold mb-4">Project</h1>
@@ -77,7 +76,8 @@ const AboutPage = () => {
             className="w-[600px] lg:w-[450px] h-[500px] object-cover mt-[60px]"
           />
         </div>
-        <h4 className="text-[40px] font-bold mt-20 mb-10 ml-85">
+        <h4 className="text-[40px] font-bold mt-20 mb-10 text-left"></h4>
+        <h4 className="text-[40px] font-bold mt-20 mb-10 text-center">
           Team member introduction
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 mb-20">
