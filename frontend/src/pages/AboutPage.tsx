@@ -4,20 +4,36 @@ import About from "../../public/about2.jpg"
 const teamMember = [
   {
     name : "오인화",
-    role : "Backend , king",
-    description : "완성된건없지만 허공을 바라보며 따봉을날리는 따봉도치"
-    
+    role : "Backend, King",
+    description : "아무것도 잘 풀리지 않지만 허공을 향해 따봉을 날리는 따봉도치",
+    photo : "/public/TeamMember/Inwha.jpg"
   },
   {
     name : "이영수",
     role : "Frontend , 채채주인",
-    Ddescription: "텅장 시간부자 vs 통장 시간거지"
+    description: "텅장 시간부자 vs 통장 시간거지"
   },
   {
     name : "김태연",
     role : "Frontend , OTAKU",
     description : "여름 너무 더워 에어 컨을 틀어",
     photo : "/public/TeamMember/Teayeon.jpg"
+  },
+  {
+    name : "김다빈",
+    role : "Backend , 한교동",
+    description : "",
+    photo : "/public/TeamMember/dabin.png"
+  },
+  {
+    name : "정상원",
+    role : "Backend",
+    description : "",
+  },
+  {
+    name : "정시연",
+    role : "Design",
+    description : "",
   }
 ]
 const AboutPage = () => {
@@ -54,12 +70,13 @@ const AboutPage = () => {
         {teamMember.map((member, i) => (
           <div
             key={i}
-            className="w-[500px] h-[400px] bg-white rounded-2xl shadow-md flex flex-col items-center justify-center p-4"
+            className="w-[500px] h-[400px] bg-white rounded-2xl shadow-md flex flex-col items-center justify-center p-4
+             transform transition-transform duration-300 hover:scale-105"
           >
             <img
               src={member.photo}
               alt={member.name}
-              className="w-30 h-30 object-cover mb-4"
+              className="w-50 h-50 object-cover mb-4"
             />
             <h5 className="font-semibold text-lg">{member.name}</h5>
             <p className="text-sm text-gray-500">{member.role}</p>
