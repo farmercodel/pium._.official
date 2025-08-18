@@ -1,5 +1,5 @@
 import PageLayout from "../components/common/PageLayout"
-import About from "/dev/pium._.official-new/frontend/public/aboutpage.jpg"
+import About from "../../public/aboutpage.jpg"
 
 const AboutPage = () => {
   return (

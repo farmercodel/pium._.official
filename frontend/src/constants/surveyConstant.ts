@@ -22,19 +22,19 @@
 
 const INPUT_SECTION_CONTENT = [
   { title: '가게명', placeholder: '상호명', required: true },
-  { title: '지역 위치/상권 키워드', placeholder: '예: 강남, 역삼, 골목상권 (콤마/줄바꿈)', required: true },
+  { title: '지역 위치/상권 키워드', placeholder: '청주시, 강남역, 역삼역 등', required: true },
   { title: '가게 주소', placeholder: '도로명 주소', required: true },
-  { title: '가격대', placeholder: '예: 1만원대, 2~3만원', required: true },
-  { title: '영업 시간 정보', placeholder: '예: 09:00 ~ 18:00', required: true },
-  { title: '가게 업종', placeholder: '예: 카페, 이자카야', required: true },
+  { title: '가격대', placeholder: '답변을 입력하세요', required: true },
+  { title: '영업 시간 정보', placeholder: '(ex)09:00 ~ 18:00', required: true },
+  { title: '가게 업종', placeholder: '카페, 식당, 칵테일 바 등', required: true },
   { title: '가게 소개', placeholder: '가게 특징/소개', required: true },
   { title: '답변 톤', placeholder: 'Casual / professional / Witty / emotional / urgent / luxury', required: true },
-  { title: '이미지 URL(들)', placeholder: 'https://... (여러 개면 콤마/줄바꿈)', required: false },
-  { title: '참고 링크', placeholder: 'https://... (여러 개 가능)', required: false },
-  { title: '제공 제품/서비스 키워드', placeholder: '예: 원두, 라떼아트 (콤마/줄바꿈)', required: false },
-  { title: '타깃 고객', placeholder: '예: 직장인, 대학생 (콤마/줄바꿈)', required: false },
-  { title: '가게 인스타그램 ID', placeholder: '예: cafe_roma', required: false },
-  { title: '진행중인 프로모션', placeholder: '예: 평일 2+1 (콤마/줄바꿈)', required: false },
+  { title: '이미지 URL(들)', placeholder: '', required: false },
+  { title: '참고 링크', placeholder: '', required: false },
+  { title: '제공 제품/서비스 키워드', placeholder: 'ex. 원두, 라떼아트', required: false },
+  { title: '타깃 고객', placeholder: 'ex. 직장인, 대학생', required: false },
+  { title: '가게 인스타그램 ID', placeholder: 'ex. pium._.official', required: false },
+  { title: '진행중인 프로모션', placeholder: '네이버 영수증 리뷰 작성 시 천 원 할인', required: false },
 
 ] as const
 
