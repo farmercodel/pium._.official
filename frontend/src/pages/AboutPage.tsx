@@ -5,27 +5,27 @@ import About from "../../public/about2.jpg"
 const teamMember = [
   {
     name : "오인화",
-    role : "Backend , King",
+    role : "Backend, King",
     description : "아무것도 잘 풀리지 않지만 허공을 향해 따봉을 날리는 따봉도치",
     email : "givemehome@kakao.com",
     photo : "/public/TeamMember/Inwha.jpg",
   },
   {
     name : "이영수",
-    role : "Frontend , 채채주인",
+    role : "Frontend, 채채주인",
     email : "leeys4903@naver.com",
     description: "텅장 시간부자 vs 통장 시간거지"
   },
   {
     name : "김태연",
-    role : "Frontend , OTAKU",
+    role : "Frontend, OTAKU",
     description : "여름 너무 더워 에어 컨을 틀어",
     email : "kty20040308@gmail.com",
     photo : "/public/TeamMember/Teayeon.jpg"
   },
   {
     name : "김다빈",
-    role : "Backend , 한교동",
+    role : "Backend, 한교동",
     description : "커피와 코드로 세상을 디버깅하는 개발자",
     email : "fkdl4862@naver.com",
     photo : "/public/TeamMember/dabin.png"
@@ -39,7 +39,7 @@ const teamMember = [
   },
   {
     name : "정시연",
-    role : "Design",
+    role : "Design, 멋쟁이 디자이너",
     email : "siyeon0473@gmail.com",
     description : "디자인전공생",
     photo : "/public/TeamMember/siyeon.jpg"
