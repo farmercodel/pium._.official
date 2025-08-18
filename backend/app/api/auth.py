@@ -20,7 +20,6 @@ from app.util.security import decode_token
 # Bearer 인증 스키마 객체 (FastAPI에서 Security 사용 시 토큰 자동 추출)
 http_bearer = HTTPBearer(auto_error=True)
 
-
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(http_bearer),  # Authorization 헤더 자동 파싱
     db: Session = Depends(get_db),  # DB 세션 주입
