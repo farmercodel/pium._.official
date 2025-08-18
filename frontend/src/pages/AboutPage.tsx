@@ -32,13 +32,17 @@ const teamMember = [
   },
   {
     name : "정상원",
-    role : "Backend",
-    description : "",
+    role : "Backend, 신참",
+    email : "tkddnjs11122@naver.com",
+    description : "안녕하세요! 백엔드, 유니티를 공부하고있는 정상원입니다",
+    photo : "/public/TeamMember/sangwon.jpg"
   },
   {
     name : "정시연",
     role : "Design",
-    description : "",
+    email : "siyeon0473@gmail.com",
+    description : "디자인전공생",
+    photo : "/public/TeamMember/siyeon.jpg"
   }
 ]
 
