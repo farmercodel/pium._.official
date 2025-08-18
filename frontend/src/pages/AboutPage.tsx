@@ -4,9 +4,9 @@ import About from "../../public/about2.jpg"
 const teamMember = [
   {
     name : "오인화",
-    role : "Backend, King",
+    role : "Backend , King",
     description : "아무것도 잘 풀리지 않지만 허공을 향해 따봉을 날리는 따봉도치",
-    email : "cordelia04@gmail.com",
+    email : "givemehome@kakao.com",
     photo : "/public/TeamMember/Inwha.jpg",
   },
   {
