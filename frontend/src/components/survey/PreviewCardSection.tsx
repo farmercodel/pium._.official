@@ -51,15 +51,24 @@ const PreviewCardSection = ({ formData, onReset, onSubmit, uploadedImageURLs }: 
 
       {/* 하단: 완료 버튼 영역 */}
       <div className="flex flex-col gap-3">
-        <Button
-          variant="primary"
-          fullWidth
-          disabled={!isFormComplete}
-          onClick={onSubmit}
-        >
-          완료
-        </Button>
-        <Button variant="secondary" fullWidth onClick={onReset}>
+        {isFormComplete ? (
+            <Button
+            variant="primary"
+            fullWidth
+            onClick={onSubmit}
+          >
+            완료
+          </Button>
+        ) : (
+            <Button
+            variant="dimmed"
+            fullWidth
+          >
+            완료
+          </Button>
+        )}
+        
+        <Button variant="warning" fullWidth onClick={onReset}>
           초기화
         </Button>
         <p className="text-xs text-gray-500 text-center">

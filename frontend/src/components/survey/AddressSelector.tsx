@@ -231,7 +231,7 @@ const AddressSelector = ({ value, onChange, required = false }: AddressSelectorP
         </Button>
         {value && (
           <Button 
-            variant="secondary" 
+            variant="warning" 
             onClick={handleClear}
             className="whitespace-nowrap"
           >
@@ -275,18 +275,25 @@ const AddressSelector = ({ value, onChange, required = false }: AddressSelectorP
             {/* 버튼 */}
             <div className="flex justify-end gap-2">
               <Button 
-                variant="secondary" 
+                variant="warning" 
                 onClick={() => setIsOpen(false)}
               >
                 취소
               </Button>
-              <Button 
-                variant="primary" 
+              {selectedAddress ? (
+                <Button 
+                  variant="primary" 
                 onClick={handleAddressSelect}
-                disabled={!selectedAddress}
               >
                 주소 선택
               </Button>
+              ) : (
+                <Button 
+                  variant="dimmed"
+                >
+                  주소 선택
+                </Button>
+              )}
             </div>
           </div>
         </div>

@@ -30,15 +30,15 @@ const Button = ({
     fullWidth = false,
 }: ButtonProps) => {
 
-    const baseClasses = 'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
+    const baseClasses = 'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50'
 
     const variantClasses = {
         custom: "",
-        primary: "bg-[#b8d885] hover:bg-[#a2be75] text-white focus:ring-[#caed92]",
-        secondary: "bg-[#b8d885] hover:bg-[#a2be75] text-white focus:ring-[#caed92]",
-        warning: "bg-[#e7e478] hover:bg-[#cbc96a] text-white focus:ring-[#fefb84]",
-        dimmed: "bg-[#c8d1a9] hover:bg-[#b0b895] text-white focus:ring-[#dce6ba]",
-        danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
+        primary: "bg-[#b8d885] hover:bg-[#a2be75] text-white focus:ring-[#caed92] cursor-pointer",
+        secondary: "bg-[#b8d885] hover:bg-[#a2be75] text-white focus:ring-[#caed92] cursor-pointer",
+        warning: "bg-[#e7e478] hover:bg-[#cbc96a] text-white focus:ring-[#fefb84] cursor-pointer",
+        dimmed: "bg-[#c8d1a9] text-white cursor-not-allowed",
+        danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 cursor-pointer",
     }
 
     const sizeClasses = {
