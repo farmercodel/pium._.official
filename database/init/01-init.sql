@@ -17,14 +17,20 @@ $$;
 -- 데이터베이스 소유권 설정
 ALTER DATABASE pium_db OWNER TO pium_user;
 
--- 기본 스키마 생성
+-- 대상 DB로 접속
 \c pium_db;
 
--- 테이블 권한 설정 (SQLAlchemy가 테이블을 생성할 수 있도록)
+-- 스키마 초기화(개발용): 테이블은 ORM/Alembic이 생성
+DROP SCHEMA IF EXISTS public CASCADE;
+CREATE SCHEMA public AUTHORIZATION pium_user;
+
+-- 권한 부여
 GRANT ALL PRIVILEGES ON SCHEMA public TO pium_user;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pium_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pium_user;
-GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO pium_user;
+
+-- 향후 생성될 객체에 대한 기본 권한 (안전장치)
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO pium_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO pium_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO pium_user;
 
 -- 성공 메시지
 SELECT 'Database initialization completed successfully!' as status;
