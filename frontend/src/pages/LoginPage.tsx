@@ -43,7 +43,13 @@ const LoginPage = () => {
                     Login to <span className="text-green-500">PIUM</span>
                 </p>
 
-                <div className="flex flex-col gap-2 w-full px-5 pt-3 pb-2 md:px-7 md:px-4 md:pb-3">
+                <form 
+                    className="flex flex-col gap-2 w-full px-5 pt-3 pb-2 md:px-7 md:px-4 md:pb-3"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleLogin();
+                    }}
+                >
                     <input
                         type="text"
                         placeholder="Email"
@@ -61,7 +67,11 @@ const LoginPage = () => {
 
                     {err && <div className="text-red-500 text-sm">{err}</div>}
 
-                    <Button className="w-full" onClick={handleLogin} disabled={loading}>
+                    <Button 
+                        type="submit"
+                        className="w-full" 
+                        disabled={loading}
+                    >
                         {loading ? "로그인 중..." : "Login"}
                     </Button>
 
@@ -72,7 +82,7 @@ const LoginPage = () => {
                     >
                         Sign Up
                     </Button>
-                </div>
+                </form>
             </AuthFrame>
         </PageLayout>
     );

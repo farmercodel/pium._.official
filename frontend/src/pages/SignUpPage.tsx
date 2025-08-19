@@ -39,9 +39,13 @@ const SignUpPage = () => {
         } catch (e: unknown) {
             if (e && typeof e === 'object' && 'response' in e) {
                 const apiError = e as { response?: { data?: { detail?: string } } };
-                setErr(apiError.response?.data?.detail ?? "회원가입 실패");
-            } else {
-                setErr("회원가입 실패");
+                // detail이 문자열인지 확인하고 안전하게 처리
+                const errorMessage = apiError.response?.data?.detail;
+                if (typeof errorMessage === 'string') {
+                    setErr(errorMessage);
+                } else {
+                    setErr("회원가입 실패");
+                }
             }
         } finally {
             setLoading(false);
@@ -55,7 +59,13 @@ const SignUpPage = () => {
                     Sign up to <span className="text-green-500">PIUM</span>
                 </p>
 
-                <div className="flex flex-col gap-2 w-full px-5 pt-3 pb-2 md:px-7 md:px-4 md:pb-3">
+                <form
+                    className="flex flex-col gap-2 w-full px-5 pt-3 pb-2 md:px-7 md:px-4 md:pb-3"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSignUp();
+                    }}
+                >
                     <input className="w-full p-2 px-4 border-2 border-gray-300 rounded-md"
                         placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
                     <input className="w-full p-2 px-4 border-2 border-gray-300 rounded-md"
@@ -70,10 +80,14 @@ const SignUpPage = () => {
 
                     {err && <div className="text-red-500 text-sm">{err}</div>}
 
-                    <Button className="w-full" onClick={handleSignUp} disabled={loading}>
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={loading}
+                    >
                         {loading ? "가입 중..." : "Sign Up"}
                     </Button>
-                </div>
+                </form>
             </AuthFrame>
         </PageLayout>
     );
