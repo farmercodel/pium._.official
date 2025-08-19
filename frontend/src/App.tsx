@@ -14,6 +14,7 @@ import SignUpPage from "./pages/SignUpPage";
 
 import { AuthProvider } from "./context/AuthContext";
 import Protected from "./routes/Protected";
+import PlansPage from "./pages/PlansPage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/guide" element={<GuidePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/plans" element={<PlansPage />} />
 
             <Route path="/survey" element={
               <Protected><SurveyPage /></Protected>

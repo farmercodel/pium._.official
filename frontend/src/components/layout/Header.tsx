@@ -24,14 +24,30 @@ function Header() {
     const [authChecked, setAuthChecked] = useState(false);
 
     const {
-        goToAdmin, goToMain, goToPreview, goToAbout, goToSurvey,
-        goToGeneration, goToResult, goToGuide, goToLogin, goToSignUp,
+        goToAdmin, 
+        goToMain, 
+        goToPreview, 
+        goToAbout, 
+        goToSurvey,
+        goToPlans,
+        goToGeneration, 
+        goToResult, 
+        goToGuide, 
+        goToLogin, 
+        goToSignUp,
     } = useNavigation();
 
     const navigationMap = {
-        main: goToMain, survey: goToSurvey, preview: goToPreview, about: goToAbout,
-        guide: goToGuide, admin: goToAdmin, generation: goToGeneration, result: goToResult,
-        login: goToLogin, 'sign up': goToSignUp,
+        main: goToMain, 
+        survey: goToSurvey, 
+        preview: goToPreview, 
+        about: goToAbout,
+        guide: goToGuide, 
+        admin: goToAdmin, 
+        generation: goToGeneration, 
+        result: goToResult,
+        login: goToLogin, 'sign up': goToSignUp, 
+        plans: goToPlans,
     } as const;
 
     const handleItemClick = (k: keyof typeof navigationMap, close?: () => void) => {

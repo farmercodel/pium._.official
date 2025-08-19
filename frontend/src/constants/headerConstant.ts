@@ -23,12 +23,12 @@ const MAIN_NAVIGATION_ITEMS = [
         navigationText: 'ai',
     },
     {
-        name: 'Preview',
-        navigationText: 'preview',
+        name: 'Plans',
+        navigationText: 'plans',
     },
     {
-        name: 'Marketplace',
-        navigationText: 'main',
+        name: 'Preview',
+        navigationText: 'preview',
     },
     {
         name: 'About',

@@ -12,6 +12,7 @@ const useNavigation = () => {
   const goToEmpty = () => navigate("/");
   const goToAbout = () => navigate("/about");
   const goToSurvey = () => navigate("/survey");
+  const goToPlans = () => navigate("/plans");
 
   const goToGeneration = (state?: GenerationState) =>
     navigate("/generation", { state });
@@ -28,6 +29,7 @@ const useNavigation = () => {
     goToEmpty,
     goToAbout,
     goToSurvey,
+    goToPlans,
     goToGeneration,
     goToResult,
     goToGuide,
