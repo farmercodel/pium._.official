@@ -104,6 +104,11 @@ useEffect(() => {
       const customerKey = `user_${Date.now()}`; 
       const token = localStorage.getItem("access_token");
 
+      if (!token) {
+        alert("로그인 후 이용 가능한 서비스입니다.");
+        return;
+    }
+
       // 서버에 구독 시작 알림(플랜/금액 기록 & success/fail URL 받기)
       const sRes = await fetch("/api/payments/toss/billing/start", {
         method: "POST",
