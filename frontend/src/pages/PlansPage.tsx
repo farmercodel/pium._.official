@@ -6,7 +6,10 @@ const PlansPage = () => {
     return (
         <PageLayout>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12 py-6 px-12 md:p-6 lg:p-12 md:h-[calc(100vh-72px-132px)]">
-                {/* Plan Card */}
+                {/* 
+                    Plan Card 
+                    TODO: Constant 분리 및 Map으로 변경, 플랜 추가/제거 시 수정 필요
+                */}
                 <div className="p-6 rounded-2xl shadow-lg border flex flex-col h-full justify-center hover:scale-105 transition-all duration-300">
                     <h3 className="text-xl font-semibold">Free</h3>
                     <p className="text-3xl font-bold mt-2">₩0<span className="text-sm">/월</span></p>
