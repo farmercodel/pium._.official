@@ -24,29 +24,29 @@ function Header() {
     const [authChecked, setAuthChecked] = useState(false);
 
     const {
-        goToAdmin, 
-        goToMain, 
-        goToPreview, 
-        goToAbout, 
+        goToAdmin,
+        goToMain,
+        goToPreview,
+        goToAbout,
         goToSurvey,
         goToPlans,
-        goToGeneration, 
-        goToResult, 
-        goToGuide, 
-        goToLogin, 
+        goToGeneration,
+        goToResult,
+        goToGuide,
+        goToLogin,
         goToSignUp,
     } = useNavigation();
 
     const navigationMap = {
-        main: goToMain, 
-        survey: goToSurvey, 
-        preview: goToPreview, 
+        main: goToMain,
+        survey: goToSurvey,
+        preview: goToPreview,
         about: goToAbout,
-        guide: goToGuide, 
-        admin: goToAdmin, 
-        generation: goToGeneration, 
+        guide: goToGuide,
+        admin: goToAdmin,
+        generation: goToGeneration,
         result: goToResult,
-        login: goToLogin, 'sign up': goToSignUp, 
+        login: goToLogin, 'sign up': goToSignUp,
         plans: goToPlans,
     } as const;
 
@@ -167,7 +167,10 @@ function Header() {
                     {/* Right: Auth */}
                     <div className="hidden lg:flex lg:flex-1 lg:justify-end items-center gap-3">
                         {!authChecked ? null : user ? (
-                            <Button onClick={handleLogout}>로그아웃</Button>
+                            <div onClick={handleLogout}
+                                className="text-md font-semibold text-black mr-2 hover:text-red-400 cursor-pointer transition-all duration-300 ease-in-out hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">
+                                Logout
+                            </div>
                         ) : (
                             <>
                                 <div onClick={() => handleItemClick(MAIN_NAVIGATION_ITEMS[4].navigationText as keyof typeof navigationMap, close)}

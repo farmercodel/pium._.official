@@ -24,7 +24,7 @@ const LoginPage = () => {
             goToMain?.(); // 로그인 성공 → 메인으로
         } catch (e: unknown) {
             if (e instanceof Error) {
-                setErr(e.message)
+                setErr("아이디 혹은 비밀번호가 일치하지 않습니다.")
             } else if (typeof e === 'object' && e !== null && 'responese' in e) {
                 const apiError = e as { response?: { data?: { detail?: string } } }
                 setErr(apiError.response?.data?.detail ?? "로그인 실패")
