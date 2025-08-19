@@ -3,7 +3,6 @@ import os
 import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import OperationalError
 from app.api import generate_ad, instagram, files, compose
 from app.db.database import init_models
@@ -11,14 +10,18 @@ from app.util.database import Base, engine, SessionLocal
 from app.api.auth_controller import router as auth_router
 from app.services.auth_service import AuthService
 from app.repository.user_repository import UserRepository
-
+from app.api.tosspayments import router as toss_router
 
 app = FastAPI(title="Pium API", version="1.0.0")
+
+origins = [
+    "http://localhost:5173", "http://127.0.0.1:5173"
+]
 
 # CORS 미들웨어 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=origins,  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -78,6 +81,7 @@ app.include_router(files.router, prefix="/api", tags=["files"])
 app.include_router(generate_ad.router, prefix="/api", tags=["GPT"])
 app.include_router(instagram.router, prefix="/api", tags=["instagram"])
 app.include_router(compose.router, prefix="/api", tags=["compose"])
+app.include_router(toss_router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
