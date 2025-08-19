@@ -20,24 +20,11 @@ ALTER DATABASE pium_db OWNER TO pium_user;
 -- 기본 스키마 생성
 \c pium_db;
 
--- 사용자 테이블 예시 (임시)
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 테스트 데이터 삽입 (임시)
-INSERT INTO users (username, email) VALUES 
-    ('test_user1', 'test1@pium.com'),
-    ('test_user2', 'test2@pium.com')
-ON CONFLICT (username) DO NOTHING;
-
--- 테이블 권한 설정
+-- 테이블 권한 설정 (SQLAlchemy가 테이블을 생성할 수 있도록)
+GRANT ALL PRIVILEGES ON SCHEMA public TO pium_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pium_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pium_user;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO pium_user;
 
 -- 성공 메시지
 SELECT 'Database initialization completed successfully!' as status;

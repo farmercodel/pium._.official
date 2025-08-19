@@ -31,7 +31,7 @@ services:
       - pium_network
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: pium_postgres
     environment:
       POSTGRES_DB: pium_db

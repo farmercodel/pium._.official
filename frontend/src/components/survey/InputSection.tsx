@@ -3,6 +3,7 @@ import InputBox from "../common/InputBox"
 import ToneRadio from "../survey/ToneRadio"
 import ImageUpload from "../survey/ImageUpload"
 import { INPUT_SECTION_CONTENT } from "../../constants/surveyConstant"
+import type { Tone } from "../../types/SurveyTypes"
 
 interface InputSectionProps {
   formData: Record<string, string>
@@ -17,7 +18,7 @@ const InputSection = ({ formData, onInputChange, onImagesUploaded, uploadedImage
       return (
         <ToneRadio
           key={item.title}
-          value={(formData["답변 톤"] as any) || "Casual"}
+          value={(formData["답변 톤"] as Tone) || "Casual"}
           onChange={(v) => onInputChange("답변 톤", v)}
           required={item.required}
         />

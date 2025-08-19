@@ -11,3 +11,4 @@ bcrypt
 python-jose[cryptography]>=3.3.0
 email-validator>=2.2.0
 requests>=2.31.0
+Pillow>=10.0.0

@@ -1,8 +1,9 @@
 // src/pages/GenerationPage.tsx
 import { useLocation, Navigate } from "react-router-dom";
+import type { GenerationState } from "../hooks/useNavigation";
 
 export default function GenerationPage() {
-  const { state } = useLocation() as { state?: any };
+  const { state } = useLocation() as { state?: GenerationState };
 
   const data = state;
 

@@ -1,5 +1,5 @@
 // src/pages/SurveyPage.tsx
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import PageLayout from "../components/common/PageLayout"
 import InputSection from "../components/survey/InputSection"
 import PreviewCardSection from "../components/survey/PreviewCardSection"
@@ -43,10 +43,15 @@ const SurveyPage = () => {
 
       goToGeneration(data)
       
-    } catch (e: any) {
-      console.error(e)
-      alert(`생성 실패: ${e?.message ?? e}`)
-    } finally {
+    } catch (e: unknown) {
+        console.error(e)
+        if (e && typeof e === 'object' && 'message' in e) {
+          const error = e as { message?: string };
+          alert(`생성 실패: ${error.message ?? '알 수 없는 오류'}`);
+        } else {
+          alert(`생성 실패: ${String(e)}`);
+        }
+      } finally {
       setSubmitting(false)
     }
   }
