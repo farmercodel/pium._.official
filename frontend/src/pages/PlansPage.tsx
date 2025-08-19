@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import PageLayout from "../components/common/PageLayout";
 import Button from "../components/common/Button";
+import type {
+  TossPaymentsInstance,
+  BillingAuthOptions,
+} from "../types/toss-payments"; // 경로는 tsconfig paths에 맞춰 조정
+
+
 
 type PlanKey = "FREE" | "BASIC" | "PRO";
 
@@ -10,29 +16,17 @@ const PLANS: Record<PlanKey, { amount: number; orderName: string; disabled?: boo
   PRO:   { amount: 19900, orderName: "Pro Plan (monthly)" },
 };
 
-declare global {
-  interface Window {
-    TossPayments?: (clientKey: string) => {
-      requestPayment: (method: string, opts: any) => Promise<void>;
-      requestBillingAuth?: (opts: any) => Promise<void>;
-    };
-  }
-}
-
 const CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY as string;
 
 
 const PlansPage = () => {
   const [loading, setLoading] = useState<PlanKey | null>(null);
   const [sdkReady, setSdkReady] = useState(false);
-  const tossRef = useRef<ReturnType<NonNullable<typeof window.TossPayments>> | null>(null);
+  const tossRef = useRef<TossPaymentsInstance | null>(null);
 
-// ✅ PlansPage 컴포넌트 안, 맨 위 useEffect 교체
 useEffect(() => {
-  // 1) 일반 쿼리 먼저
   let rawQuery = window.location.search;
 
-  // 2) HashRouter일 경우(#/plans?billing_enrolled=1) 해시에서 ? 뒤를 파싱
   if (!rawQuery && window.location.hash.includes("?")) {
     rawQuery = "?" + window.location.hash.split("?")[1];
   }
@@ -52,25 +46,21 @@ useEffect(() => {
     sp.delete("msg");
   }
 
-  // URL 정리 (search 또는 hash 모두 대응)
   const qs = sp.toString();
 
   if (window.location.hash.startsWith("#/")) {
-    // HashRouter: #/plans?x=y 형태로 정리
     const [hashPath] = window.location.hash.split("?");
     const newHash = hashPath + (qs ? `?${qs}` : "");
     if (window.location.hash !== newHash) {
       window.history.replaceState({}, "", window.location.pathname + window.location.search + newHash);
     }
   } else {
-    // BrowserRouter: /plans?x=y 형태로 정리
     const newUrl = window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
     if (window.location.pathname + window.location.search + window.location.hash !== newUrl) {
       window.history.replaceState({}, "", newUrl);
       } 
     }
   }, []);
-
 
   // 1) SDK 동적 로드
   useEffect(() => {
@@ -126,12 +116,15 @@ useEffect(() => {
       if (!tossRef.current) tossRef.current = window.TossPayments(CLIENT_KEY);
 
     const orderId = `SUBS_${customerKey}_${Date.now()}`;
-    await (tossRef.current as any).requestBillingAuth("CARD", {
-      customerKey,
-      orderId,
-      successUrl: s.successUrl,
-      failUrl: s.failUrl,
-    });
+    await tossRef.current!.requestBillingAuth(
+      "CARD",
+      {
+        customerKey,
+        orderId,
+        successUrl: s.successUrl,
+        failUrl: s.failUrl,
+      } satisfies BillingAuthOptions
+    );
 
 
     } catch (e: any) {
