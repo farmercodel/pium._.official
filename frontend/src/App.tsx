@@ -11,10 +11,10 @@ import ResultPage from "./pages/ResultPage";
 import GuidePage from "./pages/GuidePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
+import PlansPage from "./pages/PlansPage";
 
 import { AuthProvider } from "./context/AuthContext";
 import Protected from "./routes/Protected";
-import PlansPage from "./pages/PlansPage";
 
 function App() {
   return (
