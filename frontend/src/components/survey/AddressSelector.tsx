@@ -263,12 +263,11 @@ const AddressSelector = ({ value, onChange, required = false }: AddressSelectorP
             {/* 선택된 주소 정보 */}
             {selectedAddress && (
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <h4 className="font-medium mb-2">선택된 주소:</h4>
+                <h4 className="font-bold mb-2">선택된 주소</h4>
                 <div className="space-y-1 text-sm">
-                  <p><strong>도로명:</strong> {selectedAddress.roadAddress}</p>
-                  <p><strong>지번:</strong> {selectedAddress.jibunAddress}</p>
-                  <p><strong>우편번호:</strong> {selectedAddress.zoneCode}</p>
-                  <p><strong>좌표:</strong> {selectedAddress.lat.toFixed(6)}, {selectedAddress.lng.toFixed(6)}</p>
+                  <p><span className="font-bold">도로명:</span> {selectedAddress.roadAddress}</p>
+                  <p><span className="font-bold">지번:</span> {selectedAddress.jibunAddress}</p>
+                  <p><span className='font-bold'>좌표:</span> {selectedAddress.lat.toFixed(6)}, {selectedAddress.lng.toFixed(6)}</p>
                 </div>
               </div>
             )}
