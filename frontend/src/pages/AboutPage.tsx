@@ -1,5 +1,5 @@
 import PageLayout from "../components/common/PageLayout"
-import About from "../../public/about2.jpg"
+import About from "/about2.jpg"
 
 // 팀원 데이터
 const teamMember = [
@@ -8,7 +8,7 @@ const teamMember = [
     role: "Backend, King",
     description: "아무것도 잘 풀리지 않지만 허공을 향해 따봉을 날리는 따봉도치",
     email: "givemehome@kakao.com",
-    photo: "/public/TeamMember/Inwha.jpg",
+    photo: "TeamMember/Inwha.jpg",
   },
   {
     name: "이영수",
@@ -21,28 +21,28 @@ const teamMember = [
     role: "Frontend, OTAKU",
     description: "듀 가나디 듀 가나디 듀 가나디",
     email: "kty20040308@gmail.com",
-    photo: "/public/TeamMember/Teayeon.jpg"
+    photo: "TeamMember/Teayeon.jpg"
   },
   {
     name: "김다빈",
     role: "Backend, 한교동",
     description: "커피와 코드로 세상을 디버깅하는 개발자",
     email: "fkdl4862@naver.com",
-    photo: "/public/TeamMember/dabin.png"
+    photo: "TeamMember/dabin.png"
   },
   {
     name: "정상원",
     role: "Backend, 신참",
     email: "tkddnjs11122@naver.com",
     description: "안녕하세요! 백엔드, 유니티를 공부하고있는 정상원입니다",
-    photo: "/public/TeamMember/sangwon.jpg"
+    photo: "TeamMember/sangwon.jpg"
   },
   {
     name: "정시연",
     role: "Design, 멋쟁이 디자이너",
     email: "siyeon0473@gmail.com",
     description: "디자인전공생",
-    photo: "/public/TeamMember/siyeon.jpg"
+    photo: "TeamMember/siyeon.jpg"
   }
 ]
 
