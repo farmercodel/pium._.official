@@ -25,13 +25,16 @@ services:
       - ./backend:/app
     environment:
       - PYTHONPATH=/app
+      - DATABASE_URL=postgresql+asyncpg://pium_user:ktuzvxshjfqmwg3gcd3ktpxnh9haj28zhjx5srx0hu0@postgres:5432/pium_db
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - pium_network
 
+
   postgres:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     container_name: pium_postgres
     environment:
       POSTGRES_DB: pium_db

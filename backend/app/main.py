@@ -43,7 +43,7 @@ def _seed_sync_with_retry():
                 admin_user = user_repo.get_by_email("admin")
                 if not admin_user:
                     auth_service = AuthService(db)
-                    auth_service.register_user(email="admin", password="admin", is_admin=True)
+                    auth_service.register_user(email="admin@gmail.com", password="admin", is_admin=True)
                     print("(sync) 관리자 계정(admin) 생성 완료")
             finally:
                 db.close()
