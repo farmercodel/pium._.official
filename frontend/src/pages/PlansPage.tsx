@@ -10,11 +10,11 @@ const PlansPage = () => {
                 <div className="p-6 rounded-2xl shadow-lg border flex flex-col h-full justify-center hover:scale-105 transition-all duration-300">
                     <h3 className="text-xl font-semibold">Free</h3>
                     <p className="text-3xl font-bold mt-2">₩0<span className="text-sm">/월</span></p>
-                    <ul className="mt-4 space-y-2 text-gray-600">
-                        <li>✔ 기능 A</li>
-                        <li>✘ 기능 B</li>
-                        <li>✘ 기능 C</li>
-                    </ul>
+                    <div className="flex-1 my-4 lg:my-10 gap-y-2 flex flex-col">
+                        <p className="font-semibold">✔ 기능 A</p>
+                        <p className="font-semibold">✘ 기능 B</p>
+                        <p className="font-semibold">✘ 기능 C</p>
+                    </div>
                     <Button
                         variant="primary"
                         fullWidth
@@ -26,11 +26,11 @@ const PlansPage = () => {
                 <div className="p-6 rounded-2xl shadow-lg border flex flex-col h-fulljustify-center hover:scale-105 transition-all duration-300">
                     <h3 className="text-xl font-semibold">Basic</h3>
                     <p className="text-3xl font-bold mt-2">₩9,900<span className="text-sm">/월</span></p>
-                    <ul className="mt-4 space-y-2 text-gray-600">
-                        <li>✔ 기능 A</li>
-                        <li>✔ 기능 B</li>
-                        <li>✘ 기능 C</li>
-                    </ul>
+                    <div className="flex-1 my-4 lg:my-10 gap-y-2 flex flex-col">
+                        <p className="font-semibold">✔ 기능 A</p>
+                        <p className="font-semibold">✔ 기능 B</p>
+                        <p className="font-semibold">✘ 기능 C</p>
+                    </div>
                     <Button
                         variant="primary"
                         fullWidth
@@ -42,11 +42,11 @@ const PlansPage = () => {
                 <div className="p-6 rounded-2xl shadow-lg border flex flex-col h-full justify-center hover:scale-105 transition-all duration-300">
                     <h3 className="text-xl font-semibold">Pro</h3>
                     <p className="text-3xl font-bold mt-2">₩19,900<span className="text-sm">/월</span></p>
-                    <ul className="my-4 space-y-2 text-gray-600">
-                        <li>✔ 기능 A</li>
-                        <li>✔ 기능 B</li>
-                        <li>✔ 기능 C</li>
-                    </ul>
+                    <div className="flex-1 my-4 lg:my-10 gap-y-2 flex flex-col">
+                        <p className="font-semibold">✔ 기능 A</p>
+                        <p className="font-semibold">✔ 기능 B</p>
+                        <p className="font-semibold">✔ 기능 C</p>
+                    </div>
                     <Button
                         variant="primary"
                         fullWidth
