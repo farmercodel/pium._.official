@@ -1,7 +1,7 @@
 // src/hooks/useNavigation.ts
 import { useNavigate } from "react-router-dom";
 
-export type GenerationState = any; // 서버 응답 타입 정의해도 됨
+export type GenerationState = unknown; // 서버 응답 타입 정의해도 됨
 
 const useNavigation = () => {
   const navigate = useNavigate();
