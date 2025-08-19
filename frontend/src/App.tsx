@@ -29,7 +29,8 @@ function App() {
             <Route path="/signup" element={<SignUpPage />} />
 
             <Route path="/survey" element={
-              <Protected><SurveyPage /></Protected>
+              // <Protected><SurveyPage /></Protected>
+              <SurveyPage />
             }/>
             <Route path="/generation" element={
               <Protected><GenerationPage /></Protected>
