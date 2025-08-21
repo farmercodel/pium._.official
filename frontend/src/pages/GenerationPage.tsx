@@ -1,9 +1,11 @@
+// src/pages/PromoGeneratePage.tsx
 import type { JSX } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import type { MotionProps, Transition } from "framer-motion";
 import { api } from "../api/api";
+import useNavigation from "../hooks/useNavigation";
 
 /** spring 인터랙션 */
 const useLiftInteractions = (): MotionProps => {
@@ -26,6 +28,15 @@ const STORAGE = {
   imgKeys: "last_upload_image_keys",
   publishCtx: "last_publish_context", // {store_name, area_keywords, instagram_id}
 } as const;
+
+const toRelFromUrl = (u: string) => {
+  try {
+    const url = new URL(u);
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts.length >= 2) parts.shift(); // bucket 제거
+    return parts.join("/");
+  } catch { return ""; }
+};
 
 const TagChip = ({ text }: { text: string }) => (
   <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-100">
@@ -58,7 +69,7 @@ const IdeaCard = ({
       </div>
 
       <h3 className="text-base sm:text-lg font-bold text-gray-800">{idea.title}</h3>
-      <p className="mt-2 text-sm text-gray-600 leading-6">{idea.summary}</p>
+      <p className="mt-2 text-sm text-gray-600 leading-6 whitespace-pre-line">{idea.summary}</p>
 
       <div className="mt-3 flex flex-wrap gap-2">
         {idea.tags.map((t, i) => <TagChip key={i} text={t} />)}
@@ -71,7 +82,7 @@ const IdeaCard = ({
         disabled={disabled}
         {...interactions}
       >
-        {ctaLoading ? "업로드 중..." : "선택하기"}
+        {ctaLoading ? "업로드 중" : "선택하기"}
         <motion.svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden
           animate={ctaLoading ? { rotate: 360 } : { rotate: 0 }}
           transition={ctaLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
@@ -85,35 +96,83 @@ const IdeaCard = ({
   );
 };
 
-// --- helpers: variants → ideas 매핑(앞서 써둔 버전과 동일/간략) ---
+/** ===== 붙어온 캡션 분리 & 매핑 보강 ===== */
+const splitConcatenated = (raw: string): string[] => {
+  if (!raw) return [];
+  // 명시 마커 우선
+  let parts = raw.split(/<<<VARIANT_END>>>|<<VARIANT_END>>|<VARIANT_END>/g)
+                 .map(s => s.trim()).filter(Boolean);
+  if (parts.length > 1) return parts;
+
+  // "캡션 1/2/3" 라벨
+  parts = raw.split(/(?:^|\n)캡션\s*[①1]\s*|(?:^|\n)캡션\s*[②2]\s*|(?:^|\n)캡션\s*[③3]\s*/g)
+             .map(s => s.trim()).filter(Boolean);
+  if (parts.length > 1) return parts;
+
+  // "1. / 2. / 3." 불릿 (라인 시작 기준)
+  parts = raw.split(/(?:^|\n)[#\-\*]?\s*(?:1\.|2\.|3\.)\s+/g)
+             .map(s => s.trim()).filter(Boolean);
+
+  return parts.length > 1 ? parts : [raw.trim()];
+};
+
 const normalizeTags = (tags: unknown): string[] =>
   Array.isArray(tags) ? tags.map(String).filter(Boolean).map(t => t.startsWith("#") ? t : `#${t}`) : [];
 
-const mapVariantsToIdeas = (variants?: any[]): PromotionIdea[] =>
-  Array.isArray(variants) ? variants.map((v: any, i: number) => ({
+const mapVariantsToIdeas = (variants?: any[]): PromotionIdea[] => {
+  if (!Array.isArray(variants)) return [];
+
+  // 문자열 배열로 온 경우
+  if (variants.length && typeof variants[0] === "string") {
+    return (variants as string[]).flatMap((blob, i) =>
+      splitConcatenated(blob).map((t, j) => ({
+        id: `${i}-${j}-${t.slice(0,12)}`,
+        title: `AI 제안 ${j + 1}`,
+        summary: t,
+        tags: [],
+      }))
+    );
+  }
+
+  // 객체 1개인데 내부가 blob인 경우
+  if (variants.length === 1) {
+    const v = variants[0] as any;
+    const text = String(v.summary ?? v.text ?? v.content ?? v.copy ?? v.body ?? "");
+    const parts = splitConcatenated(text);
+    if (parts.length > 1) {
+      const tags = normalizeTags(v.tags ?? v.hashtags ?? v.hash_tags);
+      return parts.map((t, idx) => ({
+        id: `${String(v.id ?? v.variant_id ?? v.uuid ?? "v0")}-${idx}`,
+        title: `AI 제안 ${idx + 1}`,
+        summary: t,
+        tags,
+      }));
+    }
+  }
+
+  // 정상 객체 배열
+  return variants.map((v: any, i: number) => ({
     id: String(v.id ?? v.variant_id ?? v.uuid ?? v.key ?? i),
     title: v.title ?? v.headline ?? v.name ?? `AI 제안 ${i + 1}`,
     summary: v.summary ?? v.text ?? v.content ?? v.copy ?? v.body ?? "",
     tags: normalizeTags(v.tags ?? v.hashtags ?? v.hash_tags),
-  })) : [];
+  }));
+};
 
-// --- 핵심: 세션에서 게시에 필요한 컨텍스트 수집 ---
+/** ===== 세션 컨텍스트 ===== */
 const getPublishContext = () => {
-  // 1) 명시 저장된 컨텍스트
   try {
     const raw = sessionStorage.getItem(STORAGE.publishCtx);
     if (raw) return JSON.parse(raw) as { store_name?: string; area_keywords?: string[]; instagram_id?: string };
   } catch {}
-  // 2) payload에서 유추
   try {
     const raw = sessionStorage.getItem(STORAGE.payload);
     if (raw) {
       const p = JSON.parse(raw);
       const store_name = p.store_name ?? p.storeName ?? "";
-      const instagram_id = p.instagram_id ?? p.instagram ?? "";
+      const instagram_id = (p.instagram_id ?? p.instagram ?? "").replace(/^@/, "");
       let area_keywords: string[] = [];
       if (Array.isArray(p.area_keywords)) area_keywords = p.area_keywords.filter(Boolean).map(String);
-      // fallback: regionKeyword를 콤마/공백 분리
       if (!area_keywords.length && p.regionKeyword) {
         area_keywords = String(p.regionKeyword).split(/[,/|\s]+/).map((s: string) => s.trim()).filter(Boolean);
       }
@@ -124,19 +183,36 @@ const getPublishContext = () => {
 };
 
 const getImageKeys = (): string[] => {
-  // 명시 저장된 이미지 rel 목록
   try {
     const raw = sessionStorage.getItem(STORAGE.imgKeys);
-    if (raw) return (JSON.parse(raw) as any[]).map(String).filter(Boolean);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length) return arr.map(String).filter(Boolean);
+    }
   } catch {}
-  // payload 내부에서 추정 (images 배열에 rel/key/url 등)
   try {
     const raw = sessionStorage.getItem(STORAGE.payload);
     if (raw) {
       const p = JSON.parse(raw);
-      const src = p.image_keys ?? p.images ?? p.uploaded ?? [];
-      if (Array.isArray(src)) {
-        return src.map((x: any) => (x?.rel ?? x?.key ?? x?.id ?? x?.url ?? x)).map(String).filter(Boolean);
+      const src = p?.image_keys ?? p?.images ?? p?.uploaded ?? [];
+      if (Array.isArray(src) && src.length) {
+        return src
+          .map((x: any) => x?.rel ?? x?.key ?? (x?.url ? toRelFromUrl(String(x.url)) : toRelFromUrl(String(x))))
+          .map(String)
+          .filter(Boolean);
+      }
+    }
+  } catch {}
+  try {
+    const raw = sessionStorage.getItem(STORAGE.result);
+    if (raw) {
+      const r = JSON.parse(raw);
+      const src = r?.images ?? r?.data?.images ?? [];
+      if (Array.isArray(src) && src.length) {
+        return src
+          .map((x: any) => x?.rel ?? x?.key ?? (x?.url ? toRelFromUrl(String(x.url)) : toRelFromUrl(String(x))))
+          .map(String)
+          .filter(Boolean);
       }
     }
   } catch {}
@@ -149,19 +225,40 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [regenLoading, setRegenLoading] = useState(false);
   const [publishingId, setPublishingId] = useState<string | null>(null);
+  const { goToPreview } = useNavigation();
 
-  // 초기 로드: props → location.state → sessionStorage
+  // 초기 로드: props → location.state → sessionStorage (+여러 키 대응)
   useEffect(() => {
     if (ideas?.length) { setList(ideas); return; }
+
     const fromState = location?.state;
-    const variants = fromState?.variants ?? fromState?.data?.variants;
-    const mapped = mapVariantsToIdeas(variants);
-    if (mapped.length) { setList(mapped); try { sessionStorage.setItem(STORAGE.result, JSON.stringify(fromState)); } catch {} return; }
+    const rawVariants =
+      fromState?.variants ??
+      fromState?.data?.variants ??
+      fromState?.captions ??
+      fromState?.data?.captions ??
+      fromState?.ideas ??
+      fromState?.data?.ideas;
+
+    const mapped = mapVariantsToIdeas(rawVariants);
+    if (mapped.length) {
+      setList(mapped);
+      try { sessionStorage.setItem(STORAGE.result, JSON.stringify(fromState)); } catch {}
+      return;
+    }
+
+    // 캐시 fallback
     try {
       const cached = sessionStorage.getItem(STORAGE.result);
       if (cached) {
         const parsed = JSON.parse(cached);
-        const v2 = parsed?.variants ?? parsed?.data?.variants;
+        const v2 =
+          parsed?.variants ??
+          parsed?.data?.variants ??
+          parsed?.captions ??
+          parsed?.data?.captions ??
+          parsed?.ideas ??
+          parsed?.data?.ideas;
         const m2 = mapVariantsToIdeas(v2);
         if (m2.length) setList(m2);
       }
@@ -170,7 +267,7 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
 
   const selectedIdea = useMemo(() => list.find((i) => i.id === selectedId) || null, [list, selectedId]);
 
-  // 선택 → 즉시 게시 API 호출
+  // 선택 → 게시 API 호출
   const handleSelect = async (idea: PromotionIdea) => {
     setSelectedId(idea.id);
     onSelect?.(idea);
@@ -180,13 +277,16 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
 
     const { store_name, area_keywords, instagram_id } = getPublishContext();
     const image_keys = getImageKeys();
-    if (!image_keys.length) { alert("업로드된 이미지가 없습니다. 이미지 업로드 후 다시 시도해주세요."); return; }
+    if (!image_keys.length) {
+      alert("업로드된 이미지가 없습니다. 이미지 업로드 후 다시 시도해주세요.");
+      return;
+    }
 
     const body = {
       variant_id: idea.id,
-      content: idea.summary,            // 백엔드 캡션 필드
-      image_keys,                       // /files/upload의 rel 들
-      collaborators: instagram_id ? [instagram_id] : [],
+      content: idea.summary,
+      image_keys,
+      collaborators: instagram_id ? [instagram_id.replace(/^@/, "")] : [],
       dry_run: false,
       store_name,
       area_keywords,
@@ -194,10 +294,9 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
 
     try {
       setPublishingId(idea.id);
-      const res = await api.post("/api/choose-publish", body);
-      // 성공 UX: 토스트/알럿/리다이렉트 등
+      await api.post("/api/choose-publish", body, { timeout: 120_000 }); // 여유 있는 타임아웃
       alert("인스타그램 게시 요청이 완료되었습니다.");
-      // 필요 시: 게시 결과 페이지로 이동/갱신
+      goToPreview();
     } catch (e: any) {
       console.error(e);
       alert(e?.response?.data?.detail ?? e?.message ?? "게시 요청에 실패했습니다.");
@@ -218,9 +317,11 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
       const raw = sessionStorage.getItem(STORAGE.payload);
       if (!raw) throw new Error("최근 생성 요청 페이로드가 없습니다.");
       const payload = JSON.parse(raw);
-      const { data } = await api.post("/api/generate", payload, { timeout: 60_000 });
+      const { data } = await api.post("/api/generate", payload, { timeout: 90_000 });
       try { sessionStorage.setItem(STORAGE.result, JSON.stringify(data)); } catch {}
-      const mapped = mapVariantsToIdeas(data?.variants);
+      const mapped = mapVariantsToIdeas(
+        data?.variants ?? data?.data?.variants ?? data?.captions ?? data?.data?.captions
+      );
       if (!mapped.length) throw new Error("생성 결과가 비어있습니다.");
       setList(mapped); setSelectedId(null);
     } catch (e: any) {
@@ -233,7 +334,9 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
       <section className="relative w-full bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
           <header className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">AI가 제안한 홍보글 {Math.max(3, list.length)}개</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
+              AI가 제안한 홍보글 {Math.max(3, list.length)}개
+            </h1>
           </header>
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
@@ -258,7 +361,7 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
               whileHover={{ y: -6, scale: 1.01 }} whileTap={{ scale: 0.98, y: -1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              {regenLoading ? "생성 중..." : "다시 생성하기"}
+              {regenLoading ? "생성 중" : "다시 생성하기"}
               <motion.svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden
                 animate={regenLoading ? { rotate: 360 } : { rotate: 0 }}
                 transition={regenLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}

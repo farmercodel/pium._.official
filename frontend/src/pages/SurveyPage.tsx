@@ -8,6 +8,32 @@ import { toGenerateAdPayload } from "../types/SurveymapFormData";
 import { api } from "../api/api";
 import useNavigation from "../hooks/useNavigation";
 
+type UploadedFile = {
+  rel?: string;
+  key?: string;
+  url?: string;
+  filename?: string;
+  content_type?: string;
+  size?: number;
+  backend?: string;
+};
+
+type UploadReturn =
+  | UploadedFile[]
+  | { ok?: boolean; files: UploadedFile[] };
+
+// url → object storage 상대경로(rel) 변환
+const toRelFromUrl = (u: string) => {
+  try {
+    const url = new URL(u);
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts.length >= 2) parts.shift(); // 첫 파트(bucket) 제거
+    return parts.join("/");
+  } catch {
+    return "";
+  }
+};
+
 /** ===== Anim Variants ===== */
 const container: Variants = {
   hidden: {},
@@ -104,7 +130,9 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
   useEffect(() => {
     const urls = selectedFiles.map(f => URL.createObjectURL(f));
     setPreviews(urls);
-    return () => { urls.forEach(u => URL.revokeObjectURL(u)); };
+    return () => {
+      urls.forEach(u => URL.revokeObjectURL(u));
+    };
   }, [selectedFiles]);
 
   const formatBytes = (bytes: number) => {
@@ -194,21 +222,37 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
       // 1) 파일 사이즈 제한(10MB) 및 업로드
       const validFiles = fileArr.filter(f => f.size <= 10 * 1024 * 1024);
       if (validFiles.length < fileArr.length) {
-        const excluded = fileArr.filter(f => f.size > 10 * 1024 * 1024).map(f => f.name).join(", ");
+        const excluded = fileArr
+          .filter(f => f.size > 10 * 1024 * 1024)
+          .map(f => f.name)
+          .join(", ");
         alert(`10MB를 초과하는 파일은 제외하고 업로드합니다. 제외: ${excluded}`);
       }
-      const uploadedUrls = validFiles.length ? await uploadFiles(validFiles, "ads/images") : [];
 
-      // === (A) 업로드 직후: image_keys 저장 ===
-      try {
-        const imageKeys = Array.isArray(uploadedUrls)
-          ? uploadedUrls
-              .map((u: any) => (u?.rel ?? u?.key ?? u?.id ?? u?.url ?? u))
-              .map(String)
-              .filter(Boolean)
-          : [];
-        sessionStorage.setItem("last_upload_image_keys", JSON.stringify(imageKeys));
-      } catch {/* ignore */}
+      // 업로드 응답 정규화(배열/객체 모두 대응)
+      let uploaded: UploadReturn = { ok: true, files: [] };
+      if (validFiles.length) {
+        uploaded = (await uploadFiles(validFiles, "ads/images")) as UploadReturn;
+      }
+      const filesArr: UploadedFile[] = Array.isArray(uploaded) ? uploaded : uploaded.files;
+
+      // (A) choose-publish용 image_keys(rel) 저장
+      const imageKeys: string[] = filesArr
+        .map(x => x?.rel ?? x?.key ?? (x?.url ? toRelFromUrl(String(x.url)) : ""))
+        .map(String)
+        .filter(Boolean);
+      if (imageKeys.length) {
+        try {
+          sessionStorage.setItem("last_upload_image_keys", JSON.stringify(imageKeys));
+        } catch {}
+      } else {
+        console.warn("[upload] image rel/key 추출 실패. 응답 확인:", uploaded);
+      }
+
+      // 생성 API용 URL 배열 (toGenerateAdPayload는 string[] 기대)
+      const uploadedUrls: string[] = filesArr
+        .map(x => String(x?.url || ""))
+        .filter(Boolean);
 
       // 2) 새 폼 → 레거시 키 매핑
       const legacyForm: Record<string, string> = {
@@ -226,25 +270,22 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
         "진행중인 프로모션": values.promotion ?? "",
       };
 
-      // 3) 기존 변환 로직 사용
+      // 3) 기존 변환 로직 사용 (URL 배열 전달)
       const payload = toGenerateAdPayload(legacyForm, uploadedUrls);
 
-      // === (B) 게시 컨텍스트 저장: store_name / area_keywords / instagram_id ===
+      // (B) 게시 컨텍스트 저장: store_name / area_keywords / instagram_id
       try {
         const publishCtx = {
           store_name: payload.store_name ?? values.storeName ?? "",
           area_keywords:
             payload.area_keywords ??
             (values.regionKeyword
-              ? String(values.regionKeyword)
-                  .split(/[,/|\s]+/)
-                  .map(s => s.trim())
-                  .filter(Boolean)
+              ? String(values.regionKeyword).split(/[,/|\s]+/).map(s => s.trim()).filter(Boolean)
               : []),
-          instagram_id: payload.instagram_id ?? (values.instagram || "").replace(/^@/, ""),
+          instagram_id: (payload.instagram_id ?? values.instagram ?? "").replace(/^@/, ""),
         };
         sessionStorage.setItem("last_publish_context", JSON.stringify(publishCtx));
-      } catch {/* ignore */}
+      } catch {}
 
       sessionStorage.setItem("last_generate_payload", JSON.stringify(payload));
 
@@ -254,14 +295,9 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
       sessionStorage.setItem("last_generate_result", JSON.stringify(data));
       // 5) 결과 페이지로 이동
       goToGeneration(data);
-    } catch (e: unknown) {
+    } catch (e: any) {
       console.error(e);
-      if (e && typeof e === "object" && "message" in e) {
-        const err = e as { message?: string };
-        alert(`생성 실패: ${err.message ?? "알 수 없는 오류"}`);
-      } else {
-        alert(`생성 실패: ${String(e)}`);
-      }
+      alert(e?.message ?? "생성 실패");
     } finally {
       setSubmitting(false);
     }

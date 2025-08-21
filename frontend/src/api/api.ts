@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: "",
-  timeout: 10000,
+  timeout: 60000,
 });
 
 export function setAccessToken(token: string | null) {
