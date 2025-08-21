@@ -55,9 +55,9 @@ type Plan = {
 };
 
 const plans: Plan[] = [
-  { id: "free",  title: "FREE",  price: "₩0",       period: "/ 월", features: ["기본 기능 이용", "10개 저장공간", "이메일 지원"],                         cta: "시작하기" },
-  { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["모든 기본 기능", "100개 저장공간", "이메일 + 채팅 지원", "3인 동시 도구"], cta: "신청하기", highlight: true },
-  { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["모든 프로페셔널 기능", "무제한 저장공간", "24/7 우선 지원", "고급 분석 도구"], cta: "업그레이드" },
+  { id: "free",  title: "FREE",  price: "₩0",       period: "/ 월", features: ["월 최대 1회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "300자 이내 홍보글 생성"],                         cta: "시작하기" },
+  { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원"], cta: "신청하기", highlight: true },
+  { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["월 최대 30회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원"], cta: "업그레이드" },
 ];
 
 /** 결제 금액/오더명 매핑 (서버/SDK에서 사용) */
@@ -360,8 +360,10 @@ export const PricingPage = (): JSX.Element => {
               자주 묻는 질문
             </motion.h2>
             <motion.div className="mx-auto mt-6 max-w-3xl space-y-4" variants={container}>
-              <FaqItem q="플랜을 언제라도 변경할 수 있나요?" a="네, 언제든지 계정 설정에서 플랜을 변경하거나 취소할 수 있습니다." />
-              <FaqItem q="결제 방식은 어떻게 되나요?" a="30일 단위로 자동 갱신되는 월간 결제입니다." />
+              <FaqItem q="무료로 사용할 순 없나요?" a="&nbsp;본 서비스는 월 1회 무료 홍보 피드 생성 및 인스타그램 게시 기능을 지원합니다." />
+              <FaqItem q="어떤 서비스를 제공 받을 수 있나요?" a="&nbsp;사용자가 가게에 대한 정보를 입력하면 AI가 자동으로 홍보글과 해시태그를 생성하고, 이를 인스타그램에 자동으로 게시할 수 있도록 지원합니다.
+              또한, 사용자가 게시한 첫 번째 사진 파일을 통해 템플릿 기반 썸네일 처리 기능을 제공합니다." />
+              <FaqItem q="결제 방식은 어떻게 되나요?" a="&nbsp;30일 단위로 자동 갱신되는 월간 결제입니다." />
             </motion.div>
           </motion.section>
         </motion.div>
