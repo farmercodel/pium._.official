@@ -222,40 +222,97 @@ export const PricingPage = (): JSX.Element => {
     }
   }, []);
 
-  /** Toss SDK 동적 로드 */
+  /** Toss SDK 동적 로드 (안정화 버전) */
   useEffect(() => {
     const id = "tosspayments-sdk";
+    let cancelled = false;
+
     const boot = () => {
+      if (cancelled) return;
       if (window.TossPayments && CLIENT_KEY) {
-        tossRef.current = window.TossPayments(CLIENT_KEY);
-        setSdkReady(true);
+        try {
+          tossRef.current = window.TossPayments(CLIENT_KEY);
+          setSdkReady(true);
+        } catch (e) {
+          console.error("[Toss boot error]", e);
+          setSdkReady(false);
+        }
       }
     };
-    if (document.getElementById(id)) { boot(); return; }
-    const s = document.createElement("script");
-    s.id = id; s.src = "https://js.tosspayments.com/v1"; s.async = true; s.onload = boot;
-    document.body.appendChild(s);
+
+    // 이미 전역에 주입된 경우 즉시 부팅
+    if (window.TossPayments) {
+      boot();
+      return () => { cancelled = true; };
+    }
+
+    let script = document.getElementById(id) as HTMLScriptElement | null;
+    const onLoad = () => {
+      // data-loaded 플래그 기록(중복 이벤트 방지용)
+      try { script?.setAttribute("data-loaded", "1"); } catch {}
+      boot();
+    };
+    const onError = () => {
+      if (!cancelled) {
+        console.error("[Toss SDK] failed to load");
+        setSdkReady(false);
+      }
+    };
+
+    if (!script) {
+      script = document.createElement("script");
+      script.id = id;
+      script.src = "https://js.tosspayments.com/v1";
+      script.async = true;
+      script.addEventListener("load", onLoad);
+      script.addEventListener("error", onError);
+      document.body.appendChild(script);
+    } else {
+      // 스크립트 태그가 이미 있더라도 load 리스너를 반드시 건다
+      script.addEventListener("load", onLoad);
+      script.addEventListener("error", onError);
+      // 이미 로드 완료 상태라면 즉시 부팅
+      const ready = (script as any).dataset?.loaded === "1" || (script as any).readyState === "complete";
+      if (ready) onLoad();
+    }
+
+    return () => {
+      cancelled = true;
+      script?.removeEventListener("load", onLoad);
+      script?.removeEventListener("error", onError);
+    };
   }, []);
 
   /** 정기결제(빌링) 등록 */
   const startBillingEnroll = async (planId: Plan["id"]) => {
     if (PLAN_META[planId].disabled) return;
+
+    // sdkReady 보조 가드 (버튼 disabled와 별개로 안전망)
+    if (!sdkReady || !window.TossPayments || !CLIENT_KEY) {
+      alert("결제 준비중입니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
     try {
       setLoading(planId);
+
       const token = localStorage.getItem("access_token");
       if (!token) { alert("로그인 후 이용 가능한 서비스입니다."); return; }
-      if (!window.TossPayments || !CLIENT_KEY) throw new Error("Toss SDK/Key missing");
+
       if (!tossRef.current) tossRef.current = window.TossPayments(CLIENT_KEY);
 
       const amount = PLAN_META[planId].amount;
       const orderName = PLAN_META[planId].orderName;
 
+      // TODO: 실제 서비스에서는 사용자 고유 식별자를 사용하세요.
       const customerKey = `user_${Date.now()}`;
+
       const sRes = await fetch("/api/payments/toss/billing/start", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ customer_key: customerKey, plan: planId.toUpperCase(), amount, orderName }),
       });
+
       if (!sRes.ok) throw new Error(`billing/start ${sRes.status}: ${await sRes.text()}`);
       const s = await sRes.json();
       if (!s?.ok) throw new Error("billing/start payload not ok");
@@ -312,7 +369,6 @@ export const PricingPage = (): JSX.Element => {
               );
             })}
           </motion.div>
-
 
           {/* FAQ */}
           <motion.section className="mt-14 sm:mt-16 lg:mt-20" variants={container} {...inViewAnim}>
