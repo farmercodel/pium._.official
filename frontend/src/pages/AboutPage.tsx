@@ -181,7 +181,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
-            피움 소개
+            프로젝트 소개
           </h1>
           <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
             피움은 지역 소상공인의 디지털 마케팅 전반 경험을 높이는 AI 기반 도구입니다.

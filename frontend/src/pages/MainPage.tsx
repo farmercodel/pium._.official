@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { motion, type Variants } from "framer-motion";
 
 const features = [
   {
@@ -18,36 +19,104 @@ const features = [
   },
 ];
 
+/** ====== Animation Variants ====== */
+const container: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.08, delayChildren: 0.12 },
+  },
+};
+
+const flyUp: Variants = {
+  hidden: { opacity: 0, y: 36, scale: 0.98, filter: "blur(6px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const fade: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut" },
+  },
+};
+
+const card: Variants = {
+  hidden: { opacity: 0, y: 16, scale: 0.98 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
 export const MainPage = (): JSX.Element => {
   return (
     <>
       {/* 폰트 적용: font-sans (tailwind.config.js에서 Pretendard로 매핑) */}
       <main className="bg-white font-sans">
-        {/* Hero */}
+        {/* ====== Hero ====== */}
         <section
           className="
             relative w-full
             bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400
           "
         >
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28">
+          <motion.div
+            className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28"
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
             <div className="text-center">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight">
-            <span className="bg-gradient-to-r from-yellow-300 via-lime-400 to-green-600 bg-clip-text text-transparent">
-                PIUM
-            </span>
-            <br />
-            <span className="text-white">소상공인 마케팅 지원 서비스</span>
-            </h1>
+              <motion.h1
+                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight"
+                variants={flyUp}
+              >
+                {/* PIUM 텍스트: 밝게 끝나는 그라데이션 + 은은한 글로우 */}
+                <span className="relative inline-block">
+                  <span className="bg-gradient-to-r from-yellow-300 via-lime-300 to-cyan-200 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]">
+                    PIUM
+                  </span>
 
+                  {/* 라디얼 글로우 (배경과 분리) */}
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 -z-10 blur-3xl"
+                    style={{
+                      background:
+                        "radial-gradient(closest-side, rgba(255,255,255,0.7), transparent)",
+                    }}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 0.6, scale: 1.05 }}
+                    transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                </span>
 
-              <p className="mt-6 text-white/90 text-base sm:text-lg lg:text-xl">
+                <br />
+
+                <motion.span className="text-white" variants={fade}>
+                  소상공인 마케팅 지원 서비스
+                </motion.span>
+              </motion.h1>
+
+              <motion.p
+                className="mt-6 text-white/90 text-base sm:text-lg lg:text-xl"
+                variants={fade}
+              >
                 AI를 당신의 가게를 쉽고 빠르게 홍보합니다
-              </p>
+              </motion.p>
 
-              <div className="mt-10 flex justify-center">
+              <motion.div className="mt-10 flex justify-center" variants={flyUp}>
                 {/* CTA 버튼: 흰 배경 + 그린 텍스트(포인트톤) */}
-                <a
+                <motion.a
                   href="/Survey"
                   className="
                     inline-flex items-center justify-center
@@ -58,30 +127,41 @@ export const MainPage = (): JSX.Element => {
                     shadow-[0_10px_15px_rgba(0,0,0,0.12)]
                     transition
                     hover:bg-emerald-50
-                    active:scale-[0.98]
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70
                   "
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   시작하기
-                </a>
-              </div>
+                </motion.a>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
-        {/* Features */}
+        {/* ====== Features ====== */}
         <section className="bg-white" id="get-started" aria-labelledby="features-heading">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-20">
+          <motion.div
+            className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-20"
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.25 }}
+          >
             <div className="text-center">
-              <h2
+              <motion.h2
                 id="features-heading"
                 className="text-2xl sm:text-3xl lg:text-4xl leading-10 text-gray-800 font-semibold tracking-tight"
+                variants={fade}
               >
                 AI가 당신의 가게를 쉽고 빠르게 홍보합니다
-              </h2>
-              <p className="mt-3 text-gray-600 text-sm sm:text-base lg:text-lg">
+              </motion.h2>
+              <motion.p
+                className="mt-3 text-gray-600 text-sm sm:text-base lg:text-lg"
+                variants={fade}
+              >
                 소상공인을 위한 스마트한 마케팅 솔루션
-              </p>
+              </motion.p>
             </div>
 
             <div
@@ -94,14 +174,20 @@ export const MainPage = (): JSX.Element => {
               "
             >
               {features.map((f) => (
-                <div
+                <motion.div
                   key={f.title}
                   className="
                     rounded-2xl border border-[#e9ecef]
                     p-6 sm:p-7 lg:p-8
-                    shadow-sm hover:shadow-md transition
-                    bg-white
+                    shadow-sm bg-white
+                    transform-gpu
                   "
+                  variants={card}
+                  whileHover={{
+                    y: -4,
+                    boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
+                  }}
+                  transition={{ type: "spring", stiffness: 280, damping: 22 }}
                 >
                   <div className="flex justify-center">
                     <img
@@ -118,10 +204,10 @@ export const MainPage = (): JSX.Element => {
                   <p className="mt-3 text-center text-sm sm:text-base text-gray-600 leading-relaxed">
                     {f.desc}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </section>
       </main>
     </>
