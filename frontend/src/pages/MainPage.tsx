@@ -82,7 +82,7 @@ export const MainPage = (): JSX.Element => {
               >
                 {/* PIUM 텍스트: 밝게 끝나는 그라데이션 + 은은한 글로우 */}
                 <span className="relative inline-block">
-                  <span className="bg-gradient-to-r from-yellow-300 via-lime-300 to-cyan-200 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]">
+                  <span className="bg-gradient-to-r from-yellow-300 via-lime-300 to-cyan-200 bg-clip-text text-transparent">
                     PIUM
                   </span>
 
