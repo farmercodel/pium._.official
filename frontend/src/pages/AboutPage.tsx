@@ -342,7 +342,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
               interactions={interactions}
             />
             <LargeFeatureCard
-              title="인스타그램 피드 자동 업로드"
+              title="인스타그램 피드 자동 게시"
               iconSrc="/assets/icon-auto-post.svg"   // ← 카드별 아이콘
               bullets={[
                 "PIUM에서 제작한 템플릿을 기반으로 피드 썸네일 사진 자동 생성",
@@ -397,7 +397,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
             </motion.a>
 
             <motion.a
-              href="mailto:cordelia04@naver.com"
+              href="mailto:likelion.pium.official@gmail.com"
               className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 sm:px-8 sm:py-4 bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
               variants={flyUp}
               {...interactions}
