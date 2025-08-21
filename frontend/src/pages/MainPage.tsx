@@ -3,19 +3,19 @@ import { motion, type Variants } from "framer-motion";
 
 const features = [
   {
-    title: "홍보글 자동 생성",
-    desc: "AI가 비즈니스에 맞는 매력적인 홍보글을 자동으로 생성합니다.",
-    icon: "https://c.animaapp.com/3FkSn8lj/img/div-8.svg",
+    title: "홍보글 생성",
+    desc: "AI를 통해 사용자의 비즈니스에 맞는 매력적인 홍보글을 생성합니다.",
+    icon: "/assets/icon-copy-gen.svg",
   },
   {
     title: "해시태그 제안",
-    desc: "트렌드를 반영한 최적의 해시태그를 추천해 더 많은 고객에게 도달합니다.",
-    icon: "https://c.animaapp.com/3FkSn8lj/img/div-9.svg",
+    desc: "검색 최적화(SEO) 관점에서의 해시태그 생성으로 더 많은 고객에게 홍보될 수 있도록 합니다.",
+    icon: "/assets/icon-hashtag-suggest.svg",
   },
   {
     title: "인스타그램 자동 게시",
-    desc: "생성한 홍보글을 자동으로 인스타그램에 게시합니다.",
-    icon: "https://c.animaapp.com/3FkSn8lj/img/div-10.svg",
+    desc: "생성한 홍보글을 자동으로 인스타그램에 게시하며, 모든 게시물은 인스타그램 @pium._.official 계정에서 확인 가능합니다.",
+    icon: "/assets/icon-auto-post.svg",
   },
 ];
 
@@ -111,7 +111,7 @@ export const MainPage = (): JSX.Element => {
                 className="mt-6 text-white/90 text-base sm:text-lg lg:text-xl"
                 variants={fade}
               >
-                AI를 당신의 가게를 쉽고 빠르게 홍보합니다
+                AI를 통해당신의 가게를 쉽고 빠르게 홍보합니다
               </motion.p>
 
               <motion.div className="mt-10 flex justify-center" variants={flyUp}>
@@ -154,7 +154,7 @@ export const MainPage = (): JSX.Element => {
                 className="text-2xl sm:text-3xl lg:text-4xl leading-10 text-gray-800 font-semibold tracking-tight"
                 variants={fade}
               >
-                AI가 당신의 가게를 쉽고 빠르게 홍보합니다
+                AI를 통해 당신의 가게를 쉽고 빠르게 홍보합니다
               </motion.h2>
               <motion.p
                 className="mt-3 text-gray-600 text-sm sm:text-base lg:text-lg"
@@ -189,15 +189,37 @@ export const MainPage = (): JSX.Element => {
                   }}
                   transition={{ type: "spring", stiffness: 280, damping: 22 }}
                 >
-                  <div className="flex justify-center">
-                    <img
-                      src={f.icon}
-                      alt=""
-                      className="h-16 w-16"
-                      loading="lazy"
+                <div className="flex justify-center">
+                  <div className="relative">
+                    {/* glow */}
+                    <span
                       aria-hidden
+                      className="absolute inset-0 -z-10 rounded-full blur-lg opacity-60"
+                      style={{
+                        background:
+                          "radial-gradient(closest-side, rgba(16,185,129,0.35), rgba(20,184,166,0.25), rgba(6,182,212,0.15))",
+                      }}
                     />
+                    {/* gradient circle (64px → lg:80px) */}
+                    <div
+                      className="
+                        inline-flex h-16 w-16 items-center justify-center rounded-full
+                        ring-1 ring-white/10
+                        shadow-[0_8px_20px_rgba(16,185,129,0.22)]
+                        bg-[radial-gradient(closest-side,_rgba(110,231,183,1),_rgba(45,212,191,0.95)_60%,_rgba(34,211,238,0.9))]
+                        lg:h-20 lg:w-20
+                      "
+                    >
+                      <img
+                        src={f.icon}
+                        alt=""
+                        className="h-8 w-8 lg:h-10 lg:w-10"
+                        loading="lazy"
+                        aria-hidden
+                      />
+                    </div>
                   </div>
+                </div>
                   <h3 className="mt-6 text-center text-lg sm:text-xl font-semibold text-gray-800">
                     {f.title}
                   </h3>

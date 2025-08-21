@@ -140,19 +140,54 @@ const ProjectIntroCard = ({
   </motion.div>
 );
 
-// ---------- 주요 기능 카드 (아이콘, 가운데 정렬) ----------
-const PlaceholderIcon = () => (
-  <img src="https://c.animaapp.com/OWBCfRMZ/img/div-4.svg" alt="" className="h-5 w-5" />
-);
+// ---------- 아이콘 원형 (진한 초록 + 글로우) ----------
+const IconCircle = ({ iconSrc, icon }: { iconSrc?: string; icon?: JSX.Element }) => {
+  return (
+    <div className="relative mx-auto mb-3 h-10 w-10 sm:h-10 sm:w-10 lg:h-12 lg:w-12">
+      {/* glow */}
+      <span
+        aria-hidden
+        className="absolute inset-0 -z-10 rounded-full blur-md opacity-60"
+        style={{ background: "radial-gradient(closest-side, rgba(5,150,105,0.35), rgba(16,185,129,0.25))" }} // emerald-700 → emerald-500 글로우
+      />
+      {/* solid/gradient circle (더 진한 초록) */}
+      <div
+        className="
+          grid h-full w-full place-items-center rounded-full text-white
+          ring-1 ring-emerald-900/30 shadow
+          bg-gradient-to-br from-emerald-300 via-emerald-400 to-teal-600
+        "
+      >
+        {icon ? (
+          icon
+        ) : iconSrc ? (
+          <img src={iconSrc} alt="" className="h-5 w-5 lg:h-6 lg:w-6" aria-hidden />
+        ) : (
+          // 기본 폴백(작은 스파클)
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M12 6l1.2 2.4L15.6 9.6 13.2 11 12 13.5 10.8 11 8.4 9.6l2.4-1.2L12 6z" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </div>
+    </div>
+  );
+};
 
+// ---------- 주요 기능 카드 (아이콘, 가운데 정렬) ----------
 const LargeFeatureCard = ({
   title,
   bullets,
   interactions,
+  iconSrc,
+  icon,
 }: {
   title: string;
   bullets: string[];
   interactions: MotionProps;
+  /** 흰색 SVG 경로 */
+  iconSrc?: string;
+  /** 직접 JSX 아이콘 노드 전달 (예: <YourIcon className="h-5 w-5 text-white" />) */
+  icon?: JSX.Element;
 }) => (
   <motion.div
     role="button"
@@ -161,8 +196,8 @@ const LargeFeatureCard = ({
     variants={card}
     {...interactions}
   >
-    <div className="mx-auto mb-3 grid h-9 w-9 place-items-center rounded-full bg-emerald-50 text-emerald-600 shadow">
-      <PlaceholderIcon />
+    <div className="flex justify-center">
+      <IconCircle iconSrc={iconSrc} icon={icon} />
     </div>
     <h3 className="text-base sm:text-lg font-bold text-gray-800">{title}</h3>
     <ul className="mt-4 space-y-2 text-sm text-gray-700 text-left inline-block">
@@ -226,16 +261,10 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
           {...heroAnim}
         >
           <div className="text-center">
-            <motion.h1
-              className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900"
-              variants={flyUp}
-            >
+            <motion.h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900" variants={flyUp}>
               프로젝트 소개
             </motion.h1>
-            <motion.p
-              className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto"
-              variants={fade}
-            >
+            <motion.p className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto" variants={fade}>
               피움은 지역 소상공인의 마케팅을 돕는 AI 서비스입니다. <br />
             </motion.p>
 
@@ -254,10 +283,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
               >
                 서비스 가이드 보기
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path
-                    d="M5 12h14M13 5l7 7-7 7"
-                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  />
+                  <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </motion.a>
             </motion.div>
@@ -265,7 +291,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
         </motion.div>
       </section>
 
-      {/* 프로젝트 소개: 숫자 배지 + 가운데 정렬 */}
+      {/* 프로젝트 소개 */}
       <section className="bg-white">
         <motion.div
           className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"
@@ -283,7 +309,8 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
             <ProjectIntroCard
               index={2}
               title="해결 방향"
-              desc="사용자가 가게에 대한 정보를 입력하면 AI가 자동으로 홍보 글, 해시태그를 생성하고, 이를 인스타그램에 자동으로 게시할 수 있도록 지원합니다."
+              desc="사용자가 가게에 대한 정보를 입력하면 AI가 자동으로 홍보 글, 해시태그를 생성하고, 이를 인스타그램에 자동으로 게시할 수 있도록 지원합니다.
+              이를 통해 기존에 복잡했던 홍보 마케팅의 과정을 단순화합니다."
               interactions={interactions}
             />
             <ProjectIntroCard
@@ -296,7 +323,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
         </motion.div>
       </section>
 
-      {/* 주요 기능: 아이콘 + 가운데 정렬 */}
+      {/* 주요 기능: 아이콘 주입 + 진한 초록 원형 */}
       <section className="bg-gray-50">
         <motion.div
           className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"
@@ -307,6 +334,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8">
             <LargeFeatureCard
               title="AI 콘텐츠 생성"
+              iconSrc="/assets/icon-copy-gen.svg"   // ← 카드별 아이콘
               bullets={[
                 "사용자가 입력한 가게 정보 기반 홍보글 생성",
                 "검색 최적화(SEO) 관점에서의 해시태그 생성",
@@ -315,6 +343,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
             />
             <LargeFeatureCard
               title="인스타그램 피드 자동 업로드"
+              iconSrc="/assets/icon-auto-post.svg"   // ← 카드별 아이콘
               bullets={[
                 "PIUM에서 제작한 템플릿을 기반으로 피드 썸네일 사진 자동 생성",
                 "@pium._.official 계정과 가게 인스타그램 계정이 공동 소유자가 되어 피드 자동 업로드",
@@ -361,7 +390,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
               variants={flyUp}
               {...interactions}
             >
-              무료 체험하기
+              시작하기
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

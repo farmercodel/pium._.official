@@ -316,7 +316,7 @@ export const GuidePage = (): JSX.Element => {
             variants={flyUp}
             {...interactions}
           >
-            피움 시작하기
+            시작하기
             <img
               src="https://c.animaapp.com/OWBCfRMZ/img/i-3.svg"
               alt=""
