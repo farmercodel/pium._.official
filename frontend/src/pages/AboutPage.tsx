@@ -236,7 +236,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
               className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto"
               variants={fade}
             >
-              피움은 지역 소상공인의 디지털 마케팅 전반 경험을 높이는 AI 기반 도구입니다.
+              피움은 지역 소상공인의 마케팅을 돕는 AI 서비스입니다. <br />
             </motion.p>
 
             <motion.div className="mt-5" variants={fade}>
@@ -277,19 +277,19 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
             <ProjectIntroCard
               index={1}
               title="문제 인식"
-              desc="소상공인은 마케팅 리소스가 부족합니다. 피움은 적은 비용으로도 효과를 낼 수 있는 길을 제시합니다."
+              desc="저렴한 가격에 질 좋은 서비스를 제공함에도 불구하고 홍보의 부족으로 알려지지 않은 우리 주변의 가게들이 존재하고, 그 중 일부는 가게의 홍보를 위해 홍보 대행 서비스를 이용하다 사기 피해를 당하기도 합니다."
               interactions={interactions}
             />
             <ProjectIntroCard
               index={2}
               title="해결 방향"
-              desc="AI 기반 콘텐츠 자동 생성과 맞춤 추천으로 제작 시간을 단축하고 품질을 높입니다."
+              desc="사용자가 가게에 대한 정보를 입력하면 AI가 자동으로 홍보 글, 해시태그를 생성하고, 이를 인스타그램에 자동으로 게시할 수 있도록 지원합니다."
               interactions={interactions}
             />
             <ProjectIntroCard
               index={3}
               title="기대 효과"
-              desc="제작-배포-분석의 선순환을 구축하여 꾸준한 고객 유입과 재방문을 기대할 수 있습니다."
+              desc="복잡한 마케팅 과정을 단순화해 누구나 손쉽게 홍보 마케팅을 할 수 있도록 지원해 우리 주변의 다양한 가게들을 알릴 수 있고, 기존에 존재하던 홍보 대행으로 인한 사기 피해를 줄일 수 있습니다."
               interactions={interactions}
             />
           </div>
@@ -308,18 +308,16 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
             <LargeFeatureCard
               title="AI 콘텐츠 생성"
               bullets={[
-                "입력한 가게 정보를 바탕으로 자동 홍보글/이미지 카피 생성",
-                "목적/채널에 맞는 톤앤매너 추천",
-                "해시태그, 요약, CTA 자동 제안",
+                "사용자가 입력한 가게 정보 기반 홍보글 생성",
+                "검색 최적화(SEO) 관점에서의 해시태그 생성",
               ]}
               interactions={interactions}
             />
             <LargeFeatureCard
-              title="통합 분석"
+              title="인스타그램 피드 자동 업로드"
               bullets={[
-                "게시 후 성과 지표(노출/클릭/전환) 패널 제공",
-                "추천 액션(시간/채널/문구 A/B) 안내",
-                "재활용 콘텐츠 자동 큐레이션",
+                "PIUM에서 제작한 템플릿을 기반으로 피드 썸네일 사진 자동 생성",
+                "@pium._.official 계정과 가게 인스타그램 계정이 공동 소유자가 되어 피드 자동 업로드",
               ]}
               interactions={interactions}
             />
@@ -354,7 +352,7 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
             지금 시작해보세요
           </motion.h2>
           <motion.p className="mt-2 text-sm sm:text-base text-gray-600" variants={fade}>
-            피움과 함께 데이터 기반 마케팅의 시작을 경험해보세요.
+            피움과 함께 마케팅의 시작을 경험해보세요.
           </motion.p>
           <motion.div className="mt-6 flex flex-wrap items-center justify-center gap-3" variants={fade}>
             <motion.a
