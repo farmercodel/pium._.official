@@ -199,6 +199,17 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
       }
       const uploadedUrls = validFiles.length ? await uploadFiles(validFiles, "ads/images") : [];
 
+      // === (A) 업로드 직후: image_keys 저장 ===
+      try {
+        const imageKeys = Array.isArray(uploadedUrls)
+          ? uploadedUrls
+              .map((u: any) => (u?.rel ?? u?.key ?? u?.id ?? u?.url ?? u))
+              .map(String)
+              .filter(Boolean)
+          : [];
+        sessionStorage.setItem("last_upload_image_keys", JSON.stringify(imageKeys));
+      } catch {/* ignore */}
+
       // 2) 새 폼 → 레거시 키 매핑
       const legacyForm: Record<string, string> = {
         "가게명": values.storeName,
@@ -218,9 +229,29 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
       // 3) 기존 변환 로직 사용
       const payload = toGenerateAdPayload(legacyForm, uploadedUrls);
 
+      // === (B) 게시 컨텍스트 저장: store_name / area_keywords / instagram_id ===
+      try {
+        const publishCtx = {
+          store_name: payload.store_name ?? values.storeName ?? "",
+          area_keywords:
+            payload.area_keywords ??
+            (values.regionKeyword
+              ? String(values.regionKeyword)
+                  .split(/[,/|\s]+/)
+                  .map(s => s.trim())
+                  .filter(Boolean)
+              : []),
+          instagram_id: payload.instagram_id ?? (values.instagram || "").replace(/^@/, ""),
+        };
+        sessionStorage.setItem("last_publish_context", JSON.stringify(publishCtx));
+      } catch {/* ignore */}
+
+      sessionStorage.setItem("last_generate_payload", JSON.stringify(payload));
+
       // 4) 생성 API 호출
       const { data } = await api.post("/api/generate", payload, { timeout: 60_000 });
 
+      sessionStorage.setItem("last_generate_result", JSON.stringify(data));
       // 5) 결과 페이지로 이동
       goToGeneration(data);
     } catch (e: unknown) {
