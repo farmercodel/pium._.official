@@ -1,207 +1,189 @@
-import { useEffect, useRef, useState } from "react";
-import PageLayout from "../components/common/PageLayout";
-import Button from "../components/common/Button";
-import type {
-  TossPaymentsInstance,
-  BillingAuthOptions,
-} from "../types/toss-payments"; // 경로는 tsconfig paths에 맞춰 조정
+import type { JSX } from "react";
+import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import type { MotionProps, Transition } from "framer-motion";
 
-
-
-type PlanKey = "FREE" | "BASIC" | "PRO";
-
-const PLANS: Record<PlanKey, { amount: number; orderName: string; disabled?: boolean }> = {
-  FREE:  { amount: 0,     orderName: "Free Plan (monthly)",  disabled: true },
-  BASIC: { amount: 9900,     orderName: "Basic Plan (monthly)" },   // ← 데모 1원
-  PRO:   { amount: 19900, orderName: "Pro Plan (monthly)" },
+const useLiftInteractions = (): MotionProps => {
+  const reduce = useReducedMotion();
+  if (reduce) return {};
+  const springLift: Transition = { type: "spring", stiffness: 300, damping: 20 };
+  return {
+    whileHover: { y: -6, scale: 1.01 },
+    whileTap: { scale: 0.98, y: -1 },
+    transition: springLift,
+  };
 };
 
-const CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY as string;
+type Plan = {
+  id: "free" | "basic" | "pro";
+  title: string;
+  price: string; // 통화/형식 그대로
+  period?: string; // /월 등
+  features: string[];
+  cta: string;
+  highlight?: boolean; // 인기
+};
 
+const plans: Plan[] = [
+  {
+    id: "free",
+    title: "FREE",
+    price: "₩0",
+    period: "/ 월",
+    features: ["기본 기능 이용", "10개 저장공간", "이메일 지원"],
+    cta: "시작하기",
+  },
+  {
+    id: "basic",
+    title: "BASIC",
+    price: "₩19,900",
+    period: "/ 월",
+    features: ["모든 기본 기능", "100개 저장공간", "이메일 + 채팅 지원", "3인 동시 도구"],
+    cta: "신청하기",
+    highlight: true,
+  },
+  {
+    id: "pro",
+    title: "PRO",
+    price: "₩49,900",
+    period: "/ 월",
+    features: ["모든 프로페셔널 기능", "무제한 저장공간", "24/7 우선 지원", "고급 분석 도구"],
+    cta: "업그레이드",
+  },
+];
 
-const PlansPage = () => {
-  const [loading, setLoading] = useState<PlanKey | null>(null);
-  const [sdkReady, setSdkReady] = useState(false);
-  const tossRef = useRef<TossPaymentsInstance | null>(null);
+const CheckIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden>
+    <circle cx="10" cy="10" r="9" stroke="currentColor" className="opacity-20" />
+    <path d="M6 10.5l2.5 2.5L14 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
-useEffect(() => {
-  let rawQuery = window.location.search;
+const CrownIcon = () => (
+  <img src="https://c.animaapp.com/OWBCfRMZ/img/div-4.svg" alt="" className="h-5 w-5" />
+);
 
-  if (!rawQuery && window.location.hash.includes("?")) {
-    rawQuery = "?" + window.location.hash.split("?")[1];
-  }
-
-  const sp = new URLSearchParams(rawQuery);
-
-  if (sp.get("billing_enrolled") === "1") {
-    alert("결제 수단 등록이 완료되었습니다!");
-    sp.delete("billing_enrolled");
-  }
-
-  if (sp.get("error")) {
-    const err = sp.get("error");
-    const msg = sp.get("msg") || "결제에 실패했어요.";
-    alert(`결제 실패: ${err}\n${msg}`);
-    sp.delete("error"); 
-    sp.delete("msg");
-  }
-
-  const qs = sp.toString();
-
-  if (window.location.hash.startsWith("#/")) {
-    const [hashPath] = window.location.hash.split("?");
-    const newHash = hashPath + (qs ? `?${qs}` : "");
-    if (window.location.hash !== newHash) {
-      window.history.replaceState({}, "", window.location.pathname + window.location.search + newHash);
-    }
-  } else {
-    const newUrl = window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
-    if (window.location.pathname + window.location.search + window.location.hash !== newUrl) {
-      window.history.replaceState({}, "", newUrl);
-      } 
-    }
-  }, []);
-
-  // 1) SDK 동적 로드
-  useEffect(() => {
-    const id = "tosspayments-sdk";
-    if (document.getElementById(id)) {
-      if (window.TossPayments && CLIENT_KEY) {
-        tossRef.current = window.TossPayments(CLIENT_KEY);
-        setSdkReady(true);
-      }
-      return;
-    }
-    const s = document.createElement("script");
-    s.id = id;
-    s.src = "https://js.tosspayments.com/v1";
-    s.async = true;
-    s.onload = () => {
-      if (window.TossPayments && CLIENT_KEY) {
-        tossRef.current = window.TossPayments(CLIENT_KEY);
-        setSdkReady(true);
-      }
-    };
-    document.body.appendChild(s);
-  }, []);
-
-  // 정기결제(빌링) 등록
-  const startBillingEnroll = async (plan: PlanKey) => {
-    if (plan === "FREE") return;
-    try {
-      setLoading(plan);
-
-      const customerKey = `user_${Date.now()}`; 
-      const token = localStorage.getItem("access_token");
-
-      if (!token) {
-        alert("로그인 후 이용 가능한 서비스입니다.");
-        return;
-    }
-
-      // 서버에 구독 시작 알림(플랜/금액 기록 & success/fail URL 받기)
-      const sRes = await fetch("/api/payments/toss/billing/start", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ customer_key: customerKey, plan, amount: PLANS[plan].amount }),
-      });
-      if (!sRes.ok) throw new Error(`billing/start ${sRes.status}: ${await sRes.text()}`);
-      const s = await sRes.json();
-      if (!s?.ok) throw new Error("billing/start payload not ok");
-
-      if (!window.TossPayments || !CLIENT_KEY) throw new Error("Toss SDK/Key missing");
-      if (!tossRef.current) tossRef.current = window.TossPayments(CLIENT_KEY);
-
-    const orderId = `SUBS_${customerKey}_${Date.now()}`;
-    await tossRef.current!.requestBillingAuth(
-      "CARD",
-      {
-        customerKey,
-        orderId,
-        successUrl: s.successUrl,
-        failUrl: s.failUrl,
-      } satisfies BillingAuthOptions
-    );
-
-
-    } catch (e: any) {
-      console.group("[Billing Enroll Error]");
-      console.error(e);
-      try { console.error("as json:", JSON.stringify(e)); } catch {}
-      console.groupEnd();
-      alert(`정기결제 등록에 실패했어요.\n${e?.message ?? String(e)}`);
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const Btn = ({
-    plan,
-    children,
-    disabled,
-    onClick,
-  }: {
-    plan: PlanKey;
-    children: React.ReactNode;
-    disabled?: boolean;
-    onClick: () => void;
-  }) => (
-    <Button
-      variant="primary"
-      fullWidth
-      className="mt-2"
-      disabled={disabled || loading !== null || !sdkReady}
-      onClick={onClick}
-    >
-      {loading === plan ? "진행중..." : children}
-    </Button>
-  );
-
+const PlanCard = ({ plan, selected, onSelect }: { plan: Plan; selected: boolean; onSelect: (id: Plan["id"]) => void; }) => {
+  const interactions = useLiftInteractions();
   return (
-    <PageLayout>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12 py-6 px-12 md:p-6 lg:p-12 lg:px-36 md:h-[calc(100vh-72px-132px)]">
-        {/* Free */}
-        <div className="p-6 rounded-2xl shadow-lg border flex flex-col h-full justify-center hover:scale-105 transition-all duration-300">
-          <h3 className="text-xl font-semibold">Free</h3>
-          <p className="text-3xl font-bold mt-2">₩0<span className="text-sm">/월</span></p>
-          <div className="flex-1 my-4 lg:my-10 gap-y-2 flex flex-col">
-            <p className="font-semibold">✔ 기능 A</p>
-            <p className="font-semibold">✘ 기능 B</p>
-            <p className="font-semibold">✘ 기능 C</p>
-          </div>
-          <Btn plan="FREE" disabled onClick={() => {}}>시작하기</Btn>
-        </div>
+    <motion.div
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      onClick={() => onSelect(plan.id)}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(plan.id)}
+      className={[
+        "group relative h-full rounded-2xl bg-white p-6 sm:p-7 shadow-sm transition-shadow",
+        "border-2",
+        selected ? "border-emerald-400 shadow-md" : "border-[#a3d276] hover:shadow-md",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300",
+      ].join(" ")}
+      {...interactions}
+    >
+      {/* 인기 배지 */}
+      {plan.highlight && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 shadow">
+          인기
+        </span>
+      )}
 
-        {/* Basic */}
-        <div className="p-6 rounded-2xl shadow-lg border flex flex-col h-full justify-center hover:scale-105 transition-all duration-300">
-          <h3 className="text-xl font-semibold">Basic</h3>
-          <p className="text-3xl font-bold mt-2">₩9,900<span className="text-sm">/월</span></p>
-          <div className="flex-1 my-4 lg:my-10 gap-y-2 flex flex-col">
-            <p className="font-semibold">✔ 기능 A</p>
-            <p className="font-semibold">✔ 기능 B</p>
-            <p className="font-semibold">✘ 기능 C</p>
-          </div>
-          {/* 정기결제 등록 */}
-          <Btn plan="BASIC" onClick={() => startBillingEnroll("BASIC")}>시작하기</Btn>
-        </div>
+      {/* 원형 아이콘 (임시 이미지) */}
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-50 text-emerald-600 shadow mb-4">
+        <CrownIcon />
+      </div>
 
-        {/* Pro */}
-        <div className="p-6 rounded-2xl shadow-lg border flex flex-col h-full justify-center hover:scale-105 transition-all duration-300">
-          <h3 className="text-xl font-semibold">Pro</h3>
-          <p className="text-3xl font-bold mt-2">₩19,900<span className="text-sm">/월</span></p>
-          <div className="flex-1 my-4 lg:my-10 gap-y-2 flex flex-col">
-            <p className="font-semibold">✔ 기능 A</p>
-            <p className="font-semibold">✔ 기능 B</p>
-            <p className="font-semibold">✔ 기능 C</p>
-          </div>
-          <Btn plan="PRO" onClick={() => startBillingEnroll("PRO")}>시작하기</Btn>
+      <div className="text-center">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-800">{plan.title}</h3>
+        <div className="mt-1 text-2xl sm:text-3xl font-extrabold text-emerald-600">
+          {plan.price} {plan.period && <span className="text-sm font-semibold text-emerald-600/80 align-middle">{plan.period}</span>}
         </div>
       </div>
-    </PageLayout>
+
+      {/* Features */}
+      <ul className="mt-4 space-y-2 text-sm text-gray-700">
+        {plan.features.map((f, i) => (
+          <li key={i} className="flex items-start gap-2">
+            <span className="text-emerald-600 mt-0.5"><CheckIcon /></span>
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/* CTA */}
+      <motion.button
+        type="button"
+        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+        {...interactions}
+      >
+        {plan.cta}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </motion.button>
+    </motion.div>
   );
 };
 
-export default PlansPage;
+const FaqItem = ({ q, a }: { q: string; a: string }) => {
+  const [open, setOpen] = useState(false);
+  const reduce = useReducedMotion();
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between px-5 py-4 text-left"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="font-semibold text-gray-800">{q}</span>
+        <span aria-hidden className="text-gray-500">{open ? "−" : "+"}</span>
+      </button>
+      <motion.div
+        initial={false}
+        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        transition={reduce ? { duration: 0 } : { type: "tween", duration: 0.2 }}
+        className="overflow-hidden px-5"
+      >
+        <p className="pb-4 text-sm text-gray-600">{a}</p>
+      </motion.div>
+    </div>
+  );
+};
+
+export const PricingPage = (): JSX.Element => {
+  const [selected, setSelected] = useState<Plan["id"]>("basic");
+
+  return (
+    <main className="font-sans">
+      {/* 배경은 연한 그린 톤으로, 레이아웃 헤더/푸터 외 본문만 구성 */}
+      <section className="relative w-full bg-emerald-50/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+          <header className="text-center">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900">이용 플랜</h1>
+            <p className="mt-3 text-gray-600 text-sm sm:text-base">
+              다양한 요구사항에 맞는 플랜을 선택하세요. 언제든지 업그레이드하거나 변경할 수 있습니다.
+            </p>
+          </header>
+
+          {/* Cards */}
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
+            {plans.map((p) => (
+              <PlanCard key={p.id} plan={p} selected={selected === p.id} onSelect={setSelected} />
+            ))}
+          </div>
+
+          {/* FAQ */}
+          <section className="mt-14 sm:mt-16 lg:mt-20">
+            <h2 className="text-center text-xl sm:text-2xl font-bold text-gray-800">자주 묻는 질문</h2>
+            <div className="mx-auto mt-6 max-w-3xl space-y-4">
+              <FaqItem q="플랜을 언제라도 변경할 수 있나요?" a="네, 언제든지 계정 설정에서 플랜을 변경하거나 취소할 수 있습니다." />
+              <FaqItem q="결제 방식은 어떻게 되나요?" a="30일 단위로 자동 갱신되는 월간 결제입니다." />
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  );
+};
+
+export default PricingPage;
