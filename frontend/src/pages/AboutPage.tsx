@@ -1,6 +1,33 @@
 import type { JSX } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import type { MotionProps, Transition } from "framer-motion";
+import type { MotionProps, Transition, Variants } from "framer-motion";
+
+/** ===== Variants ===== */
+const container: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+
+const flyUp: Variants = {
+  hidden: { opacity: 0, y: 28, scale: 0.99, filter: "blur(6px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const fade: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
+};
+
+const card: Variants = {
+  hidden: { opacity: 0, y: 16, scale: 0.98 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+};
 
 /** spring 인터랙션(접근성 고려: reduceMotion 시 비활성) */
 const useLiftInteractions = (): MotionProps => {
@@ -70,7 +97,12 @@ export const defaultTeamMembers: TeamMember[] = [
 
 // 공통 컴포넌트
 const SectionTitle = ({ children }: { children: JSX.Element | string }) => (
-  <h2 className="text-center text-xl sm:text-2xl font-bold text-gray-800">{children}</h2>
+  <motion.h2
+    className="text-center text-xl sm:text-2xl font-bold text-gray-800"
+    variants={fade}
+  >
+    {children}
+  </motion.h2>
 );
 
 // ---------- 프로젝트 소개 카드 (숫자 원형, 가운데 정렬) ----------
@@ -88,7 +120,8 @@ const ProjectIntroCard = ({
   <motion.div
     role="button"
     tabIndex={0}
-    className="h-full rounded-2xl bg-white p-6 shadow-sm border border-gray-100 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+    className="h-full rounded-2xl bg-white p-6 shadow-sm border border-gray-100 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 transform-gpu"
+    variants={card}
     {...interactions}
   >
     {/* 숫자 원형 (녹색 그라데이션) */}
@@ -124,7 +157,8 @@ const LargeFeatureCard = ({
   <motion.div
     role="button"
     tabIndex={0}
-    className="h-full rounded-2xl bg-white p-6 shadow-sm border border-gray-100 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+    className="h-full rounded-2xl bg-white p-6 shadow-sm border border-gray-100 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 transform-gpu"
+    variants={card}
     {...interactions}
   >
     <div className="mx-auto mb-3 grid h-9 w-9 place-items-center rounded-full bg-emerald-50 text-emerald-600 shadow">
@@ -148,6 +182,7 @@ const MemberCard = ({ m, interactions }: { m: TeamMember; interactions: MotionPr
     role="button"
     tabIndex={0}
     className="bg-white rounded-2xl shadow-md hover:shadow-lg transition transform hover:scale-105 p-6 flex flex-col items-center border border-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+    variants={card}
     {...interactions}
   >
     <div className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden bg-gray-100 mb-4">
@@ -174,59 +209,100 @@ const MemberCard = ({ m, interactions }: { m: TeamMember; interactions: MotionPr
 
 export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }): JSX.Element => {
   const interactions = useLiftInteractions();
+  const reduce = useReducedMotion();
+
+  const heroAnim = reduce ? {} : { initial: "hidden", animate: "show" };
+  const inViewAnim = reduce
+    ? {}
+    : { initial: "hidden", whileInView: "show", viewport: { once: true, amount: 0.25 } };
 
   return (
     <main className="font-sans">
-    <section className="relative w-full bg-emerald-50/60">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
-            프로젝트 소개
-          </h1>
-          <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-            피움은 지역 소상공인의 디지털 마케팅 전반 경험을 높이는 AI 기반 도구입니다.
-          </p>
-
-          <div className="mt-5">
-            <a
-              href="/Guide"
-              className="
-                inline-flex items-center justify-center gap-2
-                rounded-full px-5 py-2.5
-                bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400
-                text-white font-semibold
-                shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200
-              "
+      {/* Hero */}
+      <section className="relative w-full bg-emerald-50/60">
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12"
+          variants={container}
+          {...heroAnim}
+        >
+          <div className="text-center">
+            <motion.h1
+              className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900"
+              variants={flyUp}
             >
-              서비스 가이드 보기
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path
-                  d="M5 12h14M13 5l7 7-7 7"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                />
-              </svg>
-            </a>
+              프로젝트 소개
+            </motion.h1>
+            <motion.p
+              className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto"
+              variants={fade}
+            >
+              피움은 지역 소상공인의 디지털 마케팅 전반 경험을 높이는 AI 기반 도구입니다.
+            </motion.p>
+
+            <motion.div className="mt-5" variants={fade}>
+              <motion.a
+                href="/Guide"
+                className="
+                  inline-flex items-center justify-center gap-2
+                  rounded-full px-5 py-2.5
+                  bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400
+                  text-white font-semibold
+                  shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200
+                "
+                {...interactions}
+              >
+                서비스 가이드 보기
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <path
+                    d="M5 12h14M13 5l7 7-7 7"
+                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  />
+                </svg>
+              </motion.a>
+            </motion.div>
           </div>
-        </div>
-      </div>
-    </section>
+        </motion.div>
+      </section>
 
       {/* 프로젝트 소개: 숫자 배지 + 가운데 정렬 */}
       <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"
+          variants={container}
+          {...inViewAnim}
+        >
           <SectionTitle>프로젝트 소개</SectionTitle>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
-            <ProjectIntroCard index={1} title="문제 인식" desc="소상공인은 마케팅 리소스가 부족합니다. 피움은 적은 비용으로도 효과를 낼 수 있는 길을 제시합니다." interactions={interactions} />
-            <ProjectIntroCard index={2} title="해결 방향" desc="AI 기반 콘텐츠 자동 생성과 맞춤 추천으로 제작 시간을 단축하고 품질을 높입니다." interactions={interactions} />
-            <ProjectIntroCard index={3} title="기대 효과" desc="제작-배포-분석의 선순환을 구축하여 꾸준한 고객 유입과 재방문을 기대할 수 있습니다." interactions={interactions} />
+            <ProjectIntroCard
+              index={1}
+              title="문제 인식"
+              desc="소상공인은 마케팅 리소스가 부족합니다. 피움은 적은 비용으로도 효과를 낼 수 있는 길을 제시합니다."
+              interactions={interactions}
+            />
+            <ProjectIntroCard
+              index={2}
+              title="해결 방향"
+              desc="AI 기반 콘텐츠 자동 생성과 맞춤 추천으로 제작 시간을 단축하고 품질을 높입니다."
+              interactions={interactions}
+            />
+            <ProjectIntroCard
+              index={3}
+              title="기대 효과"
+              desc="제작-배포-분석의 선순환을 구축하여 꾸준한 고객 유입과 재방문을 기대할 수 있습니다."
+              interactions={interactions}
+            />
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* 주요 기능: 아이콘 + 가운데 정렬 */}
       <section className="bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"
+          variants={container}
+          {...inViewAnim}
+        >
           <SectionTitle>주요 기능</SectionTitle>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8">
             <LargeFeatureCard
@@ -248,48 +324,64 @@ export const AboutPage = ({ team = defaultTeamMembers }: { team?: TeamMember[] }
               interactions={interactions}
             />
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* 팀 소개 */}
       <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"
+          variants={container}
+          {...inViewAnim}
+        >
           <SectionTitle>팀 소개</SectionTitle>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             {team.map((m) => (
               <MemberCard key={m.email} m={m} interactions={useLiftInteractions()} />
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* CTA: 링크 연결 수정 */}
       <section className="bg-gradient-to-b from-emerald-50 to-emerald-100/50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14 text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">지금 시작해보세요</h2>
-          <p className="mt-2 text-sm sm:text-base text-gray-600">피움과 함께 데이터 기반 마케팅의 시작을 경험해보세요.</p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <a
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14 text-center"
+          variants={container}
+          {...inViewAnim}
+        >
+          <motion.h2 className="text-xl sm:text-2xl font-bold text-gray-800" variants={fade}>
+            지금 시작해보세요
+          </motion.h2>
+          <motion.p className="mt-2 text-sm sm:text-base text-gray-600" variants={fade}>
+            피움과 함께 데이터 기반 마케팅의 시작을 경험해보세요.
+          </motion.p>
+          <motion.div className="mt-6 flex flex-wrap items-center justify-center gap-3" variants={fade}>
+            <motion.a
               href="/Survey"
               className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white text-sm sm:text-base font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+              variants={flyUp}
+              {...interactions}
             >
               무료 체험하기
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </a>
+            </motion.a>
 
-            <a
+            <motion.a
               href="mailto:cordelia04@naver.com"
               className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 sm:px-8 sm:py-4 bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+              variants={flyUp}
+              {...interactions}
             >
               문의하기
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M21 10a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7A8.38 8.38 0 018 17.9L3 19l1.1-4.6A8.38 8.38 0 013 10a8.5 8.5 0 018.5-8.5A8.5 8.5 0 0120 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </a>
-          </div>
-        </div>
+            </motion.a>
+          </motion.div>
+        </motion.div>
       </section>
     </main>
   );

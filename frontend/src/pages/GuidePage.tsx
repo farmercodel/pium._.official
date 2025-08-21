@@ -1,6 +1,44 @@
 import type { JSX } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import type { MotionProps, Transition } from "framer-motion";
+import type { MotionProps, Transition, Variants } from "framer-motion";
+
+/** ====== Variants ====== */
+const container: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.08, delayChildren: 0.12 },
+  },
+};
+
+const flyUp: Variants = {
+  hidden: { opacity: 0, y: 36, scale: 0.98, filter: "blur(6px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const fade: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut" },
+  },
+};
+
+const card: Variants = {
+  hidden: { opacity: 0, y: 16, scale: 0.98 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  },
+};
 
 /** spring 인터랙션(접근성 고려: reduceMotion 시 비활성) */
 const useLiftInteractions = (): MotionProps => {
@@ -36,8 +74,9 @@ const StepCard = ({
       rounded-2xl border-2 border-[#a3d276] bg-white
       p-5 sm:p-6 md:p-7 lg:p-8
       focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300
-      transition-shadow shadow-sm
+      transition-shadow shadow-sm transform-gpu
     "
+    variants={card}
     {...interactions}
   >
     <div className="mx-auto flex w-full max-w-[320px] flex-col items-center">
@@ -103,8 +142,9 @@ const FeatureCard = ({
     className="
       h-full rounded-xl bg-white p-6 text-center shadow-sm
       focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300
-      transition-shadow
+      transition-shadow transform-gpu
     "
+    variants={card}
     {...interactions}
   >
     <img src={icon} alt="" className="mx-auto h-12 w-12" />
@@ -115,29 +155,68 @@ const FeatureCard = ({
 
 export const GuidePage = (): JSX.Element => {
   const interactions = useLiftInteractions();
+  const reduce = useReducedMotion();
+
+  // 애니메이션 on/off 프롭 (reduce-motion 시 비활성)
+  const heroAnim = reduce ? {} : { initial: "hidden", animate: "show" };
+  const inViewAnim = reduce
+    ? {}
+    : { initial: "hidden", whileInView: "show", viewport: { once: true, amount: 0.25 } };
 
   return (
     <main className="font-sans">
       {/* Hero */}
       <section className="relative w-full bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20"
+          variants={container}
+          {...heroAnim}
+        >
           <div className="text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white">
+            <motion.h1
+              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white"
+              variants={flyUp}
+            >
+              <span className="relative inline-block">
                 <span className="bg-gradient-to-r from-yellow-300 via-lime-300 to-cyan-200 bg-clip-text text-transparent">
-                PIUM
-                </span> <br />
-              사용 가이드
-            </h1>
-            <p className="mt-3 sm:mt-4 text-white/90 text-sm sm:text-lg lg:text-xl">
+                  PIUM
+                </span>
+                {/* 라디얼 글로우 */}
+                {!reduce && (
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 -z-10 blur-3xl"
+                    style={{
+                      background:
+                        "radial-gradient(closest-side, rgba(255,255,255,0.7), transparent)",
+                    }}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 0.6, scale: 1.05 }}
+                    transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                )}
+              </span>{" "}
+              <br />
+              <motion.span variants={fade}>사용 가이드</motion.span>
+            </motion.h1>
+
+            <motion.p
+              className="mt-3 sm:mt-4 text-white/90 text-sm sm:text-lg lg:text-xl"
+              variants={fade}
+            >
               AI 기술로 당신의 비즈니스를 성장시키는 3단계 프로세스를 알아보세요
-            </p>
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* 3단계 카드 (모바일=1 / 태블릿=1 / 데스크탑=3) */}
       <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"
+          variants={container}
+          {...inViewAnim}
+        >
           <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
             <div className="h-full">
               <StepCard
@@ -164,15 +243,22 @@ export const GuidePage = (): JSX.Element => {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* 기능 섹션 (모바일 1 / 태블릿 2 / 데스크탑 2) */}
       <section className="bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
-          <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-800">
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"
+          variants={container}
+          {...inViewAnim}
+        >
+          <motion.h2
+            className="text-center text-2xl sm:text-3xl font-bold text-gray-800"
+            variants={fade}
+          >
             피움의 특별한 기능들
-          </h2>
+          </motion.h2>
 
           <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5 sm:gap-6 lg:gap-8">
             <FeatureCard
@@ -200,16 +286,22 @@ export const GuidePage = (): JSX.Element => {
               interactions={interactions}
             />
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* CTA */}
       <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">지금 바로 시작해보세요</h2>
-          <p className="mt-3 text-sm sm:text-lg text-gray-600">
+        <motion.div
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16 text-center"
+          variants={container}
+          {...inViewAnim}
+        >
+          <motion.h2 className="text-2xl sm:text-3xl font-bold text-gray-800" variants={fade}>
+            지금 바로 시작해보세요
+          </motion.h2>
+          <motion.p className="mt-3 text-sm sm:text-lg text-gray-600" variants={fade}>
             피움과 함께 더 효과적인 마케팅 콘텐츠를 만들어보세요
-          </p>
+          </motion.p>
 
           <motion.button
             type="button"
@@ -221,6 +313,7 @@ export const GuidePage = (): JSX.Element => {
               shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]
               focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200
             "
+            variants={flyUp}
             {...interactions}
           >
             피움 시작하기
@@ -231,7 +324,7 @@ export const GuidePage = (): JSX.Element => {
               aria-hidden
             />
           </motion.button>
-        </div>
+        </motion.div>
       </section>
     </main>
   );
