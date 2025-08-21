@@ -123,7 +123,10 @@ export const GuidePage = (): JSX.Element => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white">
-              피움 사용 가이드
+                <span className="bg-gradient-to-r from-yellow-300 via-lime-300 to-cyan-200 bg-clip-text text-transparent">
+                PIUM
+                </span> <br />
+              사용 가이드
             </h1>
             <p className="mt-3 sm:mt-4 text-white/90 text-sm sm:text-lg lg:text-xl">
               AI 기술로 당신의 비즈니스를 성장시키는 3단계 프로세스를 알아보세요
