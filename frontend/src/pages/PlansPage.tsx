@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { MotionProps, Transition, Variants } from "framer-motion";
 import type { TossPaymentsInstance, BillingAuthOptions } from "../types/toss-payments";
+import useNavigation from "../hooks/useNavigation";
 
 const CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY as string;
 
@@ -34,7 +35,7 @@ type Plan = {
 
 const plans: Plan[] = [
   { id: "free",  title: "FREE",  price: "₩0",      period: "/ 월", features: ["월 최대 1회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "300자 이내 홍보글 생성"], cta: "시작하기" },
-  { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원"], cta: "신청하기", highlight: true },
+  { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원"], cta: "업그레이드", highlight: true },
   { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["월 최대 30회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원"], cta: "업그레이드" },
 ];
 
@@ -199,6 +200,7 @@ export const PricingPage = (): JSX.Element => {
   const [sdkReady, setSdkReady] = useState(false);
   const tossRef = useRef<TossPaymentsInstance | null>(null);
   const reduce = useReducedMotion();
+  const { goToSurvey } = useNavigation();
 
   /** URL 파라미터 처리 */
   useEffect(() => {
@@ -289,21 +291,28 @@ export const PricingPage = (): JSX.Element => {
           </header>
 
           {/* Cards */}
-          <motion.div className="mt-10 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8" variants={container} {...inViewAnim}>
-            
-            {plans.map((p) => (
-              <PlanCard
-                key={p.id}
-                plan={p}
-                icon={PLAN_ICONS[p.id]}
-                selected={selected === p.id}
-                onSelect={setSelected}
-                onAction={() => startBillingEnroll(p.id)}
-                ctaDisabled={!!PLAN_META[p.id].disabled || loading !== null || !sdkReady}
-                ctaLoading={loading === p.id}
-              />
-            ))}
+          <motion.div
+            className="mt-10 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8"
+            variants={container}
+            {...inViewAnim}
+          >
+            {plans.map((p) => {
+              const isFree = p.id === "free";
+              return (
+                <PlanCard
+                  key={p.id}
+                  plan={p}
+                  icon={PLAN_ICONS[p.id]}
+                  selected={selected === p.id}
+                  onSelect={setSelected}
+                  onAction={isFree ? goToSurvey : () => startBillingEnroll(p.id)}
+                  ctaDisabled={isFree ? false : loading !== null || !sdkReady}
+                  ctaLoading={isFree ? false : loading === p.id}
+                />
+              );
+            })}
           </motion.div>
+
 
           {/* FAQ */}
           <motion.section className="mt-14 sm:mt-16 lg:mt-20" variants={container} {...inViewAnim}>

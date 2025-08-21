@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Style: sparkles -->
+  <path d="M12 3l1.5 3.5L17 8l-3.5 1.5L12 13l-1.5-3.5L7 8l3.5-1.5L12 3z" fill="#22C55E" fill-opacity="0.15" stroke="#22C55E"/>
+  <path d="M18 12l.8 1.8L21 14.5l-1.8.8L18 17l-.8-1.7-1.7-.8 1.7-.8L18 12z" fill="#22C55E" fill-opacity="0.15" stroke="#22C55E"/>
+  <path d="M5 13l.7 1.6L7.5 15l-1.8.8L5 18l-.7-1.7L2.5 15l1.8-.4L5 13z" fill="#22C55E" fill-opacity="0.15" stroke="#22C55E"/>
+</svg>

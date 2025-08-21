@@ -125,6 +125,7 @@ const StepCard = ({
 );
 
 /* 기능 카드 */
+/* 기능 카드 */
 const FeatureCard = ({
   icon,
   title,
@@ -147,7 +148,36 @@ const FeatureCard = ({
     variants={card}
     {...interactions}
   >
-    <img src={icon} alt="" className="mx-auto h-12 w-12" />
+    {/* === 아이콘: 원형 연한 그린 배경 + 은은한 글로우 === */}
+    <div className="flex justify-center">
+      <div className="relative">
+        {/* glow */}
+        <span
+          aria-hidden
+          className="absolute inset-0 -z-10 rounded-full blur-xl opacity-60"
+          style={{
+            background:
+              "radial-gradient(closest-side, rgba(16,185,129,0.18), rgba(20,184,166,0.10), transparent)",
+          }}
+        />
+        {/* light green circle */}
+        <div
+          className="
+            grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-full
+            bg-gradient-to-br from-emerald-50 via-emerald-100 to-teal-100
+            ring-1 ring-emerald-200/60 shadow
+          "
+        >
+          <img
+            src={icon}
+            alt=""
+            className="h-7 w-7 sm:h-8 sm:w-8"
+            aria-hidden
+          />
+        </div>
+      </div>
+    </div>
+
     <h3 className="mt-5 text-base sm:text-lg font-semibold text-gray-800">{title}</h3>
     <p className="mt-2 text-sm text-gray-600">{desc}</p>
   </motion.div>
@@ -262,25 +292,25 @@ export const GuidePage = (): JSX.Element => {
 
           <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5 sm:gap-6 lg:gap-8">
             <FeatureCard
-              icon="https://c.animaapp.com/OWBCfRMZ/img/div-4.svg"
+              icon="/assets/빠른.svg"
               title="빠른 생성 속도"
               desc="몇 초 만에 고품질 콘텐츠를 생성합니다"
               interactions={interactions}
             />
             <FeatureCard
-              icon="https://c.animaapp.com/OWBCfRMZ/img/div-5.svg"
+              icon="/assets/스타일.svg"
               title="다양한 스타일"
               desc="업종과 목적에 맞는 다양한 톤앤매너"
               interactions={interactions}
             />
             <FeatureCard
-              icon="https://c.animaapp.com/OWBCfRMZ/img/div-6.svg"
+              icon="/assets/모바일.svg"
               title="모바일 최적화"
               desc="언제 어디서나 편리하게 이용 가능"
               interactions={interactions}
             />
             <FeatureCard
-              icon="https://c.animaapp.com/OWBCfRMZ/img/div-7.svg"
+              icon="/assets/보안.svg"
               title="안전한 보안"
               desc="고객 정보와 데이터를 안전하게 보호"
               interactions={interactions}
@@ -317,12 +347,9 @@ export const GuidePage = (): JSX.Element => {
             {...interactions}
           >
             시작하기
-            <img
-              src="https://c.animaapp.com/OWBCfRMZ/img/i-3.svg"
-              alt=""
-              className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] lg:h-[22px] lg:w-[22px]"
-              aria-hidden
-            />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </motion.button>
         </motion.div>
       </section>
