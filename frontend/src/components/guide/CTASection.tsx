@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { container, fade, flyUp } from "../../hooks/useAnimation";
 import type { MotionProps } from "framer-motion";
+import useNavigation from "../../hooks/useNavigation";
 
 // 타입 가드 함수
 const isMotionProps = (obj: unknown): obj is MotionProps => 
@@ -12,6 +13,12 @@ interface CTASectionProps {
 
 export const CTASection = ({ interactions }: CTASectionProps) => {
   const safeInteractions = isMotionProps(interactions) ? interactions : {};
+
+  const { goToSurvey } = useNavigation();
+
+  const handleStartClick = () => {
+    goToSurvey();
+  };
 
   return (
     <section className="bg-white">
@@ -31,6 +38,7 @@ export const CTASection = ({ interactions }: CTASectionProps) => {
 
         <motion.button
           type="button"
+          onClick={handleStartClick}
           className="
             mt-7 sm:mt-8 inline-flex items-center justify-center gap-2
             rounded-full px-5 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4
