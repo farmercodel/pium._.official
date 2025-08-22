@@ -1,78 +1,17 @@
-import type { JSX, FormEvent, ChangeEvent, DragEvent } from "react";
-import { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import type { MotionProps, Transition, Variants } from "framer-motion";
+import type { JSX } from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
 
-import { uploadFiles } from "../api/upload";
-import { toGenerateAdPayload } from "../types/SurveymapFormData";
-import { api } from "../api/api";
+
 import useNavigation from "../hooks/useNavigation";
+import { useFileUpload } from "../hooks/useFileUpload";
+import { useFormSubmission } from "../hooks/useFormSubmission";
+import { useLiftInteractions, useAnimationProps, container, flyUp, fade, cardEnter } from "../hooks/useAnimation";
 import AddressSelector from "../components/survey/AddressSelector";
 
-type UploadedFile = {
-  rel?: string;
-  key?: string;
-  url?: string;
-  filename?: string;
-  content_type?: string;
-  size?: number;
-  backend?: string;
-};
 
-type UploadReturn =
-  | UploadedFile[]
-  | { ok?: boolean; files: UploadedFile[] };
 
-// url → object storage 상대경로(rel) 변환
-const toRelFromUrl = (u: string) => {
-  try {
-    const url = new URL(u);
-    const parts = url.pathname.split("/").filter(Boolean);
-    if (parts.length >= 2) parts.shift(); // 첫 파트(bucket) 제거
-    return parts.join("/");
-  } catch {
-    return "";
-  }
-};
 
-/** ===== Anim Variants ===== */
-const container: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-};
-
-const flyUp: Variants = {
-  hidden: { opacity: 0, y: 28, scale: 0.99, filter: "blur(6px)" },
-  show: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    filter: "blur(0px)",
-    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
-  },
-};
-
-const fade: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
-const cardEnter: Variants = {
-  hidden: { opacity: 0, y: 16, scale: 0.98 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
-};
-
-/** spring 인터랙션(접근성 고려: reduceMotion 시 비활성) */
-const useLiftInteractions = (): MotionProps => {
-  const reduce = useReducedMotion();
-  if (reduce) return {};
-  const springLift: Transition = { type: "spring", stiffness: 300, damping: 20 };
-  return {
-    whileHover: { y: -3, scale: 1.01 },
-    whileTap: { scale: 0.98, y: -1 },
-    transition: springLift,
-  };
-};
 
 /** 새 디자인 폼의 값 타입 */
 export type SurveyFormValues = {
@@ -92,235 +31,63 @@ export type SurveyFormValues = {
 
 export type SubmitFn = (values: SurveyFormValues, files: File[]) => Promise<void> | void;
 
-/** "09:00~18:00", "0900-1830" 등에서 첫 구간만 안전 추출 */
-const extractFirstTimeRange = (s?: string) => {
-  if (!s) return "";
-  const m = s.replace(/\s/g, "").match(/(\d{1,2}:?\d{2}(?::\d{2})?)[~-](\d{1,2}:?\d{2}(?::\d{2})?)/);
-  return m ? `${m[1]}-${m[2]}` : s;
-};
 
-// 파일 포맷 필터
-const isImage = (f: File) => f.type.startsWith("image/");
-
-// 중복 제거(이름+크기+lastModified 기준)
-const dedupeFiles = (base: File[], incoming: File[]) => {
-  const key = (f: File) => `${f.name}-${f.size}-${f.lastModified}`;
-  const set = new Set(base.map(key));
-  const merged = [...base];
-  for (const f of incoming) {
-    if (!set.has(key(f))) {
-      set.add(key(f));
-      merged.push(f);
-    }
-  }
-  return merged;
-};
 
 export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element => {
   const interactions = useLiftInteractions();
-  const reduce = useReducedMotion();
+  const { reduce, heroAnim, inViewAnim } = useAnimationProps();
   const { goToGeneration } = useNavigation();
-  const [submitting, setSubmitting] = useState(false);
-
-  /** 이미지 선택/프리뷰/삭제 관리 */
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
-  const [dropActive, setDropActive] = useState(false);
-
   const [address, setAddress] = useState("");
 
-  // objectURL 관리
-  useEffect(() => {
-    const urls = selectedFiles.map(f => URL.createObjectURL(f));
-    setPreviews(urls);
-    return () => {
-      urls.forEach(u => URL.revokeObjectURL(u));
-    };
-  }, [selectedFiles]);
+  // 커스텀 훅 사용
+  const {
+    selectedFiles,
+    previews,
+    dropActive,
+    formatBytes,
+    handleFileChange,
+    handleDrop,
+    handleDragOver,
+    handleDragLeave,
+    removeFileAt,
+  } = useFileUpload();
 
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const units = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
-  };
+  const { submitting, handleFormSubmit } = useFormSubmission(onSubmit);
 
-  const addFiles = (files: File[]) => {
-    const onlyImages = files.filter(isImage);
-    if (onlyImages.length < files.length) {
-      alert("이미지 파일만 업로드할 수 있습니다.");
-    }
-    setSelectedFiles(prev => dedupeFiles(prev, onlyImages));
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    addFiles(files);
-    // 같은 파일 다시 선택 가능하도록 리셋
-    e.target.value = "";
-  };
-
-  const handleDrop = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDropActive(false);
-    const files = Array.from(e.dataTransfer?.files ?? []);
-    addFiles(files);
-  };
-
-  const handleDragOver = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDropActive(true);
-  };
-
-  const handleDragLeave = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDropActive(false);
-  };
-
-  const removeFileAt = (idx: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (submitting) return;
-
-    if (selectedFiles.length === 0) {
-      alert("이미지를 최소 1장 업로드해 주세요.");
-      return;
-    }
-
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-
-    const values: SurveyFormValues = {
-      storeName: String(fd.get("storeName") || ""),
-      regionKeyword: String(fd.get("regionKeyword") || ""),
-      address: String(fd.get("address") || ""),
-      priceRange: String(fd.get("priceRange") || ""),
-      category: String(fd.get("category") || ""),
-      hours: String(fd.get("hours") || ""),
-      intro: String(fd.get("intro") || ""),
-      refLink: String(fd.get("refLink") || ""),
-      serviceKeywords: String(fd.get("serviceKeywords") || ""),
-      target: String(fd.get("target") || ""),
-      instagram: String(fd.get("instagram") || ""),
-      promotion: String(fd.get("promotion") || ""),
-    };
-
-    const fileArr = selectedFiles;
-
-    if (onSubmit) {
-      await onSubmit(values, fileArr);
-      return;
-    }
-
+  // 폼 제출 핸들러
+  const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
-      setSubmitting(true);
-
-      // 1) 파일 사이즈 제한(10MB) 및 업로드
-      const validFiles = fileArr.filter(f => f.size <= 10 * 1024 * 1024);
-      if (validFiles.length < fileArr.length) {
-        const excluded = fileArr
-          .filter(f => f.size > 10 * 1024 * 1024)
-          .map(f => f.name)
-          .join(", ");
-        alert(`10MB를 초과하는 파일은 제외하고 업로드합니다. 제외: ${excluded}`);
-      }
-
-      // 업로드 응답 정규화(배열/객체 모두 대응)
-      let uploaded: UploadReturn = { ok: true, files: [] };
-      if (validFiles.length) {
-        uploaded = (await uploadFiles(validFiles, "ads/images")) as UploadReturn;
-      }
-      const filesArr: UploadedFile[] = Array.isArray(uploaded) ? uploaded : uploaded.files;
-
-      // (A) choose-publish용 image_keys(rel) 저장
-      const imageKeys: string[] = filesArr
-        .map(x => x?.rel ?? x?.key ?? (x?.url ? toRelFromUrl(String(x.url)) : ""))
-        .map(String)
-        .filter(Boolean);
-      if (imageKeys.length) {
-        try {
-          sessionStorage.setItem("last_upload_image_keys", JSON.stringify(imageKeys));
-        } catch {
-          console.error("[upload] image rel/key 추출 실패. 응답 확인:", uploaded);
-        }
-      } else {
-        console.warn("[upload] image rel/key 추출 실패. 응답 확인:", uploaded);
-      }
-
-      // 생성 API용 URL 배열 (toGenerateAdPayload는 string[] 기대)
-      const uploadedUrls: string[] = filesArr
-        .map(x => String(x?.url || ""))
-        .filter(Boolean);
-
-      // 2) 새 폼 → 레거시 키 매핑
-      const legacyForm: Record<string, string> = {
-        "가게명": values.storeName,
-        "지역 위치/상권 키워드": values.regionKeyword,
-        "가게 주소": values.address,
-        "가격대": values.priceRange,
-        "영업 시간 정보": extractFirstTimeRange(values.hours),
-        "가게 업종": values.category,
-        "가게 소개": values.intro,
-        "참고 링크": values.refLink ?? "",
-        "제공 제품/서비스 키워드": values.serviceKeywords ?? "",
-        "타깃 고객": values.target ?? "",
-        "가게 인스타그램 ID": (values.instagram || "").replace(/^@/, ""),
-        "진행중인 프로모션": values.promotion ?? "",
-      };
-
-      // 3) 기존 변환 로직 사용 (URL 배열 전달)
-      const payload = toGenerateAdPayload(legacyForm, uploadedUrls);
-
-      // (B) 게시 컨텍스트 저장: store_name / area_keywords / instagram_id
-      try {
-        const publishCtx = {
-          store_name: payload.store_name ?? values.storeName ?? "",
-          area_keywords:
-            payload.area_keywords ??
-            (values.regionKeyword
-              ? String(values.regionKeyword).split(/[,/|\s]+/).map(s => s.trim()).filter(Boolean)
-              : []),
-          instagram_id: (payload.instagram_id ?? values.instagram ?? "").replace(/^@/, ""),
+      if (onSubmit) {
+        // 사용자 정의 onSubmit이 있는 경우
+        const form = e.currentTarget;
+        const fd = new FormData(form);
+        const values: SurveyFormValues = {
+          storeName: String(fd.get("storeName") || ""),
+          regionKeyword: String(fd.get("regionKeyword") || ""),
+          address: String(fd.get("address") || ""),
+          priceRange: String(fd.get("priceRange") || ""),
+          category: String(fd.get("category") || ""),
+          hours: String(fd.get("hours") || ""),
+          intro: String(fd.get("intro") || ""),
+          refLink: String(fd.get("refLink") || ""),
+          serviceKeywords: String(fd.get("serviceKeywords") || ""),
+          target: String(fd.get("target") || ""),
+          instagram: String(fd.get("instagram") || ""),
+          promotion: String(fd.get("promotion") || ""),
         };
-        sessionStorage.setItem("last_publish_context", JSON.stringify(publishCtx));
-      } catch {
-        console.error("[upload] publish context 저장 실패. 응답 확인:", payload);
-      }
-
-      sessionStorage.setItem("last_generate_payload", JSON.stringify(payload));
-
-      // 4) 생성 API 호출
-      const { data } = await api.post("/api/generate", payload, { timeout: 60_000 });
-
-      sessionStorage.setItem("last_generate_result", JSON.stringify(data));
-      // 5) 결과 페이지로 이동
-      goToGeneration(data);
-    } catch (e: unknown) {
-      console.error('폼 제출 중 오류 발생:', e);
-      
-      // 타입 가드를 통한 안전한 에러 처리
-      if (e instanceof Error) {
-        alert(e.message);
-      } else if (typeof e === 'object' && e !== null && 'message' in e) {
-        alert(String((e as { message: unknown }).message));
+        await onSubmit(values, selectedFiles);
       } else {
-        alert("생성 실패");
+        // 기본 제출 로직
+        const result = await handleFormSubmit(e, selectedFiles);
+        if (result) {
+          goToGeneration(result);
+        }
       }
-    } finally {
-      setSubmitting(false);
+    } catch (error) {
+      console.error('폼 제출 실패:', error);
+      // 에러는 이미 handleFormSubmit에서 처리됨
     }
   };
-
-  // 접근성: reduce-motion 시 애니메이션 비활성
-  const heroAnim = reduce ? {} : { initial: "hidden", animate: "show" };
-  const inViewAnim = reduce ? {} : { initial: "hidden", whileInView: "show", viewport: { once: true, amount: 0.25 } };
 
   return (
     <main className="font-sans">
@@ -335,12 +102,12 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
           </motion.p>
         </motion.header>
 
-        <form className="mt-10 space-y-10" onSubmit={handleFormSubmit}>
+        <form className="mt-10 space-y-10" onSubmit={onSubmitHandler}>
           {/* 기본 정보 */}
           <motion.section
             className="rounded-2xl bg-white shadow-sm border border-gray-100 p-6 sm:p-8"
             variants={cardEnter}
-            {...inViewAnim}
+            {...heroAnim}
           >
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 grid place-items-center text-white text-sm font-bold shadow-md">1</div>

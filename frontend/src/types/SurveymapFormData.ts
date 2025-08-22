@@ -90,3 +90,19 @@ export function toGenerateAdPayload(
     num_variants,
   };
 }
+
+/** 새 디자인 폼의 값 타입 */
+export type SurveyFormValues = {
+  storeName: string;
+  regionKeyword: string;
+  address: string;
+  priceRange: string;
+  category: string;
+  hours: string;
+  intro: string;
+  refLink?: string;
+  serviceKeywords?: string;
+  target?: string;
+  instagram?: string;
+  promotion?: string;
+};
