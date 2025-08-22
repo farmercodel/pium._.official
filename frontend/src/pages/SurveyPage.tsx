@@ -247,7 +247,9 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
       if (imageKeys.length) {
         try {
           sessionStorage.setItem("last_upload_image_keys", JSON.stringify(imageKeys));
-        } catch {}
+        } catch {
+          console.error("[upload] image rel/key 추출 실패. 응답 확인:", uploaded);
+        }
       } else {
         console.warn("[upload] image rel/key 추출 실패. 응답 확인:", uploaded);
       }
@@ -288,7 +290,9 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
           instagram_id: (payload.instagram_id ?? values.instagram ?? "").replace(/^@/, ""),
         };
         sessionStorage.setItem("last_publish_context", JSON.stringify(publishCtx));
-      } catch {}
+      } catch {
+        console.error("[upload] publish context 저장 실패. 응답 확인:", payload);
+      }
 
       sessionStorage.setItem("last_generate_payload", JSON.stringify(payload));
 
@@ -298,9 +302,17 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
       sessionStorage.setItem("last_generate_result", JSON.stringify(data));
       // 5) 결과 페이지로 이동
       goToGeneration(data);
-    } catch (e: any) {
-      console.error(e);
-      alert(e?.message ?? "생성 실패");
+    } catch (e: unknown) {
+      console.error('폼 제출 중 오류 발생:', e);
+      
+      // 타입 가드를 통한 안전한 에러 처리
+      if (e instanceof Error) {
+        alert(e.message);
+      } else if (typeof e === 'object' && e !== null && 'message' in e) {
+        alert(String((e as { message: unknown }).message));
+      } else {
+        alert("생성 실패");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -510,7 +522,6 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
                           >
                             <div className="aspect-square w-full overflow-hidden rounded-lg border border-gray-200 bg-white">
                               {previews[idx] ? (
-                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   src={previews[idx]}
                                   alt={f.name}
