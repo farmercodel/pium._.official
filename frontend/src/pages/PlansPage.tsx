@@ -13,6 +13,7 @@ import {
 import { useTossPayments } from "../hooks/useTossPayments";
 import { useUrlParams } from "../hooks/useUrlParams";
 import { useScrollToTop } from "../hooks/useScrollToTop";
+import { Modal } from "../components/common/Modal";
 
 type Plan = {
   id: "free" | "basic" | "pro";
@@ -190,11 +191,15 @@ const FaqItem = ({ q, a }: { q: string; a: string }) => {
 export const PricingPage = (): JSX.Element => {
   const [selected, setSelected] = useState<Plan["id"]>("basic");
   const [loading, setLoading] = useState<Plan["id"] | null>(null);
-  const { heroAnim, inViewAnim } = useAnimationProps();
+
+  // ✨ 에러 모달 상태
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const { heroAnim, inViewAnim, reduce } = useAnimationProps();
   const { sdkReady, startBillingEnroll } = useTossPayments();
   const { goToSurvey } = useNavigation();
 
-  // 커스텀 훅 사용
   useUrlParams();
   useScrollToTop();
 
@@ -202,42 +207,41 @@ export const PricingPage = (): JSX.Element => {
   const handleBillingEnroll = async (planId: Plan["id"]) => {
     if (PLAN_META[planId].disabled) return;
 
-    console.log(`[PlansPage] 정기결제 등록 시작: ${planId}`, {
-      planId,
-      amount: PLAN_META[planId].amount,
-      orderName: PLAN_META[planId].orderName,
-      sdkReady
-    });
-
     try {
       setLoading(planId);
       const amount = PLAN_META[planId].amount;
       const orderName = PLAN_META[planId].orderName;
-      
-      console.log('[PlansPage] startBillingEnroll 호출:', { planId, amount, orderName });
+
       await startBillingEnroll(planId, amount, orderName);
-      
-      console.log('[PlansPage] 정기결제 등록 성공');
     } catch (error) {
-      console.error('[PlansPage] 정기결제 등록 실패:', error);
-      
-      // 사용자에게 에러 메시지 표시
-      let errorMessage = "정기결제 등록에 실패했습니다.";
-      if (error instanceof Error) {
-        errorMessage += `\n${error.message}`;
-      } else if (typeof error === 'string') {
-        errorMessage += `\n${error}`;
-      }
-      
-      alert(errorMessage);
+      let msg = "";
+      if (error instanceof Error) msg += `\n${error.message}`;
+      else if (typeof error === "string") msg += `\n${error}`;
+      setErrorMessage(msg);
+      setErrorOpen(true);
     } finally {
       setLoading(null);
-      console.log('[PlansPage] 로딩 상태 해제');
     }
   };
 
   return (
     <main className="font-sans">
+      {/* 🔔 에러 모달 (AlertModal로 교체) */}
+      <Modal
+        open={errorOpen}
+        onClose={() => setErrorOpen(false)}
+        onConfirm={() => {
+          setErrorOpen(false);
+          if (selected !== "free") handleBillingEnroll(selected);
+        }}
+        title="정기 결제 등록에 실패했습니다."
+        desc={errorMessage}
+        confirmText="다시 시도"  // 왼쪽(Primary)
+        cancelText="닫기"        // 오른쪽(Secondary)
+        variant="success"        // ✅ 에메랄드 보더/아이콘 (또는 이 줄 삭제해서 기본값 사용)
+        reduceMotion={!!reduce}
+      />
+
       <section className="relative w-full bg-emerald-50/60">
         <motion.div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20" variants={container} {...heroAnim}>
           <header className="text-center">
@@ -246,11 +250,7 @@ export const PricingPage = (): JSX.Element => {
           </header>
 
           {/* Cards */}
-          <motion.div
-            className="mt-10 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8"
-            variants={container}
-            {...inViewAnim}
-          >
+          <motion.div className="mt-10 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8" variants={container} {...inViewAnim}>
             {plans.map((p) => {
               const isFree = p.id === "free";
               return (
