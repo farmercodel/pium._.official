@@ -114,7 +114,7 @@ export function Modal({
             }
             className={`
               relative w-[92vw] max-w-md
-              p-[1px] rounded-2xl bg-gradient-to-br ${grad}
+              p-[1px] rounded-2xl bg-black
               shadow-[0_20px_40px_rgba(0,0,0,0.18)]
               focus:outline-none
             `}
@@ -176,31 +176,35 @@ export function Modal({
 
               {/* Actions */}
               <div className="mt-6 flex items-center justify-center gap-3">
-                {/* ✅ 확인(다시 시도) 먼저, 닫기는 오른쪽으로 배치 */}
-                <button
-                  type="button"
-                  onClick={onConfirm ?? onClose}
-                  className={`
-                    inline-flex items-center justify-center rounded-full px-5 py-2.5 font-semibold text-white
-                    bg-gradient-to-r ${grad} shadow-[0_12px_20px_rgba(16,185,129,0.25)]
-                    focus:outline-none focus-visible:ring-2 ${ring}
-                    transition hover:brightness-[1.03] active:scale-[0.99]
-                  `}
-                >
-                  {confirmText}
-                </button>
+                {/* ✅ 다시 시도: 에메랄드 그라데이션 + 호버 이동 */}
+              <button
+                type="button"
+                onClick={onConfirm ?? onClose}
+                className={`
+                  relative inline-flex items-center gap-2 justify-center rounded-full px-6 py-3
+                  font-semibold text-white
+                  focus:outline-none focus-visible:ring-2 ${ring}
+                  bg-[linear-gradient(90deg,#34D399_0%,#06B6D4_100%)]
+                  shadow-[0_8px_18px_rgba(6,182,212,0.28)]
+                  hover:brightness-105 active:scale-[0.99] transition
+                `}
+              >
+                <span>{confirmText}</span>
+              </button>
 
+                {/* 닫기 */}
                 <button
-                  type="button"
-                  onClick={onClose}
-                  className="inline-flex items-center justify-center rounded-full px-4 py-2.5
-                             text-gray-700 bg-white border border-gray-200
-                             hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300
-                             transition"
-                >
+                        type="button"
+                        onClick={onClose}
+                        className="inline-flex items-center justify-center rounded-full px-6 py-3
+                                  text-gray-700 bg-white border border-gray-200
+                                  hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300
+                                  transition"
+                      >
                   {cancelText}
                 </button>
               </div>
+
             </div>
           </motion.div>
         </motion.div>
