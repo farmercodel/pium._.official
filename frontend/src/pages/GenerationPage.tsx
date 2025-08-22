@@ -7,6 +7,19 @@ import type { MotionProps, Transition } from "framer-motion";
 import { api } from "../api/api";
 import useNavigation from "../hooks/useNavigation";
 
+// 타입 가드 함수들
+const isError = (obj: unknown): obj is Error => 
+  obj instanceof Error;
+
+const hasResponse = (obj: unknown): obj is { response?: { data?: { detail?: string } } } => 
+  typeof obj === 'object' && obj !== null && 'response' in obj;
+
+const hasMessage = (obj: unknown): obj is { message: string } => 
+  typeof obj === 'object' && obj !== null && 'message' in obj && typeof (obj as { message: string }).message === 'string';
+
+const hasProperty = <K extends string>(obj: unknown, key: K): obj is Record<K, unknown> => 
+  typeof obj === 'object' && obj !== null && key in obj;
+
 /** spring 인터랙션 */
 const useLiftInteractions = (): MotionProps => {
   const reduce = useReducedMotion();
@@ -78,7 +91,12 @@ const IdeaCard = ({
       <motion.button
         type="button"
         className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-60"
-        onClick={(e) => { e.stopPropagation(); !disabled && onSelect(idea); }}
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          if (!disabled) {
+            onSelect(idea);
+          }
+        }}
         disabled={disabled}
         {...interactions}
       >
@@ -110,7 +128,7 @@ const splitConcatenated = (raw: string): string[] => {
   if (parts.length > 1) return parts;
 
   // "1. / 2. / 3." 불릿 (라인 시작 기준)
-  parts = raw.split(/(?:^|\n)[#\-\*]?\s*(?:1\.|2\.|3\.)\s+/g)
+  parts = raw.split(/(?:^|\n)[#\-*]?\s*(?:1\.|2\.|3\.)\s+/g)
              .map(s => s.trim()).filter(Boolean);
 
   return parts.length > 1 ? parts : [raw.trim()];
@@ -119,8 +137,8 @@ const splitConcatenated = (raw: string): string[] => {
 const normalizeTags = (tags: unknown): string[] =>
   Array.isArray(tags) ? tags.map(String).filter(Boolean).map(t => t.startsWith("#") ? t : `#${t}`) : [];
 
-const mapVariantsToIdeas = (variants?: any[]): PromotionIdea[] => {
-  if (!Array.isArray(variants)) return [];
+const mapVariantsToIdeas = (variants?: unknown[]): PromotionIdea[] => {
+  if (!variants || !Array.isArray(variants)) return [];
 
   // 문자열 배열로 온 경우
   if (variants.length && typeof variants[0] === "string") {
@@ -136,7 +154,7 @@ const mapVariantsToIdeas = (variants?: any[]): PromotionIdea[] => {
 
   // 객체 1개인데 내부가 blob인 경우
   if (variants.length === 1) {
-    const v = variants[0] as any;
+    const v = variants[0] as Record<string, unknown>;
     const text = String(v.summary ?? v.text ?? v.content ?? v.copy ?? v.body ?? "");
     const parts = splitConcatenated(text);
     if (parts.length > 1) {
@@ -151,34 +169,67 @@ const mapVariantsToIdeas = (variants?: any[]): PromotionIdea[] => {
   }
 
   // 정상 객체 배열
-  return variants.map((v: any, i: number) => ({
-    id: String(v.id ?? v.variant_id ?? v.uuid ?? v.key ?? i),
-    title: v.title ?? v.headline ?? v.name ?? `AI 제안 ${i + 1}`,
-    summary: v.summary ?? v.text ?? v.content ?? v.copy ?? v.body ?? "",
-    tags: normalizeTags(v.tags ?? v.hashtags ?? v.hash_tags),
-  }));
+  return variants.map((v: unknown, i: number) => {
+    if (typeof v === 'object' && v !== null) {
+      const obj = v as Record<string, unknown>;
+      return {
+        id: String(obj.id ?? obj.variant_id ?? obj.uuid ?? obj.key ?? i),
+        title: String(obj.title ?? obj.headline ?? obj.name ?? `AI 제안 ${i + 1}`),
+        summary: String(obj.summary ?? obj.text ?? obj.content ?? obj.copy ?? obj.body ?? ""),
+        tags: normalizeTags(obj.tags ?? obj.hashtags ?? obj.hash_tags),
+      };
+    }
+    return {
+      id: String(i),
+      title: `AI 제안 ${i + 1}`,
+      summary: "",
+      tags: [],
+    };
+  });
 };
 
 /** ===== 세션 컨텍스트 ===== */
 const getPublishContext = () => {
   try {
     const raw = sessionStorage.getItem(STORAGE.publishCtx);
-    if (raw) return JSON.parse(raw) as { store_name?: string; area_keywords?: string[]; instagram_id?: string };
-  } catch {}
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return {
+          store_name: typeof parsed.store_name === 'string' ? parsed.store_name : '',
+          area_keywords: Array.isArray(parsed.area_keywords) ? parsed.area_keywords.filter((item: unknown): item is string => typeof item === 'string') : [],
+          instagram_id: typeof parsed.instagram_id === 'string' ? parsed.instagram_id : '',
+        };
+      }
+    }
+  } catch (error) {
+    console.error('[getPublishContext] Error parsing publishCtx:', error);
+  }
+  
   try {
     const raw = sessionStorage.getItem(STORAGE.payload);
     if (raw) {
       const p = JSON.parse(raw);
-      const store_name = p.store_name ?? p.storeName ?? "";
-      const instagram_id = (p.instagram_id ?? p.instagram ?? "").replace(/^@/, "");
-      let area_keywords: string[] = [];
-      if (Array.isArray(p.area_keywords)) area_keywords = p.area_keywords.filter(Boolean).map(String);
-      if (!area_keywords.length && p.regionKeyword) {
-        area_keywords = String(p.regionKeyword).split(/[,/|\s]+/).map((s: string) => s.trim()).filter(Boolean);
+      if (typeof p === 'object' && p !== null) {
+        const store_name = typeof p.store_name === 'string' ? p.store_name : 
+                          typeof p.storeName === 'string' ? p.storeName : "";
+        const instagram_id = (typeof p.instagram_id === 'string' ? p.instagram_id : 
+                             typeof p.instagram === 'string' ? p.instagram : "").replace(/^@/, "");
+        
+        let area_keywords: string[] = [];
+        if (Array.isArray(p.area_keywords)) {
+          area_keywords = p.area_keywords.filter((item: unknown): item is string => typeof item === 'string');
+        }
+        if (!area_keywords.length && typeof p.regionKeyword === 'string') {
+          area_keywords = p.regionKeyword.split(/[,/|\s]+/).map((s: string) => s.trim()).filter(Boolean);
+        }
+        return { store_name, area_keywords, instagram_id };
       }
-      return { store_name, area_keywords, instagram_id };
     }
-  } catch {}
+  } catch (error) {
+    console.error('[getPublishContext] Error parsing payload:', error);
+  }
+  
   return { store_name: "", area_keywords: [], instagram_id: "" };
 };
 
@@ -187,40 +238,67 @@ const getImageKeys = (): string[] => {
     const raw = sessionStorage.getItem(STORAGE.imgKeys);
     if (raw) {
       const arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr.length) return arr.map(String).filter(Boolean);
+      if (Array.isArray(arr) && arr.length) {
+        return arr.map(String).filter(Boolean);
+      }
     }
-  } catch {}
+  } catch (error) {
+    console.error('[getImageKeys] Error parsing imgKeys:', error);
+  }
+  
   try {
     const raw = sessionStorage.getItem(STORAGE.payload);
     if (raw) {
       const p = JSON.parse(raw);
-      const src = p?.image_keys ?? p?.images ?? p?.uploaded ?? [];
-      if (Array.isArray(src) && src.length) {
-        return src
-          .map((x: any) => x?.rel ?? x?.key ?? (x?.url ? toRelFromUrl(String(x.url)) : toRelFromUrl(String(x))))
-          .map(String)
-          .filter(Boolean);
+      if (typeof p === 'object' && p !== null) {
+        const src = p?.image_keys ?? p?.images ?? p?.uploaded ?? [];
+        if (Array.isArray(src) && src.length) {
+          return src
+            .map((x: unknown) => {
+              if (typeof x === 'object' && x !== null) {
+                const obj = x as Record<string, unknown>;
+                return obj?.rel ?? obj?.key ?? (typeof obj?.url === 'string' ? toRelFromUrl(obj.url) : '');
+              }
+              return typeof x === 'string' ? toRelFromUrl(x) : '';
+            })
+            .map(String)
+            .filter(Boolean);
+        }
       }
     }
-  } catch {}
+  } catch (error) {
+    console.error('[getImageKeys] Error parsing payload:', error);
+  }
+  
   try {
     const raw = sessionStorage.getItem(STORAGE.result);
     if (raw) {
       const r = JSON.parse(raw);
-      const src = r?.images ?? r?.data?.images ?? [];
-      if (Array.isArray(src) && src.length) {
-        return src
-          .map((x: any) => x?.rel ?? x?.key ?? (x?.url ? toRelFromUrl(String(x.url)) : toRelFromUrl(String(x))))
-          .map(String)
-          .filter(Boolean);
+      if (typeof r === 'object' && r !== null) {
+        const src = r?.images ?? (hasProperty(r, 'data') && hasProperty(r.data, 'images') ? r.data.images : []);
+        if (Array.isArray(src) && src.length) {
+          return src
+            .map((x: unknown) => {
+              if (typeof x === 'object' && x !== null) {
+                const obj = x as Record<string, unknown>;
+                return obj?.rel ?? obj?.key ?? (typeof obj?.url === 'string' ? toRelFromUrl(obj.url) : '');
+              }
+              return typeof x === 'string' ? toRelFromUrl(x) : '';
+            })
+            .map(String)
+            .filter(Boolean);
+        }
       }
     }
-  } catch {}
+  } catch (error) {
+    console.error('[getImageKeys] Error parsing result:', error);
+  }
+  
   return [];
 };
 
 export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenerateProps): JSX.Element => {
-  const location = useLocation() as any;
+  const location = useLocation();
   const [list, setList] = useState<PromotionIdea[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [regenLoading, setRegenLoading] = useState(false);
@@ -231,19 +309,21 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
   useEffect(() => {
     if (ideas?.length) { setList(ideas); return; }
 
-    const fromState = location?.state;
+    const fromState = location?.state as Record<string, unknown> | undefined;
     const rawVariants =
       fromState?.variants ??
-      fromState?.data?.variants ??
+      (hasProperty(fromState, 'data') && hasProperty(fromState.data, 'variants') ? fromState.data.variants : undefined) ??
       fromState?.captions ??
-      fromState?.data?.captions ??
+      (hasProperty(fromState, 'data') && hasProperty(fromState.data, 'captions') ? fromState.data.captions : undefined) ??
       fromState?.ideas ??
-      fromState?.data?.ideas;
+      (hasProperty(fromState, 'data') && hasProperty(fromState.data, 'ideas') ? fromState.data.ideas : undefined);
 
-    const mapped = mapVariantsToIdeas(rawVariants);
+    const mapped = mapVariantsToIdeas(Array.isArray(rawVariants) ? rawVariants : undefined);
     if (mapped.length) {
       setList(mapped);
-      try { sessionStorage.setItem(STORAGE.result, JSON.stringify(fromState)); } catch {}
+      try { sessionStorage.setItem(STORAGE.result, JSON.stringify(fromState)); } catch (error) {
+        console.error('[useEffect] Error setting sessionStorage:', error);
+      }
       return;
     }
 
@@ -252,17 +332,21 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
       const cached = sessionStorage.getItem(STORAGE.result);
       if (cached) {
         const parsed = JSON.parse(cached);
-        const v2 =
-          parsed?.variants ??
-          parsed?.data?.variants ??
-          parsed?.captions ??
-          parsed?.data?.captions ??
-          parsed?.ideas ??
-          parsed?.data?.ideas;
-        const m2 = mapVariantsToIdeas(v2);
-        if (m2.length) setList(m2);
+        if (typeof parsed === 'object' && parsed !== null) {
+          const v2 =
+            parsed?.variants ??
+            (hasProperty(parsed, 'data') && hasProperty(parsed.data, 'variants') ? parsed.data.variants : undefined) ??
+            parsed?.captions ??
+            (hasProperty(parsed, 'data') && hasProperty(parsed.data, 'captions') ? parsed.data.captions : undefined) ??
+            parsed?.ideas ??
+            (hasProperty(parsed, 'data') && hasProperty(parsed.data, 'ideas') ? parsed.data.ideas : undefined);
+          const m2 = mapVariantsToIdeas(Array.isArray(v2) ? v2 : undefined);
+          if (m2.length) setList(m2);
+        }
       }
-    } catch {}
+    } catch (error) {
+      console.error('[useEffect] Error parsing cached result:', error);
+    }
   }, [ideas, location?.state]);
 
   const selectedIdea = useMemo(() => list.find((i) => i.id === selectedId) || null, [list, selectedId]);
@@ -297,9 +381,19 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
       await api.post("/api/choose-publish", body, { timeout: 120_000 }); // 여유 있는 타임아웃
       alert("인스타그램 게시 요청이 완료되었습니다.");
       goToPreview();
-    } catch (e: any) {
-      console.error(e);
-      alert(e?.response?.data?.detail ?? e?.message ?? "게시 요청에 실패했습니다.");
+    } catch (error: unknown) {
+      console.error('[handleSelect] Error:', error);
+      
+      let errorMessage = "게시 요청에 실패했습니다.";
+      if (hasResponse(error) && error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (hasMessage(error)) {
+        errorMessage = error.message;
+      } else if (isError(error)) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       setPublishingId(null);
     }
@@ -316,16 +410,35 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
       // 기본: 이전 payload로 재생성
       const raw = sessionStorage.getItem(STORAGE.payload);
       if (!raw) throw new Error("최근 생성 요청 페이로드가 없습니다.");
+      
       const payload = JSON.parse(raw);
+      if (typeof payload !== 'object' || payload === null) {
+        throw new Error("페이로드 형식이 올바르지 않습니다.");
+      }
+      
       const { data } = await api.post("/api/generate", payload, { timeout: 90_000 });
-      try { sessionStorage.setItem(STORAGE.result, JSON.stringify(data)); } catch {}
+      try { sessionStorage.setItem(STORAGE.result, JSON.stringify(data)); } catch (error) {
+        console.error('[handleRegenerate] Error setting sessionStorage:', error);
+      }
+      
       const mapped = mapVariantsToIdeas(
-        data?.variants ?? data?.data?.variants ?? data?.captions ?? data?.data?.captions
+        data?.variants ?? (hasProperty(data, 'data') && hasProperty(data.data, 'variants') ? data.data.variants : undefined) ?? 
+        data?.captions ?? (hasProperty(data, 'data') && hasProperty(data.data, 'captions') ? data.data.captions : undefined)
       );
+      
       if (!mapped.length) throw new Error("생성 결과가 비어있습니다.");
       setList(mapped); setSelectedId(null);
-    } catch (e: any) {
-      alert(e?.message ?? "다시 생성에 실패했습니다.");
+    } catch (error: unknown) {
+      console.error('[handleRegenerate] Error:', error);
+      
+      let errorMessage = "다시 생성에 실패했습니다.";
+      if (hasMessage(error)) {
+        errorMessage = error.message;
+      } else if (isError(error)) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     } finally { setRegenLoading(false); }
   };
 

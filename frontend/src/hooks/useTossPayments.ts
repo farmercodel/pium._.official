@@ -4,10 +4,10 @@ import type { TossPaymentsInstance, BillingAuthOptions } from "../types/toss-pay
 const CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY as string;
 
 // 타입 가드 함수들
-const isError = (error: unknown): error is Error => error instanceof Error;
-const hasMessage = (obj: unknown): obj is { message: unknown } => 
-  typeof obj === 'object' && obj !== null && 'message' in obj;
-const isString = (value: unknown): value is string => typeof value === 'string';
+//const isError = (error: unknown): error is Error => error instanceof Error;
+//const hasMessage = (obj: unknown): obj is { message: unknown } => 
+//  typeof obj === 'object' && obj !== null && 'message' in obj;
+//const isString = (value: unknown): value is string => typeof value === 'string';
 
 // 스크립트 요소의 타입 가드
 const hasDataset = (script: unknown): script is { dataset?: { loaded: string } } => 

@@ -4,9 +4,10 @@ import { getMe, logout as doLogout } from "../api/auth";
 
 // 사용자 타입 정의
 interface User {
-  id: string;
+  id: string | number;
   email: string;
   name?: string;
+  is_active?: boolean;
   [key: string]: unknown; // 추가 속성 허용
 }
 
@@ -28,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return (
       typeof obj === 'object' &&
       obj !== null &&
-      typeof (obj as User).id === 'string' &&
+      (typeof (obj as User).id === 'string' || typeof (obj as User).id === 'number') &&
       typeof (obj as User).email === 'string'
     );
   };
@@ -43,6 +44,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       obj !== null &&
       'message' in obj &&
       typeof (obj as { message: string }).message === 'string'
+    );
+  };
+
+  const hasResponse = (obj: unknown): obj is { response: { status: number } } => {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'response' in obj &&
+      typeof (obj as { response: { status: number } }).response === 'object' &&
+      (obj as { response: { status: number } }).response !== null &&
+      'status' in (obj as { response: { status: number } }).response &&
+      typeof (obj as { response: { status: number } }).response.status === 'number'
     );
   };
 
@@ -62,7 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(me);
       } else {
         console.error('[AuthContext] Invalid user data received:', me);
-        throw new Error('Invalid user data received from server');
+        // 사용자 데이터가 유효하지 않아도 토큰은 유지 (일시적인 서버 문제일 수 있음)
+        console.warn('[AuthContext] Keeping token despite invalid user data');
       }
     } catch (error) {
       console.error('[AuthContext] Failed to fetch user data:', error);
@@ -79,9 +93,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       console.error('[AuthContext] Error message:', errorMessage);
       
-      // 토큰 무효 → 정리
-      localStorage.removeItem("access_token");
-      setUser(null);
+      // 네트워크 에러나 일시적인 서버 문제인 경우 토큰 유지
+      // 401 Unauthorized나 403 Forbidden 같은 인증 에러만 토큰 삭제
+      if (hasResponse(error) && error.response) {
+        const response = error.response as { status: number };
+        const status = response.status;
+        if (status === 401 || status === 403) {
+          console.warn('[AuthContext] Authentication error, removing token');
+          localStorage.removeItem("access_token");
+          setUser(null);
+        } else {
+          console.warn('[AuthContext] Non-auth error, keeping token');
+        }
+      } else {
+        console.warn('[AuthContext] Network or unknown error, keeping token');
+      }
     } finally {
       setLoading(false);
     }
