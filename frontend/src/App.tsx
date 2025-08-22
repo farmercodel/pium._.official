@@ -7,7 +7,6 @@ import PreviewPage from "./pages/PreviewPage";
 import AboutPage from "./pages/AboutPage";
 import SurveyPage from "./pages/SurveyPage";
 import GenerationPage from "./pages/GenerationPage";
-import ResultPage from "./pages/ResultPage";
 import GuidePage from "./pages/GuidePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
@@ -35,9 +34,6 @@ function App() {
             }/>
             <Route path="/generation" element={
               <Protected><GenerationPage /></Protected>
-            }/>
-            <Route path="/result" element={
-              <Protected><ResultPage /></Protected>
             }/>
           </Routes>
         </Layout>

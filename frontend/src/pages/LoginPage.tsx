@@ -5,6 +5,7 @@ import AuthFrame from "../components/auth/AuthFrame";
 import useNavigation from "../hooks/useNavigation";
 import Button from "../components/common/Button";
 import { login } from "../api/auth";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 // --- inline icons (presentational only) ---
 const IconMail = () => (
@@ -22,12 +23,19 @@ const IconLock = () => (
 
 const LoginPage = () => {
   const { goToMain, goToSignUp } = useNavigation();
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
 
   // 입력 상태
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const handleSignUpClick = () => {
+    goToSignUp();
+  };
 
   const handleLogin = async () => {
     setErr(null);
@@ -120,8 +128,8 @@ const LoginPage = () => {
           {/* Sign up link style */}
           <Button
             variant="custom"
-            className="mt-2 w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm"
-            onClick={() => goToSignUp?.()}
+            className="mt-2 w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm cursor-pointer"
+            onClick={() => handleSignUpClick()}
           >
             Sign Up
           </Button>
