@@ -50,7 +50,8 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
             <br />
 
             <motion.span className="text-white" variants={fade}>
-              소상공인 마케팅 지원 서비스
+              <span className="block lg:inline">소상공인 마케팅</span>
+              <span className="block lg:inline lg:ml-2">지원 서비스</span>
             </motion.span>
           </motion.h1>
 
