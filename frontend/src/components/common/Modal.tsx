@@ -114,7 +114,7 @@ export function Modal({
             }
             className={`
               relative w-[92vw] max-w-md
-              p-[1px] rounded-2xl bg-black
+              p-[1px] rounded-2xl bg-gray
               shadow-[0_20px_40px_rgba(0,0,0,0.18)]
               focus:outline-none
             `}

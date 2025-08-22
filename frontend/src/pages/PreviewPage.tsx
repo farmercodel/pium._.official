@@ -100,7 +100,7 @@ const PreviewPage = () => {
                 Instagram 미리보기
               </motion.h1>
               <motion.p className="mt-2 text-sm sm:text-base text-gray-600" variants={fade}>
-                지금까지 인스타그램에 게시된 콘텐츠와 최신 게시물을 확인하세요.
+                지금 인스타그램에 게시된 콘텐츠와 최신 게시물을 확인하세요.
               </motion.p>
               <motion.div className="mt-5" variants={fade}>
                 <motion.button

@@ -35,7 +35,7 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
                     >
                         {/* PIUM 텍스트: 밝게 끝나는 그라데이션 + 은은한 글로우 */}
                         <span className="relative inline-block">
-                            <span className="bg-[linear-gradient(90deg,#E6EC2C_0%,#9FE316_45%,#00B87C_100%)] bg-clip-text text-transparent contrast-125 saturate-125 [text-shadow:0_1px_0_rgba(0,0,0,0.05)]">
+                            <span className="bg-[linear-gradient(90deg,#E6EC2C_0%,#9FE316_45%)] bg-clip-text text-transparent contrast-125 saturate-125 [text-shadow:0_1px_0_rgba(0,0,0,0.05)]">
                                 PIUM
                             </span>
 
@@ -67,7 +67,7 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
                         className="mt-6 text-white/90 text-base sm:text-lg lg:text-xl"
                         variants={fade}
                     >
-                        AI를 통해 여러분들의 가게를 쉽고 빠르게 홍보합니다.
+                        AI를 통해 여러분들의 가게를 쉽고 빠르게 홍보해 보세요!
                     </motion.p>
 
                     <motion.div className="mt-10 flex justify-center" variants={flyUp}>
