@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { uploadFiles } from '../api/upload';
 import { toGenerateAdPayload } from '../types/SurveymapFormData';
 import { api } from '../api/api';
-import type { SurveyFormValues } from '../pages/SurveyPage';
+import type { SurveyFormValues } from '../types/SurveymapFormData';
 
 // url → object storage 상대경로(rel) 변환
 const toRelFromUrl = (u: string) => {
@@ -32,6 +32,8 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
     e.preventDefault();
     if (submitting) return;
 
+    console.log('useFormSubmission 시작 - 선택된 파일 개수:', selectedFiles.length);
+
     if (selectedFiles.length === 0) {
       alert("이미지를 최소 1장 업로드해 주세요.");
       return;
@@ -55,6 +57,8 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
       promotion: String(fd.get("promotion") || ""),
     };
 
+    console.log('폼 데이터 추출 완료:', values);
+
     const fileArr = selectedFiles;
 
     if (onSubmit) {
@@ -73,6 +77,7 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
 
     try {
       setSubmitting(true);
+      console.log('기본 제출 로직 시작 - 파일 업로드 중...');
 
       // 1) 파일 사이즈 제한(10MB) 및 업로드
       const validFiles = fileArr.filter(f => f.size <= 10 * 1024 * 1024);
@@ -84,10 +89,14 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
         alert(`10MB를 초과하는 파일은 제외하고 업로드합니다. 제외: ${excluded}`);
       }
 
+      console.log('유효한 파일 개수:', validFiles.length);
+
       // 업로드 응답 정규화(배열/객체 모두 대응)
       let uploaded: unknown = { ok: true, files: [] };
       if (validFiles.length) {
+        console.log('파일 업로드 API 호출 중...');
         uploaded = await uploadFiles(validFiles, "ads/images");
+        console.log('파일 업로드 완료:', uploaded);
       }
       
       // 타입 가드를 통한 안전한 처리
@@ -101,6 +110,8 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
         }
       }
 
+      console.log('처리된 파일 배열:', filesArr);
+
       // (A) choose-publish용 image_keys(rel) 저장
       const imageKeys: string[] = filesArr
         .map(x => x?.rel ?? x?.key ?? (x?.url ? toRelFromUrl(String(x.url)) : ""))
@@ -110,6 +121,7 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
       if (imageKeys.length) {
         try {
           sessionStorage.setItem("last_upload_image_keys", JSON.stringify(imageKeys));
+          console.log('이미지 키 저장 완료:', imageKeys);
         } catch (error) {
           console.error('이미지 키 저장 실패:', error);
         }
@@ -121,6 +133,8 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
       const uploadedUrls: string[] = filesArr
         .map(x => String(x?.url || ""))
         .filter(Boolean);
+
+      console.log('업로드된 URL 배열:', uploadedUrls);
 
       // 2) 새 폼 → 레거시 키 매핑
       const legacyForm: Record<string, string> = {
@@ -138,8 +152,11 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
         "진행중인 프로모션": values.promotion ?? "",
       };
 
+      console.log('레거시 폼 데이터:', legacyForm);
+
       // 3) 기존 변환 로직 사용 (URL 배열 전달)
       const payload = toGenerateAdPayload(legacyForm, uploadedUrls);
+      console.log('생성 API 페이로드:', payload);
 
       // (B) 게시 컨텍스트 저장: store_name / area_keywords / instagram_id
       try {
@@ -153,6 +170,7 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
           instagram_id: (payload.instagram_id ?? values.instagram ?? "").replace(/^@/, ""),
         };
         sessionStorage.setItem("last_publish_context", JSON.stringify(publishCtx));
+        console.log('게시 컨텍스트 저장 완료:', publishCtx);
       } catch (error) {
         console.error('게시 컨텍스트 저장 실패:', error);
       }
@@ -160,7 +178,9 @@ export const useFormSubmission = (onSubmit?: (values: SurveyFormValues, files: F
       sessionStorage.setItem("last_generate_payload", JSON.stringify(payload));
 
       // 4) 생성 API 호출
+      console.log('생성 API 호출 중...');
       const { data } = await api.post("/api/generate", payload, { timeout: 60_000 });
+      console.log('생성 API 응답:', data);
 
       sessionStorage.setItem("last_generate_result", JSON.stringify(data));
       
