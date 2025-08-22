@@ -42,6 +42,15 @@ interface KakaoGeocoderResult {
   };
 }
 
+// 장소 검색 결과 타입
+interface KakaoPlaceResult {
+  x: string; // 경도
+  y: string; // 위도
+  place_name: string;
+  address_name: string;
+  road_address_name?: string;
+}
+
 // 전역 타입 선언
 declare global {
   interface Window {
@@ -59,6 +68,9 @@ declare global {
           };
           Geocoder: new () => {
             coord2Address: (lng: number, lat: number, callback: (result: KakaoGeocoderResult[], status: string) => void) => void;
+          };
+          Places: new () => {
+            keywordSearch: (keyword: string, callback: (results: KakaoPlaceResult[], status: string) => void) => void;
           };
         };
       };
@@ -83,16 +95,21 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
   const [isOpen, setIsOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<AddressData | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchMessage, setSearchMessage] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<KakaoMap | null>(null);
   const marker = useRef<KakaoMarker | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // 카카오맵 로드 상태 확인 (스크립트가 이미 로드되어 있음)
   useEffect(() => {
     const checkKakaoMap = () => {
       if (window.kakao && window.kakao.maps && 
           window.kakao.maps.LatLng && window.kakao.maps.Map &&
-          window.kakao.maps.services && window.kakao.maps.services.Geocoder) {
+          window.kakao.maps.services && window.kakao.maps.services.Geocoder &&
+          window.kakao.maps.services.Places) {
         console.log('카카오맵 및 서비스 준비 완료');
         setIsMapLoaded(true);
       } else {
@@ -103,6 +120,31 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
 
     checkKakaoMap();
   }, []);
+
+  // Enter 키 이벤트 처리
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && isOpen) {
+        e.preventDefault();
+        
+        if (isSearchFocused) {
+          // 검색창에 포커스가 있으면 검색 실행
+          searchPlaces(searchKeyword);
+        } else if (selectedAddress) {
+          // 주소가 선택된 상태면 주소 선택 실행
+          handleAddressSelect();
+        }
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, isSearchFocused, selectedAddress, searchKeyword]);
 
   // 지도 초기화
   const initMap = () => {
@@ -140,6 +182,52 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
       return () => clearTimeout(timer);
     }
   }, [isOpen, isMapLoaded]);
+
+  // 키워드로 장소 검색
+  const searchPlaces = (keyword: string) => {
+    if (!window.kakao || !window.kakao.maps || !mapInstance.current) {
+      console.log('검색 조건 미충족');
+      setSearchMessage('지도가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    if (!keyword.trim()) {
+      console.log('검색어가 비어있음');
+      setSearchMessage('검색어를 입력해주세요.');
+      return;
+    }
+
+    try {
+      const places = new window.kakao.maps.services.Places();
+      
+      places.keywordSearch(keyword, (results: KakaoPlaceResult[], status: string) => {
+        if (status === window.kakao.maps.services.Status.OK && results.length > 0) {
+          console.log('검색 결과:', results);
+          
+          // 첫 번째 결과로 지도 중심 이동
+          const place = results[0];
+          const latlng = new window.kakao.maps.LatLng(parseFloat(place.y), parseFloat(place.x));
+          
+          mapInstance.current?.setCenter(latlng);
+          updateMarker(latlng);
+          getAddressFromCoords(latlng);
+          
+          // 검색어 초기화 및 성공 메시지
+          setSearchKeyword('');
+          setSearchMessage('검색 완료! 지도에서 위치를 확인하세요.');
+          
+          // 3초 후 메시지 제거
+          setTimeout(() => setSearchMessage(''), 3000);
+        } else {
+          console.log('검색 결과 없음');
+          setSearchMessage('검색 결과가 없습니다. 다른 키워드로 검색해보세요.');
+        }
+      });
+    } catch (error) {
+      console.error('장소 검색 실패:', error);
+      setSearchMessage('검색 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
+  };
 
   // 마커 업데이트
   const updateMarker = (latlng: KakaoLatLng) => {
@@ -246,7 +334,7 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
 
       {/* 지도 팝업 */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">지도에서 위치 선택</h3>
@@ -256,6 +344,46 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
               >
                 ✕
               </button>
+            </div>
+            
+            {/* 검색 입력 필드 */}
+            <div className="mb-4">
+              <div className="flex gap-2">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  placeholder="장소명, 주소, 건물명으로 검색 (예: 강남역, 코엑스, 서울시청)"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-300 placeholder:text-gray-400"
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                />
+                <Button 
+                  variant="primary" 
+                  onClick={() => searchPlaces(searchKeyword)}
+                  className="whitespace-nowrap px-4 py-2"
+                >
+                  검색
+                </Button>
+              </div>
+              
+              {/* 검색 메시지 표시 */}
+              {searchMessage && (
+                <div className={`mt-2 p-2 rounded-md text-sm ${
+                  searchMessage.includes('완료') 
+                    ? 'bg-green-50 text-green-700 border border-green-200' 
+                    : searchMessage.includes('오류') || searchMessage.includes('실패')
+                    ? 'bg-red-50 text-red-700 border border-red-200'
+                    : 'bg-blue-50 text-blue-700 border border-blue-200'
+                }`}>
+                  {searchMessage}
+                </div>
+              )}
+              
+              <p className="text-sm text-gray-500 mt-1">
+                Enter 키를 누르거나 검색 버튼을 클릭하세요
+              </p>
             </div>
             
             {/* 지도 */}
