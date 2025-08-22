@@ -5,6 +5,7 @@ import AuthFrame from "../components/auth/AuthFrame";
 import useNavigation from "../hooks/useNavigation";
 import Button from "../components/common/Button";
 import { login } from "../api/auth";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 // --- inline icons (presentational only) ---
 const IconMail = () => (
@@ -22,6 +23,9 @@ const IconLock = () => (
 
 const LoginPage = () => {
   const { goToMain, goToSignUp } = useNavigation();
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
 
   // 입력 상태
   const [email, setEmail] = useState("");

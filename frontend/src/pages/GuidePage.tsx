@@ -1,6 +1,7 @@
 import type { JSX } from "react";
 import { useGuidePage } from "../hooks/useGuidePage";
 import { useLiftInteractions } from "../hooks/useAnimation";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 import { HeroSection } from "../components/guide/HeroSection";
 import { StepsSection } from "../components/guide/StepsSection";
 import { FeaturesSection } from "../components/guide/FeaturesSection";
@@ -9,6 +10,9 @@ import { CTASection } from "../components/guide/CTASection";
 export const GuidePage = (): JSX.Element => {
   const { steps, features } = useGuidePage();
   const interactions = useLiftInteractions(-6); // Guide 전용: y: -6
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
 
   return (
     <main className="font-sans">

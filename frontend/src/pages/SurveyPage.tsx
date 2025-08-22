@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import useNavigation from "../hooks/useNavigation";
 import { useFileUpload } from "../hooks/useFileUpload";
 import { useFormSubmission } from "../hooks/useFormSubmission";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 import { 
   useLiftInteractions, 
   useAnimationProps, 
@@ -25,6 +26,9 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
   const { reduce, heroAnim, inViewAnim } = useAnimationProps();
   const { goToGeneration } = useNavigation();
   const [address, setAddress] = useState("");
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
 
   // 파일 업로드 훅 사용
   const {

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useGenerationPage } from "../hooks/useGenerationPage";
 import { useAnimationProps, container } from "../hooks/useAnimation";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 import { HeaderSection } from "../components/generation/HeaderSection";
 import { IdeasSection } from "../components/generation/IdeasSection";
 import { ActionsSection } from "../components/generation/ActionsSection";
@@ -27,6 +28,9 @@ export const PromoGeneratePage = ({ ideas, onSelect, onRegenerate }: PromoGenera
   } = useGenerationPage(ideas);
   
   const { inViewAnim } = useAnimationProps();
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
 
   // 초기 데이터 로드
   useEffect(() => {

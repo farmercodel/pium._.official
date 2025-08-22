@@ -13,6 +13,7 @@ import {
   popIn 
 } from "../hooks/useAnimation";
 import { useInstagramPreview } from "../hooks/useInstagramPreview";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 type PreviewDef =
   | { kind: "latest"; username: string; title: string }
@@ -85,6 +86,9 @@ const PreviewPage = () => {
     hoverY: -6,           // Preview 전용: y: -6
     viewportAmount: 0.2   // Preview 전용: viewport amount
   });
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
 
   return (
     <PageLayout>

@@ -12,6 +12,7 @@ import {
 } from "../hooks/useAnimation";
 import { useTossPayments } from "../hooks/useTossPayments";
 import { useUrlParams } from "../hooks/useUrlParams";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 type Plan = {
   id: "free" | "basic" | "pro";
@@ -193,6 +194,7 @@ export const PricingPage = (): JSX.Element => {
 
   // 커스텀 훅 사용
   useUrlParams();
+  useScrollToTop();
 
   /** 정기결제(빌링) 등록 */
   const handleBillingEnroll = async (planId: Plan["id"]) => {

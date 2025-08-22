@@ -5,6 +5,7 @@ import PageLayout from "../components/common/PageLayout";
 import useNavigation from "../hooks/useNavigation";
 import Button from "../components/common/Button";
 import { signup, login } from "../api/auth";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 const toYMD = () => new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
 
@@ -35,6 +36,9 @@ const IconLock = () => (
 
 const SignUpPage = () => {
   const { goToMain } = useNavigation();
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
 
   const [email, setEmail] = useState("");
   const [pNm, setPNm] = useState(""); // p_nm
