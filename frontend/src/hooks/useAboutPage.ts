@@ -85,7 +85,7 @@ export const featureData = [
   },
   {
     title: "인스타그램 피드 자동 게시",
-    iconSrc: "/assets/icon-auto-post.svg",
+    iconSrc: "/assets/instagram_white.svg",
     bullets: [
       "PIUM에서 제작한 템플릿을 기반으로 피드 썸네일 사진 자동 생성",
       "@pium._.official 계정과 가게 인스타그램 계정이 공동 소유자가 되어 피드 자동 업로드",

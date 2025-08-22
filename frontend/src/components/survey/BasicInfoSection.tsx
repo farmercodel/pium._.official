@@ -33,7 +33,7 @@ export const BasicInfoSection = ({ address, setAddress, heroAnim }: BasicInfoSec
             name="storeName"
             required
             type="text"
-            placeholder="가게 이름을 입력하세요"
+            placeholder="가게 이름을 입력하세요."
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>
@@ -47,7 +47,7 @@ export const BasicInfoSection = ({ address, setAddress, heroAnim }: BasicInfoSec
             name="regionKeyword"
             required
             type="text"
-            placeholder="예: 강남역, 홍대"
+            placeholder="지역/상권명을 입력하세요. (ex) 강남역, 충주시 등"
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>
@@ -74,7 +74,7 @@ export const BasicInfoSection = ({ address, setAddress, heroAnim }: BasicInfoSec
             name="priceRange"
             required
             type="text"
-            placeholder="예: 저가 / 중가 / 고가 또는 1만원대"
+            placeholder="가격대를 입력하세요."
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>
@@ -88,7 +88,7 @@ export const BasicInfoSection = ({ address, setAddress, heroAnim }: BasicInfoSec
             name="category"
             required
             type="text"
-            placeholder="예: 음식점, 카페, 소매/리테일, 서비스"
+            placeholder="업종을 입력하세요."
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>
@@ -102,7 +102,7 @@ export const BasicInfoSection = ({ address, setAddress, heroAnim }: BasicInfoSec
             name="hours"
             required
             type="text"
-            placeholder="예: 평일 09:00-22:00, 주말 10:00-23:00"
+            placeholder="영업 시간을 입력하세요. (ex) 09:00~18:00"
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>

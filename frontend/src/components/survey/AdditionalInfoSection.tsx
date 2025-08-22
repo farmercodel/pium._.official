@@ -38,7 +38,7 @@ export const AdditionalInfoSection = ({ inViewAnim }: AdditionalInfoSectionProps
             id="serviceKeywords"
             name="serviceKeywords"
             type="text"
-            placeholder="예: 와이파이, 주차가능, 반려동물"
+            placeholder="와이파이, 주차가능, 반려동물 등"
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>
@@ -49,7 +49,7 @@ export const AdditionalInfoSection = ({ inViewAnim }: AdditionalInfoSectionProps
             id="target"
             name="target"
             type="text"
-            placeholder="예: 20-30대 직장인, 커플, 가족"
+            placeholder="20-30대 직장인, 커플, 가족 등"
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>
@@ -74,7 +74,7 @@ export const AdditionalInfoSection = ({ inViewAnim }: AdditionalInfoSectionProps
             id="promotion"
             name="promotion"
             type="text"
-            placeholder="예: 첫 방문 10% 할인, 생일 케이크 서비스"
+            placeholder="첫 방문 10% 할인, 생일 케이크 서비스 등"
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>

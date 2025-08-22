@@ -19,7 +19,7 @@ export const useMainPage = () => {
     {
       title: "인스타그램 자동 게시",
       desc: "생성한 홍보 콘텐츠를 자동으로\n인스타그램에 게시합니다.",
-      icon: "/assets/icon-auto-post.svg",
+      icon: "/assets/instagram_white.svg",
     },
   ];
 

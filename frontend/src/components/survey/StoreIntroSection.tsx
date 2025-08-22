@@ -49,7 +49,7 @@ export const StoreIntroSection = ({
             name="intro"
             required
             rows={5}
-            placeholder="가게의 특징, 분위기, 추천 메뉴 등을 자유롭게 소개해주세요"
+            placeholder="가게의 특징, 분위기, 대표 메뉴 등을 자유롭게 소개해 주세요."
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
         </motion.div>
