@@ -30,10 +30,10 @@ export const CTASection = ({ interactions }: CTASectionProps) => {
         viewport={{ once: true, amount: 0.2 }}
       >
         <motion.h2 className="text-2xl sm:text-3xl font-bold text-gray-800" variants={fade}>
-          지금 바로 시작해보세요
+          지금 바로 시작해 보세요
         </motion.h2>
         <motion.p className="mt-3 text-sm sm:text-lg text-gray-600" variants={fade}>
-          피움과 함께 더 효과적인 마케팅 콘텐츠를 만들어보세요
+          PIUM과 함께 기존보다 더 효과적인 홍보 마케팅 콘텐츠를 만들어 보세요!
         </motion.p>
 
         <motion.button
