@@ -61,7 +61,12 @@ const FeatureCard = ({ feature, interactions }: FeatureCardProps) => {
       <h3 className="mt-6 text-center text-lg sm:text-xl font-semibold text-gray-800">
         {feature.title}
       </h3>
-      <p className="mt-3 text-center text-sm sm:text-base text-gray-600 leading-relaxed">
+      <p
+        className="
+          mt-3 text-center text-sm sm:text-base text-gray-600 leading-relaxed
+          whitespace-normal lg:whitespace-pre-line
+        "
+      >
         {feature.desc}
       </p>
     </motion.div>
@@ -89,7 +94,7 @@ export const FeaturesSection = ({ features, interactions }: FeaturesSectionProps
             className="text-2xl sm:text-3xl lg:text-4xl leading-10 text-gray-800 font-semibold tracking-tight"
             variants={fade}
           >
-            AI를 통해 당신의 가게를 쉽고 빠르게 홍보합니다
+            AI를 통해 여러분들의 가게를 쉽고 빠르게 홍보합니다.
           </motion.h2>
           <motion.p
             className="mt-3 text-gray-600 text-sm sm:text-base lg:text-lg"

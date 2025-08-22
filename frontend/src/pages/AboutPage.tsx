@@ -1,11 +1,11 @@
 import type { JSX } from "react";
 import { useAboutPage } from "../hooks/useAboutPage";
 import { useScrollToTop } from "../hooks/useScrollToTop";
-import { HeroSection } from "../components/about/HeroSection";
-import { ProjectIntroSection } from "../components/about/ProjectIntroSection";
-import { FeaturesSection } from "../components/about/FeaturesSection";
-import { TeamSection } from "../components/about/TeamSection";
-import { CTASection } from "../components/about/CTASection";
+import { HeroSection } from "../components/About/HeroSection";
+import { ProjectIntroSection } from "../components/About/ProjectIntroSection";
+import { FeaturesSection } from "../components/About/FeaturesSection";
+import { TeamSection } from "../components/About/TeamSection";
+import { CTASection } from "../components/About/CTASection";
 
 export const AboutPage = ({ team }: { team?: ReturnType<typeof useAboutPage>['teamMembers'] }): JSX.Element => {
   const { teamMembers, projectIntroData, featureData, heroAnim, inViewAnim } = useAboutPage(team);
