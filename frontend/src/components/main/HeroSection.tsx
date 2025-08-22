@@ -67,7 +67,7 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
                         className="mt-6 text-white/90 text-base sm:text-lg lg:text-xl"
                         variants={fade}
                     >
-                        AI를 통해 여러분들의 가게를 쉽고 빠르게 홍보합니다
+                        AI를 통해 여러분들의 가게를 쉽고 빠르게 홍보합니다.
                     </motion.p>
 
                     <motion.div className="mt-10 flex justify-center" variants={flyUp}>

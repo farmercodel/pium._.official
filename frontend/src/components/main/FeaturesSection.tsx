@@ -64,7 +64,7 @@ const FeatureCard = ({ feature, interactions }: FeatureCardProps) => {
       <p
         className="
           mt-3 text-center text-sm sm:text-base text-gray-600 leading-relaxed
-          whitespace-normal lg:whitespace-pre-line
+          whitespace-pre-line
         "
       >
         {feature.desc}
@@ -94,7 +94,7 @@ export const FeaturesSection = ({ features, interactions }: FeaturesSectionProps
             className="text-2xl sm:text-3xl lg:text-4xl leading-10 text-gray-800 font-semibold tracking-tight"
             variants={fade}
           >
-            PIUM에서만 제공하는 특별한 기능
+            PIUM에서 제공하는 특별한 기능
           </motion.h2>
           <motion.p
             className="mt-3 text-gray-600 text-sm sm:text-base lg:text-lg"
