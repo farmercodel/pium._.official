@@ -94,7 +94,7 @@ export const FeaturesSection = ({ features, interactions }: FeaturesSectionProps
             className="text-2xl sm:text-3xl lg:text-4xl leading-10 text-gray-800 font-semibold tracking-tight"
             variants={fade}
           >
-            AI를 통해 여러분들의 가게를 쉽고 빠르게 홍보합니다.
+            PIUM에서만 제공하는 특별한 기능
           </motion.h2>
           <motion.p
             className="mt-3 text-gray-600 text-sm sm:text-base lg:text-lg"
