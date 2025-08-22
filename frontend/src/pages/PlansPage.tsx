@@ -26,8 +26,8 @@ type Plan = {
 
 const plans: Plan[] = [
   { id: "free",  title: "FREE",  price: "₩0",      period: "/ 월", features: ["월 최대 1회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "300자 이내 홍보글 생성"], cta: "시작하기" },
-  { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원"], cta: "업그레이드", highlight: true },
-  { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["월 최대 30회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원"], cta: "업그레이드" },
+  { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원"], cta: "업그레이드", highlight: true },
+  { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["월 최대 30회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원", "정교한 답변"], cta: "업그레이드" },
 ];
 
 /** 결제 금액/오더명 매핑 (서버/SDK에서 사용) */
@@ -86,8 +86,14 @@ type PlanCardProps = {
   ctaLoading: boolean;
 };
 
+
+export function Divider() {
+  return <div className="my-6 sm:my-8 h-px bg-sky-100/70" />;
+}
+
+
 const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLoading }: PlanCardProps) => {
-  const interactions = useLiftInteractions(-6); // Plans 전용: y: -6
+  const interactions = useLiftInteractions(-6);
   const { reduce } = useAnimationProps();
 
   return (
@@ -99,7 +105,7 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(plan.id)}
       className={[
         "group relative h-full rounded-2xl bg-white p-6 sm:p-7 shadow-sm transition-shadow transform-gpu",
-        "border-2",
+        "border-2 flex flex-col",
         selected ? "border-emerald-400 shadow-md" : "border-[#a3d276] hover:shadow-md",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300",
       ].join(" ")}
@@ -113,19 +119,13 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
       }
       {...interactions}
     >
-      {/* 인기 배지 */}
       {plan.highlight && !reduce && (
-        <motion.span
-          className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 shadow"
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-        >
+        <motion.span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 shadow"
+          initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
           인기
         </motion.span>
       )}
 
-      {/* 원형 아이콘 (흰색 아이콘 + 컬러 배경) */}
       <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-emerald-300 via-emerald-400 to-teal-600 text-white shadow mb-4">
         {icon}
       </div>
@@ -133,13 +133,11 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
       <div className="text-center">
         <h3 className="text-lg sm:text-xl font-bold text-gray-800">{plan.title}</h3>
         <div className="mt-1 text-2xl sm:text-3xl font-extrabold text-emerald-600">
-          {plan.price}{" "}
-          {plan.period && <span className="text-sm font-semibold text-emerald-600/80 align-middle">{plan.period}</span>}
+          {plan.price} {plan.period && <span className="text-sm font-semibold text-emerald-600/80 align-middle">{plan.period}</span>}
         </div>
       </div>
 
-      {/* Features */}
-      <ul className="mt-4 space-y-2 text-sm text-gray-700">
+      <ul className="mt-4 space-y-2 text-sm text-gray-700 flex-1">
         {plan.features.map((f, i) => (
           <li key={i} className="flex items-start gap-2">
             <span className="text-emerald-600 mt-0.5"><CheckIcon /></span>
@@ -148,26 +146,30 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
         ))}
       </ul>
 
-      {/* CTA */}
-      <motion.button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onAction(); }}
-        disabled={ctaDisabled}
-        aria-busy={ctaLoading}
-        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-60"
-        {...useLiftInteractions()}
-      >
-        {ctaLoading ? "진행중..." : plan.cta}
-        <motion.svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden
-          animate={ctaLoading ? { rotate: 360 } : { rotate: 0 }}
-          transition={ctaLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
+      <Divider></Divider>
+
+      <div className="mt-auto pt-4">
+        <motion.button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onAction(); }}
+          disabled={ctaDisabled}
+          aria-busy={ctaLoading}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-60"
+          {...useLiftInteractions()}
         >
-          <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </motion.svg>
-      </motion.button>
+          {ctaLoading ? "진행중..." : plan.cta}
+          <motion.svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden
+            animate={ctaLoading ? { rotate: 360 } : { rotate: 0 }}
+            transition={ctaLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
+          >
+            <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </motion.svg>
+        </motion.button>
+      </div>
     </motion.div>
   );
 };
+
 
 const FaqItem = ({ q, a }: { q: string; a: string }) => {
   const [open, setOpen] = useState(false);
