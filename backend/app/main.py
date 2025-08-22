@@ -11,6 +11,7 @@ from app.api.auth_controller import router as auth_router
 from app.services.auth_service import AuthService
 from app.repository.user_repository import UserRepository
 from app.api.tosspayments import router as toss_router
+from app.api.inquires import router as inquires_router
 
 app = FastAPI(title="Pium API", version="1.0.0")
 
@@ -82,6 +83,7 @@ app.include_router(generate_ad.router, prefix="/api", tags=["GPT"])
 app.include_router(instagram.router, prefix="/api", tags=["instagram"])
 app.include_router(compose.router, prefix="/api", tags=["compose"])
 app.include_router(toss_router, prefix="/api")
+app.include_router(inquires_router, prefix = "/api")
 
 if __name__ == "__main__":
     import uvicorn

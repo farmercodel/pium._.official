@@ -18,6 +18,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 # 프로젝트 공용 Base 클래스 (SQLAlchemy Declarative Base)
 from app.util.database import Base
 
+from sqlalchemy.orm import relationship
+
 
 class User(Base):
     """
@@ -78,3 +80,6 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc), # 최초 생성 시 현재 시간
         onupdate=lambda: datetime.now(timezone.utc) # 업데이트 시 시간 갱신
     )
+
+    # 양방향 관계: 이 사용자가 작성한 모든 문의
+    inquiries = relationship("Inquiry", back_populates="user")

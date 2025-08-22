@@ -67,7 +67,7 @@ export const AboutPage = ({ team }: { team?: ReturnType<typeof useAboutPage>['te
       <ProjectIntroSection projectIntroData={projectIntroData} inViewAnim={inViewAnim} />
       <FeaturesSection featureData={featureData} inViewAnim={inViewAnim} />
       <TeamSection teamMembers={teamMembers} inViewAnim={inViewAnim} />
-      <CTASection inViewAnim={inViewAnim} />
+      <CTASection inViewAnim={inViewAnim} /> 
     </main>
   );
 };
