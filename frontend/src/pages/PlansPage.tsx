@@ -3,13 +3,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import useNavigation from "../hooks/useNavigation";
 import { 
-  usePlansAnimation, 
+  useAnimationProps, 
   useLiftInteractions, 
   container, 
   flyUp, 
   fade, 
   cardEnter 
-} from "../hooks/usePlansAnimation";
+} from "../hooks/useAnimation";
 import { useTossPayments } from "../hooks/useTossPayments";
 import { useUrlParams } from "../hooks/useUrlParams";
 
@@ -86,8 +86,8 @@ type PlanCardProps = {
 };
 
 const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLoading }: PlanCardProps) => {
-  const interactions = useLiftInteractions();
-  const { reduce } = usePlansAnimation();
+  const interactions = useLiftInteractions(-6); // Plans 전용: y: -6
+  const { reduce } = useAnimationProps();
 
   return (
     <motion.div
@@ -170,7 +170,7 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
 
 const FaqItem = ({ q, a }: { q: string; a: string }) => {
   const [open, setOpen] = useState(false);
-  const { reduce } = usePlansAnimation();
+  const { reduce } = useAnimationProps();
   return (
     <motion.div className="rounded-xl border border-gray-200 bg-white" variants={cardEnter}>
       <button type="button" className="flex w-full items-center justify-between px-5 py-4 text-left" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
@@ -187,7 +187,7 @@ const FaqItem = ({ q, a }: { q: string; a: string }) => {
 export const PricingPage = (): JSX.Element => {
   const [selected, setSelected] = useState<Plan["id"]>("basic");
   const [loading, setLoading] = useState<Plan["id"] | null>(null);
-  const { heroAnim, inViewAnim } = usePlansAnimation();
+  const { heroAnim, inViewAnim } = useAnimationProps();
   const { sdkReady, startBillingEnroll } = useTossPayments();
   const { goToSurvey } = useNavigation();
 

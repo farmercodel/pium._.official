@@ -4,14 +4,14 @@ import PageLayout from "../components/common/PageLayout";
 import InstaPreview from "../components/preview/InstaPreview";
 import { motion } from "framer-motion";
 import { 
-  usePreviewAnimation, 
+  useAnimationProps, 
   useLiftInteractions, 
   container, 
   flyUp, 
   fade, 
   cardEnter, 
   popIn 
-} from "../hooks/usePreviewAnimation";
+} from "../hooks/useAnimation";
 import { useInstagramPreview } from "../hooks/useInstagramPreview";
 
 type PreviewDef =
@@ -80,8 +80,11 @@ function PreviewCard({ item, version }: { item: PreviewDef; version: number }) {
 const PreviewPage = () => {
   const [version, setVersion] = useState(0);
   const refresh = () => setVersion((v) => v + 1);
-  const interactions = useLiftInteractions();
-  const { reduce, heroAnim, inViewAnim } = usePreviewAnimation();
+  const interactions = useLiftInteractions(-6); // Preview 전용: y: -6
+  const { reduce, heroAnim, inViewAnim } = useAnimationProps({ 
+    hoverY: -6,           // Preview 전용: y: -6
+    viewportAmount: 0.2   // Preview 전용: viewport amount
+  });
 
   return (
     <PageLayout>

@@ -74,6 +74,7 @@ export const MainPage = (): JSX.Element => {
             variants={container}
             initial="hidden"
             animate="show"
+            transition={{ delay: 0.1 }}
           >
             <div className="text-center">
               <motion.h1
