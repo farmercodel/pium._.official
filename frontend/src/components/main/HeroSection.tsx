@@ -1,91 +1,89 @@
-import type { HeroSectionProps } from "../../types/mainPageSection"
-import { HERO_CONTENT } from "../../constants/mainConstant"
-import { ArrowRightIcon } from "@heroicons/react/24/outline"
-import { motion } from "framer-motion"
-import Button from "../common/Button"
+import { motion } from "framer-motion";
+import { container, flyUp, fade } from "../../hooks/useAnimation";
 
-const HeroSection = ({ onCTAClick, className }: HeroSectionProps) => {
+interface HeroSectionProps {
+  reduce: boolean;
+}
+
+export const HeroSection = ({ reduce }: HeroSectionProps) => {
   return (
     <section
-      className={`relative w-full font-sans  /* ← 폰트 */
-                  bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400
-                  p-4 sm:p-6 lg:p-10 lg:px-35 shadow-lg ${className}`}
+      className="
+        relative w-full
+        bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400
+      "
     >
       <motion.div
-        className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28"
+        variants={container}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.1 }}
       >
-        {/* Left: Text */}
-        <div className="flex-1 text-white space-y-4 sm:space-y-6 text-center lg:text-left">
-          <div className="bg-black/10 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
-            {/* 제목은 약간 두껍게 + 자간 타이트 */}
-            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight pb-2">
-              {HERO_CONTENT.title}
-            </h2>
-            <p className="text-base sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 pb-4 text-white/90">
-              {HERO_CONTENT.description}
-            </p>
-
-            {/* Feature Points */}
-            <ul className="space-y-2 text-sm sm:text-base">
-              <li className="flex items-center gap-2 justify-center lg:justify-start">
-                <span className="bg-white/20 rounded-full p-1">{HERO_CONTENT.featurePoints[0].icon}</span>
-                {HERO_CONTENT.featurePoints[0].text}
-              </li>
-              <li className="flex items-center gap-2 justify-center lg:justify-start">
-                <span className="bg-white/20 rounded-full p-1">{HERO_CONTENT.featurePoints[1].icon}</span>
-                {HERO_CONTENT.featurePoints[1].text}
-              </li>
-              <li className="flex items-center gap-2 justify-center lg:justify-start">
-                <span className="bg-white/20 rounded-full p-1">{HERO_CONTENT.featurePoints[2].icon}</span>
-                {HERO_CONTENT.featurePoints[2].text}
-              </li>
-            </ul>
-          </div>
-
-          {/* CTA Button: 그라데이션/호버 톤업 */}
-          <Button
-            onClick={onCTAClick}
-            className="
-              inline-flex items-center gap-2
-              rounded-full px-6 py-3 font-bold w-fit
-              text-white
-              bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400
-              shadow-[0_10px_15px_rgba(0,0,0,0.15)]
-              transition
-              hover:from-emerald-400 hover:via-teal-500 hover:to-cyan-500
-              active:scale-[0.98]
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70
-              mx-auto lg:mx-0
-            "
-            variant="custom"
-            size="custom"
+        <div className="text-center">
+          <motion.h1
+            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight"
+            variants={flyUp}
           >
-            {HERO_CONTENT.cta}
-            <ArrowRightIcon className="size-5" />
-          </Button>
-        </div>
+            {/* PIUM 텍스트: 밝게 끝나는 그라데이션 + 은은한 글로우 */}
+            <span className="relative inline-block">
+              <span className="bg-gradient-to-r from-yellow-300 via-lime-300 to-cyan-200 bg-clip-text text-transparent">
+                PIUM
+              </span>
 
-        {/* Right: Image with Overlap Effect */}
-        <div className="flex-1 flex justify-center items-center rounded-xl p-4 lg:p-0 relative">
-          <img
-            src={HERO_CONTENT.img[0].src}
-            alt={HERO_CONTENT.img[0].alt}
-            className="rounded-xl shadow-2xl w-96 sm:w-102 lg:w-110 relative bottom-6 lg:bottom-3 z-20
-                       transform -rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300"
-          />
-          <img
-            src={HERO_CONTENT.img[1].src}
-            alt={HERO_CONTENT.img[1].alt}
-            className="rounded-xl shadow-xl w-96 sm:w-102 lg:w-110 absolute lg:-bottom-3 -right-6 z-10
-                       transform rotate-6 hover:rotate-3 hover:scale-105 hover:z-25 transition-transform duration-300"
-          />
+              {/* 라디얼 글로우 (배경과 분리) */}
+              {!reduce && (
+                <motion.span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 -z-10 blur-3xl"
+                  style={{
+                    background:
+                      "radial-gradient(closest-side, rgba(255,255,255,0.7), transparent)",
+                  }}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 0.6, scale: 1.05 }}
+                  transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                />
+              )}
+            </span>
+
+            <br />
+
+            <motion.span className="text-white" variants={fade}>
+              소상공인 마케팅 지원 서비스
+            </motion.span>
+          </motion.h1>
+
+          <motion.p
+            className="mt-6 text-white/90 text-base sm:text-lg lg:text-xl"
+            variants={fade}
+          >
+            AI를 통해 당신의 가게를 쉽고 빠르게 홍보합니다
+          </motion.p>
+
+          <motion.div className="mt-10 flex justify-center" variants={flyUp}>
+            {/* CTA 버튼: 흰 배경 + 그린 텍스트(포인트톤) */}
+            <motion.a
+              href="/Survey"
+              className="
+                inline-flex items-center justify-center
+                rounded-full px-6 py-3 lg:px-8 lg:py-4
+                text-emerald-600 font-bold
+                bg-white
+                border border-emerald-200
+                shadow-[0_10px_15px_rgba(0,0,0,0.12)]
+                transition
+                hover:bg-emerald-50
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70
+              "
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              시작하기
+            </motion.a>
+          </motion.div>
         </div>
       </motion.div>
     </section>
-  )
-}
-
-export default HeroSection
+  );
+};
