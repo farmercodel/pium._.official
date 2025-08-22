@@ -27,7 +27,7 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
           >
             {/* PIUM 텍스트: 밝게 끝나는 그라데이션 + 은은한 글로우 */}
             <span className="relative inline-block">
-              <span className="bg-gradient-to-r from-yellow-300 via-lime-300 to-cyan-200 bg-clip-text text-transparent">
+              <span className="bg-[linear-gradient(90deg,#E6EC2C_0%,#9FE316_45%,#00B87C_100%)] bg-clip-text text-transparent contrast-125 saturate-125 [text-shadow:0_1px_0_rgba(0,0,0,0.05)]">
                 PIUM
               </span>
 
