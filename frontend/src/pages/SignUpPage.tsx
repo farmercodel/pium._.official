@@ -35,7 +35,7 @@ const IconLock = () => (
 );
 
 const SignUpPage = () => {
-  const { goToMain } = useNavigation();
+  const { goToMain, goToLogin } = useNavigation();
   
   // 페이지 이동 시 스크롤을 맨 위로
   useScrollToTop();
@@ -47,6 +47,10 @@ const SignUpPage = () => {
   const [password2, setPassword2] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const handleLoginClick = () => {
+    goToLogin();
+  };
 
   const handleSignUp = async () => {
     setErr(null);
@@ -198,8 +202,11 @@ const SignUpPage = () => {
 
         {/* Footer below card */}
         <div className="text-center mt-4 text-sm text-gray-500">
+          <div>
           이미 계정이 있으신가요?{' '}
-          <a href="/login" className="font-medium text-emerald-700 hover:underline">로그인</a>
+          {/* <a href="/login" className="font-medium text-emerald-700 hover:underline">로그인</a> */}
+          <span onClick={() => handleLoginClick()} className="font-medium text-emerald-700 hover:underline cursor-pointer">로그인</span>
+          </div>
           <div className="mt-4 text-xs text-gray-400">© {new Date().getFullYear()} 피움</div>
         </div>
       </AuthFrame>

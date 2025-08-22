@@ -33,6 +33,10 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  const handleSignUpClick = () => {
+    goToSignUp();
+  };
+
   const handleLogin = async () => {
     setErr(null);
     if (!email || !password) return setErr("이메일과 비밀번호를 입력하세요.");
@@ -124,8 +128,8 @@ const LoginPage = () => {
           {/* Sign up link style */}
           <Button
             variant="custom"
-            className="mt-2 w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm"
-            onClick={() => goToSignUp?.()}
+            className="mt-2 w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm cursor-pointer"
+            onClick={() => handleSignUpClick()}
           >
             Sign Up
           </Button>
