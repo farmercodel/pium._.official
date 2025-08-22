@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { fade, cardEnter, container } from "../../hooks/useAnimation";
 
 interface StoreIntroSectionProps {
-  inViewAnim: unknown;
   reduce: boolean;
   selectedFiles: File[];
   previews: string[];
@@ -16,7 +15,6 @@ interface StoreIntroSectionProps {
 }
 
 export const StoreIntroSection = ({ 
-  inViewAnim, 
   reduce,
   selectedFiles,
   previews,
@@ -28,14 +26,13 @@ export const StoreIntroSection = ({
   handleDragLeave,
   removeFileAt
 }: StoreIntroSectionProps) => {
-  // 타입 가드를 통한 안전한 inViewAnim 처리
-  const safeInViewAnim = typeof inViewAnim === 'object' && inViewAnim !== null ? inViewAnim : {};
-
   return (
     <motion.section
       className="rounded-2xl bg-white shadow-sm border border-gray-100 p-6 sm:p-8"
       variants={cardEnter}
-      {...safeInViewAnim}
+      initial={reduce ? undefined : "hidden"}
+      animate={reduce ? undefined : "show"}
+      viewport={{ once: true, amount: 0.25 }}
     >
       <div className="flex items-center gap-3">
         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 grid place-items-center text-white text-sm font-bold shadow-md">2</div>

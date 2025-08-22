@@ -129,7 +129,6 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
 
           {/* 가게 소개 */}
           <StoreIntroSection 
-            inViewAnim={inViewAnim}
             reduce={reduce ?? false}
             selectedFiles={selectedFiles}
             previews={previews}
