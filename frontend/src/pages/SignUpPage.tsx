@@ -114,7 +114,7 @@ const SignUpPage = () => {
               </span>
               <input
                 className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pl-11 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                placeholder="example@email.com"
+                placeholder="이메일을 입력하세요."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -130,7 +130,7 @@ const SignUpPage = () => {
               </span>
               <input
                 className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pl-11 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                placeholder="00-00-00000"
+                placeholder="사업자등록번호를 하이픈(-) 없이 입력하세요."
                 value={brn}
                 onChange={(e) => setBrn(e.target.value)}
               />
@@ -163,7 +163,7 @@ const SignUpPage = () => {
               <input
                 type="password"
                 className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pl-11 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                placeholder="비밀번호를 입력하세요"
+                placeholder="비밀번호를 입력하세요."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -180,7 +180,7 @@ const SignUpPage = () => {
               <input
                 type="password"
                 className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pl-11 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                placeholder="비밀번호를 다시 입력하세요"
+                placeholder="비밀번호를 다시 입력하세요."
                 value={password2}
                 onChange={(e) => setPassword2(e.target.value)}
               />
@@ -207,7 +207,7 @@ const SignUpPage = () => {
           {/* <a href="/login" className="font-medium text-emerald-700 hover:underline">로그인</a> */}
           <span onClick={() => handleLoginClick()} className="font-medium text-emerald-700 hover:underline cursor-pointer">로그인</span>
           </div>
-          <div className="mt-4 text-xs text-gray-400">© {new Date().getFullYear()} 피움</div>
+          <div className="mt-4 text-xs text-gray-400">© {new Date().getFullYear()} PIUM</div>
         </div>
       </AuthFrame>
     </PageLayout>

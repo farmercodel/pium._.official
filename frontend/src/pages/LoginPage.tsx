@@ -88,7 +88,7 @@ const LoginPage = () => {
               </span>
               <input
                 type="text"
-                placeholder="example@email.com"
+                placeholder="이메일을 입력하세요."
                 className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pl-11 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -136,7 +136,7 @@ const LoginPage = () => {
         </form>
 
         {/* Footer below card */}
-        <div className="text-center mt-4 text-xs text-gray-400">© {new Date().getFullYear()} 피움</div>
+        <div className="text-center mt-4 text-xs text-gray-400">© {new Date().getFullYear()} PIUM</div>
       </AuthFrame>
     </PageLayout>
   );
