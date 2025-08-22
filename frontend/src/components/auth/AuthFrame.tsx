@@ -9,7 +9,7 @@ interface AuthFrameProps {
 const AuthFrame = ({ children, onBackToMain }: AuthFrameProps) => {
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm md:max-w-md border-2 border-gray-300 rounded-2xl shadow-lg flex items-center justify-center px-6 py-8 flex-col gap-4 bg-white">
+      <div className="w-full max-w-sm md:max-w-md border-2 border-gray-200 rounded-2xl shadow-lg flex items-center justify-center px-6 py-8 flex-col gap-4 bg-white">
         {children}
       </div>
       <div
