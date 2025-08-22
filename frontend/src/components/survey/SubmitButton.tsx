@@ -14,10 +14,10 @@ export const SubmitButton = ({ submitting, interactions, reduce }: SubmitButtonP
         type="submit"
         disabled={submitting}
         aria-busy={submitting}
-        className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white text-sm sm:text-base lg:text-lg font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70"
-        {...interactions}
+        className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white text-sm sm:text-base lg:text-lg font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 ${submitting ? "cursor-not-allowed" : "cursor-pointer"}`}
+        {...(submitting ? {} : interactions)}
         animate={reduce ? {} : submitting ? { scale: 0.99 } : { scale: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20}}
       >
         {submitting ? "생성 중" : "가게 정보 등록하기"}
         

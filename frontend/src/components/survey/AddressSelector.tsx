@@ -113,7 +113,7 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
 
     try {
       const options: KakaoMapOptions = {
-        center: new window.kakao.maps.LatLng(37.5665, 126.9780), // 서울시청
+        center: new window.kakao.maps.LatLng(37.468097, 127.039248), // 양재aT센터
         level: 3
       };
 
