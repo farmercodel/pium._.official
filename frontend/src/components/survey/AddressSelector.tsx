@@ -5,6 +5,8 @@ interface AddressSelectorProps {
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  id?: string;
+  name?: string;
 }
 
 interface AddressData {
@@ -77,7 +79,7 @@ interface KakaoMapEvent {
   latLng: KakaoLatLng;
 }
 
-const AddressSelector = ({ value, onChange, required = false }: AddressSelectorProps) => {
+const AddressSelector = ({ value, onChange, required = false, id, name }: AddressSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<AddressData | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -213,18 +215,20 @@ const AddressSelector = ({ value, onChange, required = false }: AddressSelectorP
       {/* 주소 입력 필드 */}
       <div className="flex gap-2">
         <input
+          id={id}
+          name={name}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="지도에서 위치를 선택하세요"
-          className="flex-1 p-2 px-4 border-2 border-gray-300 rounded-md placeholder-gray-400"
+          className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           readOnly
           required={required}
         />
         <Button 
           variant="secondary" 
           onClick={() => setIsOpen(true)}
-          className="whitespace-nowrap"
+          className="whitespace-nowrap inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white text-sm font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_15px_25px_rgba(0,0,0,0.15),0_8px_12px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out"
           disabled={!isMapLoaded}
         >
           지도에서 선택
@@ -233,7 +237,7 @@ const AddressSelector = ({ value, onChange, required = false }: AddressSelectorP
           <Button 
             variant="warning" 
             onClick={handleClear}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white text-sm font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_15px_25px_rgba(0,0,0,0.15),0_8px_12px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out"
           >
             초기화
           </Button>

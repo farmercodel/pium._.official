@@ -7,6 +7,7 @@ import { uploadFiles } from "../api/upload";
 import { toGenerateAdPayload } from "../types/SurveymapFormData";
 import { api } from "../api/api";
 import useNavigation from "../hooks/useNavigation";
+import AddressSelector from "../components/survey/AddressSelector";
 
 type UploadedFile = {
   rel?: string;
@@ -125,6 +126,8 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [dropActive, setDropActive] = useState(false);
+
+  const [address, setAddress] = useState("");
 
   // objectURL 관리
   useEffect(() => {
@@ -365,13 +368,12 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                   주소 <span className="text-emerald-600">*</span>
                 </label>
-                <input
+                <AddressSelector
                   id="address"
                   name="address"
-                  required
-                  type="text"
-                  placeholder="상세 주소를 입력하세요"
-                  className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  value={address}
+                  onChange={(address) => setAddress(address)}
+                  required={false}
                 />
               </motion.div>
 
