@@ -1,27 +1,17 @@
 import type { JSX } from "react";
-import { useState, useEffect, useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import type { MotionProps, Transition, Variants } from "framer-motion";
-import type { TossPaymentsInstance, BillingAuthOptions } from "../types/toss-payments";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import useNavigation from "../hooks/useNavigation";
-
-const CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY as string;
-
-const useLiftInteractions = (): MotionProps => {
-  const reduce = useReducedMotion();
-  if (reduce) return {};
-  const springLift: Transition = { type: "spring", stiffness: 300, damping: 20 };
-  return { whileHover: { y: -6, scale: 1.01 }, whileTap: { scale: 0.98, y: -1 }, transition: springLift };
-};
-
-/** ===== Animation Variants ===== */
-const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
-const flyUp: Variants = {
-  hidden: { opacity: 0, y: 28, scale: 0.99, filter: "blur(6px)" },
-  show: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
-};
-const fade: Variants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } } };
-const cardEnter: Variants = { hidden: { opacity: 0, y: 16, scale: 0.98 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } };
+import { 
+  usePlansAnimation, 
+  useLiftInteractions, 
+  container, 
+  flyUp, 
+  fade, 
+  cardEnter 
+} from "../hooks/usePlansAnimation";
+import { useTossPayments } from "../hooks/useTossPayments";
+import { useUrlParams } from "../hooks/useUrlParams";
 
 type Plan = {
   id: "free" | "basic" | "pro";
@@ -97,7 +87,7 @@ type PlanCardProps = {
 
 const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLoading }: PlanCardProps) => {
   const interactions = useLiftInteractions();
-  const reduce = useReducedMotion();
+  const { reduce } = usePlansAnimation();
 
   return (
     <motion.div
@@ -180,7 +170,7 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
 
 const FaqItem = ({ q, a }: { q: string; a: string }) => {
   const [open, setOpen] = useState(false);
-  const reduce = useReducedMotion();
+  const { reduce } = usePlansAnimation();
   return (
     <motion.div className="rounded-xl border border-gray-200 bg-white" variants={cardEnter}>
       <button type="button" className="flex w-full items-center justify-between px-5 py-4 text-left" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
@@ -197,146 +187,50 @@ const FaqItem = ({ q, a }: { q: string; a: string }) => {
 export const PricingPage = (): JSX.Element => {
   const [selected, setSelected] = useState<Plan["id"]>("basic");
   const [loading, setLoading] = useState<Plan["id"] | null>(null);
-  const [sdkReady, setSdkReady] = useState(false);
-  const tossRef = useRef<TossPaymentsInstance | null>(null);
-  const reduce = useReducedMotion();
+  const { heroAnim, inViewAnim } = usePlansAnimation();
+  const { sdkReady, startBillingEnroll } = useTossPayments();
   const { goToSurvey } = useNavigation();
 
-  /** URL 파라미터 처리 */
-  useEffect(() => {
-    let rawQuery = window.location.search;
-    if (!rawQuery && window.location.hash.includes("?")) rawQuery = "?" + window.location.hash.split("?")[1];
-    const sp = new URLSearchParams(rawQuery);
-
-    if (sp.get("billing_enrolled") === "1") { alert("결제 수단 등록이 완료되었습니다!"); sp.delete("billing_enrolled"); }
-    if (sp.get("error")) { const err = sp.get("error"); const msg = sp.get("msg") || "결제에 실패했어요."; alert(`결제 실패: ${err}\n${msg}`); sp.delete("error"); sp.delete("msg"); }
-
-    const qs = sp.toString();
-    if (window.location.hash.startsWith("#/")) {
-      const [hashPath] = window.location.hash.split("?");
-      const newHash = hashPath + (qs ? `?${qs}` : "");
-      if (window.location.hash !== newHash) window.history.replaceState({}, "", window.location.pathname + window.location.search + newHash);
-    } else {
-      const newUrl = window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
-      if (window.location.pathname + window.location.search + window.location.hash !== newUrl) window.history.replaceState({}, "", newUrl);
-    }
-  }, []);
-
-  /** Toss SDK 동적 로드 (안정화 버전) */
-  useEffect(() => {
-    const id = "tosspayments-sdk";
-    let cancelled = false;
-
-    const boot = () => {
-      if (cancelled) return;
-      if (window.TossPayments && CLIENT_KEY) {
-        try {
-          tossRef.current = window.TossPayments(CLIENT_KEY);
-          setSdkReady(true);
-        } catch (e) {
-          console.error("[Toss boot error]", e);
-          setSdkReady(false);
-        }
-      }
-    };
-
-    // 이미 전역에 주입된 경우 즉시 부팅
-    if (window.TossPayments) {
-      boot();
-      return () => { cancelled = true; };
-    }
-
-    let script = document.getElementById(id) as HTMLScriptElement | null;
-    const onLoad = () => {
-      // data-loaded 플래그 기록(중복 이벤트 방지용)
-      try { script?.setAttribute("data-loaded", "1"); } catch {}
-      boot();
-    };
-    const onError = () => {
-      if (!cancelled) {
-        console.error("[Toss SDK] failed to load");
-        setSdkReady(false);
-      }
-    };
-
-    if (!script) {
-      script = document.createElement("script");
-      script.id = id;
-      script.src = "https://js.tosspayments.com/v1";
-      script.async = true;
-      script.addEventListener("load", onLoad);
-      script.addEventListener("error", onError);
-      document.body.appendChild(script);
-    } else {
-      // 스크립트 태그가 이미 있더라도 load 리스너를 반드시 건다
-      script.addEventListener("load", onLoad);
-      script.addEventListener("error", onError);
-      // 이미 로드 완료 상태라면 즉시 부팅
-      const ready = (script as any).dataset?.loaded === "1" || (script as any).readyState === "complete";
-      if (ready) onLoad();
-    }
-
-    return () => {
-      cancelled = true;
-      script?.removeEventListener("load", onLoad);
-      script?.removeEventListener("error", onError);
-    };
-  }, []);
+  // 커스텀 훅 사용
+  useUrlParams();
 
   /** 정기결제(빌링) 등록 */
-  const startBillingEnroll = async (planId: Plan["id"]) => {
+  const handleBillingEnroll = async (planId: Plan["id"]) => {
     if (PLAN_META[planId].disabled) return;
 
-    // sdkReady 보조 가드 (버튼 disabled와 별개로 안전망)
-    if (!sdkReady || !window.TossPayments || !CLIENT_KEY) {
-      alert("결제 준비중입니다. 잠시 후 다시 시도해 주세요.");
-      return;
-    }
+    console.log(`[PlansPage] 정기결제 등록 시작: ${planId}`, {
+      planId,
+      amount: PLAN_META[planId].amount,
+      orderName: PLAN_META[planId].orderName,
+      sdkReady
+    });
 
     try {
       setLoading(planId);
-
-      const token = localStorage.getItem("access_token");
-      if (!token) { alert("로그인 후 이용 가능한 서비스입니다."); return; }
-
-      if (!tossRef.current) tossRef.current = window.TossPayments(CLIENT_KEY);
-
       const amount = PLAN_META[planId].amount;
       const orderName = PLAN_META[planId].orderName;
-
-      // TODO: 실제 서비스에서는 사용자 고유 식별자를 사용하세요.
-      const customerKey = `user_${Date.now()}`;
-
-      const sRes = await fetch("/api/payments/toss/billing/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ customer_key: customerKey, plan: planId.toUpperCase(), amount, orderName }),
-      });
-
-      if (!sRes.ok) throw new Error(`billing/start ${sRes.status}: ${await sRes.text()}`);
-      const s = await sRes.json();
-      if (!s?.ok) throw new Error("billing/start payload not ok");
-
-      const orderId = `SUBS_${customerKey}_${Date.now()}`;
-      await tossRef.current!.requestBillingAuth("CARD", {
-        customerKey,
-        orderId,
-        successUrl: s.successUrl,
-        failUrl: s.failUrl,
-      } satisfies BillingAuthOptions);
-    } catch (e: any) {
-      console.group("[Billing Enroll Error]");
-      console.error(e);
-      try { console.error("as json:", JSON.stringify(e)); } catch {}
-      console.groupEnd();
-      alert(`정기결제 등록에 실패했어요.\n${e?.message ?? String(e)}`);
+      
+      console.log('[PlansPage] startBillingEnroll 호출:', { planId, amount, orderName });
+      await startBillingEnroll(planId, amount, orderName);
+      
+      console.log('[PlansPage] 정기결제 등록 성공');
+    } catch (error) {
+      console.error('[PlansPage] 정기결제 등록 실패:', error);
+      
+      // 사용자에게 에러 메시지 표시
+      let errorMessage = "정기결제 등록에 실패했습니다.";
+      if (error instanceof Error) {
+        errorMessage += `\n${error.message}`;
+      } else if (typeof error === 'string') {
+        errorMessage += `\n${error}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(null);
+      console.log('[PlansPage] 로딩 상태 해제');
     }
   };
-
-  const heroAnim = reduce ? {} : { initial: "hidden", animate: "show" };
-  const inViewAnim = reduce ? {} : { initial: "hidden", whileInView: "show", viewport: { once: true, amount: 0.25 } };
 
   return (
     <main className="font-sans">
@@ -362,7 +256,7 @@ export const PricingPage = (): JSX.Element => {
                   icon={PLAN_ICONS[p.id]}
                   selected={selected === p.id}
                   onSelect={setSelected}
-                  onAction={isFree ? goToSurvey : () => startBillingEnroll(p.id)}
+                  onAction={isFree ? goToSurvey : () => handleBillingEnroll(p.id)}
                   ctaDisabled={isFree ? false : loading !== null || !sdkReady}
                   ctaLoading={isFree ? false : loading === p.id}
                 />
