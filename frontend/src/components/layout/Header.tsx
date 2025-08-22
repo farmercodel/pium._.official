@@ -46,7 +46,8 @@ function Header() {
         admin: goToAdmin,
         generation: goToGeneration,
         result: goToResult,
-        login: goToLogin, 'sign up': goToSignUp,
+        login: goToLogin, 
+        'sign up': goToSignUp,
         plans: goToPlans,
     } as const;
 

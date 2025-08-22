@@ -61,8 +61,8 @@ const POPUP_NAVIGATION_ITEMS = [
 
 const POPUP_ACTION_ITEMS = [
     { 
-        name: 'Watch demo', 
-        navigationText: 'main', 
+        name: 'modal test', 
+        navigationText: 'modal', 
         icon: PlayCircleIcon 
     },
     { 
