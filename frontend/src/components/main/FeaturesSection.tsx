@@ -3,9 +3,8 @@ import { container, fade, cardEnter } from "../../hooks/useAnimation";
 import type { Feature } from "../../hooks/useMainPage";
 import type { MotionProps } from "framer-motion";
 
-// 타입 가드 함수
-const isMotionProps = (obj: unknown): obj is MotionProps => 
-  typeof obj === 'object' && obj !== null;
+const isMotionProps = (obj: unknown): obj is MotionProps =>
+  typeof obj === "object" && obj !== null;
 
 interface FeatureCardProps {
   feature: Feature;
@@ -14,7 +13,7 @@ interface FeatureCardProps {
 
 const FeatureCard = ({ feature, interactions }: FeatureCardProps) => {
   const safeInteractions = isMotionProps(interactions) ? interactions : {};
-  
+
   return (
     <motion.div
       className="
@@ -29,35 +28,36 @@ const FeatureCard = ({ feature, interactions }: FeatureCardProps) => {
     >
       <div className="flex justify-center">
         <div className="relative">
-          {/* glow */}
+          {/* glow - 팔레트 맞춤 (원형 축소에 맞춰 blur도 축소) */}
           <span
             aria-hidden
-            className="absolute inset-0 -z-10 rounded-full blur-lg opacity-60"
+            className="absolute inset-0 -z-10 rounded-full blur-md opacity-60"
             style={{
               background:
-                "radial-gradient(closest-side, rgba(16,185,129,0.35), rgba(20,184,166,0.25), rgba(6,182,212,0.15))",
+                "radial-gradient(closest-side, rgba(241,244,193,0.55), rgba(213,222,126,0.35), rgba(185,232,116,0.25))",
             }}
           />
-          {/* gradient circle (64px → lg:80px) */}
+          {/* gradient circle (기존 64px → 48px, lg: 80px → 64px) */}
           <div
             className="
-            inline-flex h-16 w-16 items-center justify-center rounded-full
-            ring-1 ring-white/10
-            shadow-[0_8px_20px_rgba(16,185,129,0.22)]
-            bg-[radial-gradient(closest-side,_rgba(110,231,183,1),_rgba(45,212,191,0.95)_60%,_rgba(34,211,238,0.9))]
-            lg:h-20 lg:w-20
-          "
+              inline-flex h-12 w-12 items-center justify-center rounded-full
+              ring-1 ring-white/10
+              shadow-[0_8px_20px_rgba(185,232,116,0.22)]
+              bg-[radial-gradient(closest-side,_#f1f4c1,_#d5de7e_60%,_#b9e874)]
+              lg:h-16 lg:w-16
+            "
           >
             <img
               src={feature.icon}
               alt=""
-              className="h-8 w-8 lg:h-10 lg:w-10"
+              className="h-6 w-6 lg:h-8 lg:w-8"
               loading="lazy"
               aria-hidden
             />
           </div>
         </div>
       </div>
+
       <h3 className="mt-6 text-center text-lg sm:text-xl font-semibold text-gray-800">
         {feature.title}
       </h3>
@@ -114,11 +114,7 @@ export const FeaturesSection = ({ features, interactions }: FeaturesSectionProps
           "
         >
           {features.map((feature) => (
-            <FeatureCard
-              key={feature.title}
-              feature={feature}
-              interactions={interactions}
-            />
+            <FeatureCard key={feature.title} feature={feature} interactions={interactions} />
           ))}
         </div>
       </motion.div>

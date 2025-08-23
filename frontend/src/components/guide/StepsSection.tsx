@@ -47,10 +47,10 @@ const StepCard = ({ idx, title, desc, label, labelIcon, interactions }: StepCard
           className="
             h-10 w-10 sm:h-12 sm:w-12
             rounded-full
-            bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400
             text-white text-base sm:text-lg font-bold
             flex items-center justify-center
             shadow-md
+            bg-[radial-gradient(closest-side,_#f1f4c1,_#d5de7e_60%,_#b9e874)]
           "
         >
           {idx}

@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { container, fade, cardEnter } from "../../hooks/useAnimation";
 import type { MotionProps } from "framer-motion";
 
-// 타입 가드 함수
-const isMotionProps = (obj: unknown): obj is MotionProps => 
-  typeof obj === 'object' && obj !== null;
+// 타입 가드
+const isMotionProps = (obj: unknown): obj is MotionProps =>
+  typeof obj === "object" && obj !== null;
 
 interface Feature {
   icon: string;
@@ -21,50 +21,50 @@ interface FeatureCardProps {
 
 const FeatureCard = ({ icon, title, desc, interactions }: FeatureCardProps) => {
   const safeInteractions = isMotionProps(interactions) ? interactions : {};
-  
+
   return (
     <motion.div
       role="button"
       tabIndex={0}
       className="
-        h-full rounded-xl bg-white p-6 text-center shadow-sm
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300
+        h-full rounded-2xl bg-white p-6 text-center shadow-sm
+        border border-[#e9ecef]
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(192,214,99,0.6)]
         transition-shadow transform-gpu
       "
       variants={cardEnter}
       {...safeInteractions}
     >
-      {/* === 아이콘: 원형 연한 그린 배경 + 은은한 글로우 === */}
+      {/* === 아이콘: 기존 느낌 유지 + 포인트톤 radial === */}
       <div className="flex justify-center">
         <div className="relative">
-          {/* glow */}
-          <span
-            aria-hidden
-            className="absolute inset-0 -z-10 rounded-full blur-xl opacity-60"
-            style={{
-              background:
-                "radial-gradient(closest-side, rgba(16,185,129,0.18), rgba(20,184,166,0.10), transparent)",
-            }}
-          />
-          {/* light green circle */}
-          <div
-            className="
-              grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-full
-              bg-gradient-to-br from-emerald-50 via-emerald-100 to-teal-100
-              ring-1 ring-emerald-200/60 shadow
-            "
-          >
-            <img
-              src={icon}
-              alt=""
-              className="h-7 w-7 sm:h-8 sm:w-8"
+          {/* glow – 더 밝고 얇게 */}
+            <span
               aria-hidden
+              className="absolute inset-0 -z-10 rounded-full blur-xl opacity-30"
+              style={{
+                background:
+                  "radial-gradient(closest-side, rgba(249,250,233,0.35) 0%, rgba(233,241,191,0.18) 45%, rgba(255,255,255,0) 80%)",
+              }}
             />
+
+            {/* gradient circle – 아주 밝은 라임 톤(테두리 밝게) */}
+            <div
+              className="
+                grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-full
+                ring-1 ring-[rgba(192,214,99,0.18)]
+                shadow-[0_3px_8px_rgba(192,214,99,0.08)]
+                bg-[radial-gradient(closest-side,_#FBFCEA,_#F3F8D8_58%,_#EEF5CD_100%)]
+              "
+            >
+            <img src={icon} alt="" className="h-7 w-7 sm:h-8 sm:w-8" aria-hidden />
           </div>
         </div>
       </div>
 
-      <h3 className="mt-5 text-base sm:text-lg font-semibold text-gray-800">{title}</h3>
+      <h3 className="mt-5 text-base sm:text-lg font-semibold text-gray-800">
+        {title}
+      </h3>
       <p className="mt-2 text-sm text-gray-600">{desc}</p>
     </motion.div>
   );
