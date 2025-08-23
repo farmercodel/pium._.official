@@ -89,7 +89,9 @@ const LargeFeatureCard = ({
       {bullets.map((b, i) => (
         <li key={i} className="flex gap-2">
           <span className="text-emerald-600 mt-0.5">•</span>
-          <span className="whitespace-pre-line sm:whitespace-normal">{b}</span>
+            <span className="min-w-0 whitespace-pre-line sm:whitespace-normal">
+            {b.replaceAll("\\n", "\n")}
+          </span>
         </li>
       ))}
     </ul>

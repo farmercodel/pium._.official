@@ -26,9 +26,9 @@ type Plan = {
 };
 
 const plans: Plan[] = [
-  { id: "free",  title: "FREE",  price: "₩0",      period: "/ 월", features: ["월 최대 1회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "300자 이내 홍보글 생성"], cta: "시작하기" },
-  { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원"], cta: "업그레이드", highlight: true },
-  { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["월 최대 30회 서비스 지원", "템플릿 기반 썸네일 처리 기능 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원", "정교한 답변"], cta: "업그레이드" },
+  { id: "free",  title: "FREE",  price: "₩0",      period: "/ 월", features: ["월 최대 1회 서비스 지원", "1가지 썸네일 템플릿 지원", "300자 이내 홍보글 생성"], cta: "시작하기" },
+  { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "15가지 썸네일 템플릿 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원"], cta: "업그레이드", highlight: true },
+  { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["월 최대 30회 서비스 지원", "30가지 썸네일 템플릿 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원", "정교한 답변"], cta: "업그레이드" },
 ];
 
 /** 결제 금액/오더명 매핑 (서버/SDK에서 사용) */

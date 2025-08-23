@@ -92,7 +92,7 @@ export const FeaturesSection = ({ features, interactions }: FeaturesSectionProps
           피움의 특별한 기능들
         </motion.h2>
 
-        <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5 sm:gap-6 lg:gap-8">
+        <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 whitespace-pre-line sm:whitespace-normal">
           {features.map((feature, index) => (
             <FeatureCard
               key={index}
