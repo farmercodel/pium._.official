@@ -40,14 +40,15 @@ export const CTASection = ({ interactions }: CTASectionProps) => {
           type="button"
           onClick={handleStartClick}
           className="
-            mt-7 sm:mt-8 inline-flex items-center justify-center gap-2
-            rounded-full px-5 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4
-            text-white text-sm sm:text-base lg:text-lg font-semibold
-            shadow-[0_10px_20px_rgba(0,0,0,0.12)]
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70
-            cursor-pointer
-            bg-[linear-gradient(180deg,#e9f1bf_0%,#c0d663_100%)]
-            hover:opacity-95 active:scale-[0.98]
+              relative mt-7 sm:mt-8 inline-flex items-center justify-center gap-2
+              rounded-full px-5 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4
+              text-white text-sm sm:text-base lg:text-lg font-semibold
+              shadow-[0_10px_20px_rgba(25,198,211,0.28),0_4px_8px_rgba(0,0,0,0.06)]
+              ring-1 ring-white/30
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70
+              cursor-pointer
+              bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)]
+              hover:opacity-95 active:scale-[0.98]
           "
           variants={flyUp}
           whileHover={{ y: -2 }}
