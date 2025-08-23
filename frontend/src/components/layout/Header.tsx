@@ -52,7 +52,7 @@ function Header() {
     } as const;
 
     const AUTH_BTN = {
-    primary: "w-full rounded-xl bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),_0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200",
+    primary: "w-full rounded-xl bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),_0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200",
     secondary: "w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm",
     logout: "w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm"
     } as const;
