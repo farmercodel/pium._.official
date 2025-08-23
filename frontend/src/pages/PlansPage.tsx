@@ -155,7 +155,13 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
           onClick={(e) => { e.stopPropagation(); onAction(); }}
           disabled={ctaDisabled}
           aria-busy={ctaLoading}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3
+            bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)]
+            text-white font-semibold
+            shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]
+            group-aria-pressed:shadow-[0_12px_22px_rgba(16,185,129,0.22)]
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200
+            disabled:opacity-60 transition-colors duration-200"
           {...useLiftInteractions()}
         >
           {ctaLoading ? "진행중..." : plan.cta}

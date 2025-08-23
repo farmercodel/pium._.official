@@ -108,16 +108,31 @@ export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element =
 
   return (
     <main className="font-sans">
-      <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-        {/* 헤더: fly-up + stagger */}
-        <motion.header className="text-center" variants={container} {...heroAnim}>
-          <motion.h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900" variants={flyUp}>
+    <section className="relative w-full bg-[#F9FAEA]">
+      <motion.div
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12"
+        variants={container}
+        {...heroAnim}
+      >
+        <div className="text-center">
+          <motion.h1
+            className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900"
+            variants={flyUp}
+          >
             가게 정보 등록
           </motion.h1>
-          <motion.p className="mt-3 text-gray-600 text-sm sm:text-base" variants={fade}>
+          <motion.p
+            className="mt-2 text-sm sm:text-base text-gray-600"
+            variants={fade}
+          >
             AI 홍보 콘텐츠 생성을 위해 기본 정보를 입력해 주세요.
           </motion.p>
-        </motion.header>
+        </div>
+      </motion.div>
+    </section>
+
+
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 pb-16">
 
         <form className="mt-10 space-y-10" onSubmit={onSubmitHandler}>
           {/* 기본 정보 */}

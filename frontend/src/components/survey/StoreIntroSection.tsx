@@ -35,7 +35,7 @@ export const StoreIntroSection = ({
       viewport={{ once: true, amount: 0.25 }}
     >
       <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 grid place-items-center text-white text-sm font-bold shadow-md">2</div>
+        <div className="h-8 w-8 rounded-full bg-[linear-gradient(to_bottom_right,_#cfe89b_0%,_#8fd77e_52%,_#19c6d3_100%)] grid place-items-center text-white text-sm font-bold shadow-md">2</div>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800">가게 소개</h2>
       </div>
 

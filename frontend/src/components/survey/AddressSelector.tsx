@@ -313,20 +313,33 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
           readOnly
           required={required}
         />
-        <div className="flex gap-2 lg:flex-shrink-0">
-          <Button 
-            variant="secondary" 
+        <div className="mt-2 flex gap-2 lg:flex-shrink-0">
+          {/* 지도에서 선택 – 연한(톤 다운) 그라데이션 + h-12 */}
+          <Button
+            variant="secondary"
             onClick={() => setIsOpen(true)}
-            className="flex-1 lg:flex-none whitespace-nowrap inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white text-sm font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_15px_25px_rgba(0,0,0,0.15),0_8px_12px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out"
+            className="flex-1 lg:flex-none whitespace-nowrap inline-flex items-center justify-center gap-2
+                      rounded-xl !h-12 !min-h-0 px-5 py-0 leading-none
+                      bg-gradient-to-b from-[#cfe89b]/90 via-[#8fd77e]/90 to-[#19c6d3]/90
+                      text-white text-sm font-semibold
+                      shadow-[0_4px_10px_rgba(16,185,129,0.12)]
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200
+                      disabled:opacity-70 transition-all"
             disabled={!isMapLoaded}
           >
             지도에서 선택
           </Button>
+
+          {/* 초기화 – 글자 더 잘 보이게(!text-*) + h-12 + 아웃라인 */}
           {value && (
-            <Button 
-              variant="warning" 
+            <Button
+              variant="warning"
               onClick={handleClear}
-              className="flex-1 lg:flex-none whitespace-nowrap inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white text-sm font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_15px_25px_rgba(0,0,0,0.15),0_8px_12px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out"
+              className="flex-1 lg:flex-none whitespace-nowrap inline-flex items-center justify-center gap-2
+                        rounded-xl !h-12 !min-h-0 px-4 py-0 leading-none
+                        bg-white !text-emerald-700
+                        ring-1 ring-emerald-200 hover:bg-emerald-50 active:bg-emerald-100
+                        shadow-none transition-colors"
             >
               초기화
             </Button>
@@ -361,13 +374,17 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
                 />
-                <Button 
-                  variant="primary" 
-                  onClick={() => searchPlaces(searchKeyword)}
-                  className="whitespace-nowrap px-4 py-2"
-                >
-                  검색
-                </Button>
+            <Button 
+              onClick={() => searchPlaces(searchKeyword)}
+              className="whitespace-nowrap rounded-xl h-10 px-4 py-0 leading-none
+                        bg-gradient-to-b from-[#cfe89b]/90 via-[#8fd77e]/90 to-[#19c6d3]/90
+                        text-white text-sm font-semibold
+                        shadow-[0_3px_8px_rgba(16,185,129,0.15)]
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200
+                        hover:brightness-105 active:brightness-95 transition-all"
+            >
+              검색
+            </Button>
               </div>
               
               {/* 검색 메시지 표시 */}
@@ -408,27 +425,41 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
             
             {/* 버튼 */}
             <div className="flex justify-end gap-2">
-              <Button 
-                variant="warning" 
+              {/* 취소: 아웃라인 + 글자 선명 */}
+              <Button
                 onClick={() => setIsOpen(false)}
+                className="rounded-xl h-10 px-4 py-0 leading-none
+                          bg-white !text-emerald-700
+                          ring-1 ring-emerald-200 hover:bg-emerald-50 active:bg-emerald-100
+                          shadow-none transition-colors"
               >
                 취소
               </Button>
+
+              {/* 주소 선택: 선택됨일 때만 그라데이션, 아니면 Dimmed */}
               {selectedAddress ? (
-                <Button 
-                  variant="primary" 
-                onClick={handleAddressSelect}
-              >
-                주소 선택
-              </Button>
+                <Button
+                  onClick={handleAddressSelect}
+                  className="rounded-xl h-10 px-5 py-0 leading-none
+                            bg-gradient-to-b from-[#cfe89b]/90 via-[#8fd77e]/90 to-[#19c6d3]/90
+                            text-white font-semibold
+                            shadow-[0_4px_10px_rgba(16,185,129,0.16)]
+                            focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200
+                            hover:brightness-105 active:brightness-95 transition-all"
+                >
+                  주소 선택
+                </Button>
               ) : (
-                <Button 
-                  variant="dimmed"
+                <Button
+                  className="rounded-xl h-10 px-5 py-0 leading-none
+                            bg-gray-100 text-gray-400 cursor-not-allowed"
+                  disabled
                 >
                   주소 선택
                 </Button>
               )}
             </div>
+
           </div>
         </div>
       )}
