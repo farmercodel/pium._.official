@@ -10,7 +10,7 @@ export const HeroSection = ({ heroAnim }: HeroSectionProps) => {
   const interactions = useLiftInteractions(-6);
 
   return (
-    <section className="relative w-full bg-emerald-50/60">
+    <section className="relative w-full bg-[#F9FAEA]">
       <motion.div
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12"
         variants={container}
@@ -30,7 +30,7 @@ export const HeroSection = ({ heroAnim }: HeroSectionProps) => {
               className="
                 inline-flex items-center justify-center gap-2
                 rounded-full px-5 py-2.5
-                bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400
+                bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)]
                 text-white font-semibold
                 shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200

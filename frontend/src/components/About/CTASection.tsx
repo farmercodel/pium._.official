@@ -10,7 +10,7 @@ export const CTASection = ({ inViewAnim }: CTASectionProps) => {
   const interactions = useLiftInteractions(-6);
 
   return (
-    <section className="bg-gradient-to-b from-emerald-50 to-emerald-100/50">
+    <section className="bg-[#F9FAEA]">
       <motion.div
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14 text-center"
         variants={container}
@@ -25,7 +25,7 @@ export const CTASection = ({ inViewAnim }: CTASectionProps) => {
         <motion.div className="mt-6 flex flex-wrap items-center justify-center gap-3" variants={fade}>
           <motion.a
             href="/Survey"
-            className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white text-sm sm:text-base font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+            className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 sm:px-8 sm:py-4 bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white text-sm sm:text-base font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
             variants={fade}
             {...interactions}
           >
