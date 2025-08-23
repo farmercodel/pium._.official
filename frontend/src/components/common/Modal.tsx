@@ -30,11 +30,16 @@ const stylesByVariant: Record<
         chipBg: "from-emerald-50 via-emerald-100 to-teal-100",
     },
     success: {
-        grad: "from-emerald-500 via-emerald-500 to-teal-500",
-        ring: "ring-emerald-300",
-        glow: "rgba(16,185,129,0.26), rgba(45,212,191,0.18), rgba(13,148,136,0.12)",
-        icon: "text-emerald-600",
-        chipBg: "from-emerald-50 via-emerald-100 to-teal-100",
+    // 버튼들과 톤 통일: 에메랄드 중심, 살짝 투명도 줘서 부드럽게
+    grad: "from-emerald-300/90 via-emerald-400/90 to-teal-500/90",
+    // 링은 한 톤 연하게
+    ring: "ring-emerald-200",
+    // 글로우(그림자)도 채도·알파 낮춰 눈부심 줄이기
+    glow: "rgba(16,185,129,0.18), rgba(45,212,191,0.12), rgba(6,182,212,0.10)",
+    // 아이콘은 선명도 유지(화이트 배경 대비 좋음). 더 연하게 원하면 500으로.
+    icon: "text-emerald-600",
+    // 칩/배지 배경은 아주 연한 톤으로
+    chipBg: "from-emerald-50 via-emerald-100 to-teal-50",
     },
     // 필요하면 노란 경고, 빨간 위험도 그대로 사용 가능
     warning: {
