@@ -54,7 +54,7 @@ const FeatureCard = ({ icon, title, desc, interactions }: FeatureCardProps) => {
                 grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-full
                 ring-1 ring-[rgba(192,214,99,0.18)]
                 shadow-[0_3px_8px_rgba(192,214,99,0.08)]
-                bg-[radial-gradient(closest-side,_#FBFCEA,_#F3F8D8_58%,_#EEF5CD_100%)]
+                bg-[linear-gradient(to_bottom_right,_#cfe89b_0%,_#8fd77e_52%,_#19c6d3_100%)]
               "
             >
             <img src={icon} alt="" className="h-7 w-7 sm:h-8 sm:w-8" aria-hidden />

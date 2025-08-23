@@ -119,7 +119,7 @@ const LoginPage = () => {
           {/* Submit */}
           <Button
             type="submit"
-            className="mt-4 w-full rounded-xl bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+            className="mt-4 w-full rounded-xl bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
             disabled={loading}
           >
             {loading ? "로그인 중..." : "Login"}

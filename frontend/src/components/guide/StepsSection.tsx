@@ -50,7 +50,7 @@ const StepCard = ({ idx, title, desc, label, labelIcon, interactions }: StepCard
             text-white text-base sm:text-lg font-bold
             flex items-center justify-center
             shadow-md
-            bg-[radial-gradient(closest-side,_#f1f4c1,_#d5de7e_60%,_#b9e874)]
+            bg-[linear-gradient(to_bottom_right,_#cfe89b_0%,_#8fd77e_52%,_#19c6d3_100%)]
           "
         >
           {idx}
