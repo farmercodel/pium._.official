@@ -48,7 +48,7 @@ const ProjectIntroCard = ({
       className="mx-auto mb-4 grid h-10 w-10 place-items-center rounded-full text-white shadow"
       style={{
         background:
-          "linear-gradient(135deg, rgb(52 211 153) 0%, rgb(45 212 191) 50%, rgb(34 211 238) 100%)",
+          'linear-gradient(to bottom right, #cfe89b 0%, #8fd77e 52%, #19c6d3 100%)',
       }}
       aria-hidden
     >
@@ -70,7 +70,7 @@ export const ProjectIntroSection = ({ projectIntroData, inViewAnim }: ProjectInt
         {...inViewAnim}
       >
         <SectionTitle>프로젝트 소개</SectionTitle>
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 whitespace-pre-line">
           {projectIntroData.map((item) => (
             <ProjectIntroCard
               key={item.index}
