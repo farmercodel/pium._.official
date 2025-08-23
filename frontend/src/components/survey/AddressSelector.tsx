@@ -317,7 +317,7 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
           <Button 
             variant="secondary" 
             onClick={() => setIsOpen(true)}
-            className="flex-1 lg:flex-none whitespace-nowrap inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white text-sm font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_15px_25px_rgba(0,0,0,0.15),0_8px_12px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out"
+            className="flex-1 lg:flex-none whitespace-nowrap inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white text-sm font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_15px_25px_rgba(0,0,0,0.15),0_8px_12px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out"
             disabled={!isMapLoaded}
           >
             지도에서 선택
@@ -326,7 +326,7 @@ const AddressSelector = ({ value, onChange, required = false, id, name }: Addres
             <Button 
               variant="warning" 
               onClick={handleClear}
-              className="flex-1 lg:flex-none whitespace-nowrap inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white text-sm font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_15px_25px_rgba(0,0,0,0.15),0_8px_12px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out"
+              className="flex-1 lg:flex-none whitespace-nowrap inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white text-sm font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-70 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_15px_25px_rgba(0,0,0,0.15),0_8px_12px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out"
             >
               초기화
             </Button>
