@@ -2,19 +2,28 @@ import { motion } from "framer-motion";
 import { container, flyUp, fade } from "../../hooks/useAnimation";
 import useNavigation from "../../hooks/useNavigation";
 
-interface HeroSectionProps { reduce: boolean; }
+interface HeroSectionProps {
+  reduce: boolean;
+}
 
 export const HeroSection = ({ reduce }: HeroSectionProps) => {
   const { goToSurvey } = useNavigation();
-  const handleSurveyClick = () => goToSurvey();
+
+  const handleSurveyClick = () => {
+    goToSurvey();
+  };
 
   return (
     <section
       className="
-        relative w-full bg-[#F9FAEA]   /* ✅ 프리뷰 페이지와 동일 배경색 */
-        bg-center bg-cover bg-no-repeat
+        relative w-full bg-center bg-cover bg-no-repeat
       "
+      // 배경 이미지
+      style={{ backgroundImage: "url('/assets/피움 바탕.svg')" }}
     >
+      {/* 가독성을 위한 은은한 화이트 오버레이 */}
+      <div className="absolute inset-0 bg-white/55" />
+
       <motion.div
         className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28"
         variants={container}
@@ -27,18 +36,20 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
             className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight"
             variants={flyUp}
           >
+            {/* PIUM: 지정 컬러 그라데이션 + 은은한 글로우 */}
             <span className="relative inline-block">
-              <span
-                className="
-                  bg-[linear-gradient(90deg,#7cdb3e_0%,#d5ed7e_45%,#c0d663_100%)]
-                  bg-clip-text text-transparent
-                  font-extrabold
-                  [-webkit-text-stroke:0.7px_rgba(213,237,126,0.55)]
-                "
-              >
-                PIUM
-              </span>
+            <span
+            className="
+                bg-[linear-gradient(90deg,#7cdb3e_0%,#d5ed7e_45%,#c0d663_100%)]
+                bg-clip-text text-transparent
+                font-extrabold
+                [-webkit-text-stroke:0.7px_rgba(213,237,126,0.55)]
+            "
+            >
+            PIUM
+            </span>
 
+              {/* 미세한 라이트 글로우 효과 (reduce일 때 생략) */}
               {!reduce && (
                 <motion.span
                   aria-hidden
@@ -56,6 +67,7 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
 
             <br />
 
+            {/* 메인 카피: 회색 톤으로 이미지 위 가독성 확보 */}
             <motion.span className="text-gray-600" variants={fade}>
               <span className="block lg:inline">소상공인 마케팅</span>
               <span className="block lg:inline lg:ml-2">지원 서비스</span>
@@ -70,7 +82,7 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
           </motion.p>
 
           <motion.div className="mt-10 flex justify-center" variants={flyUp}>
-            {/* ✅ 프리뷰와 동일 버튼 그라데이션 */}
+            {/* CTA 버튼: #c0d663 기반 그라데이션 */}
             <motion.button
               type="button"
               onClick={handleSurveyClick}
@@ -78,8 +90,7 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
                 inline-flex items-center justify-center
                 rounded-full px-6 py-3 lg:px-8 lg:py-4
                 text-white font-bold
-                shadow-[0_10px_20px_rgba(25,198,211,0.28),0_4px_8px_rgba(0,0,0,0.06)]
-                ring-1 ring-white/30
+                shadow-[0_10px_20px_rgba(0,0,0,0.12)]
                 transition
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70
                 cursor-pointer
