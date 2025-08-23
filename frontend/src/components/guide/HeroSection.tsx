@@ -72,7 +72,7 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
             className="mt-6 text-gray-600/90 text-base sm:text-lg lg:text-xl"
             variants={fade}
           >
-            AI 기술로 당신의 비즈니스를 성장시키는 3단계 프로세스를 알아보세요
+            PIUM 서비스 이용을 위한 3단계 프로세스
           </motion.p>
         </div>
       </motion.div>
