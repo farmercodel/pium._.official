@@ -93,10 +93,18 @@ async def choose_and_publish(
     if not req.image_keys:
         raise HTTPException(status_code=400, detail="image_keys가 비었습니다. /files/upload 응답의 rel 값을 보내주세요.")
 
-    latest = await AdRepo.get_latest_request(db, user_id=current_user.id)
-    if not latest or not latest.payload:
-        raise HTTPException(status_code=400, detail="최근 생성한 요청이 없습니다.")
-    payload = latest.payload
+    # 1) variant를 먼저 찾고(유저 검증 포함)
+    variant = await AdRepo.get_variant_by_id(
+        db, user_id=current_user.id, variant_id=req.variant_id
+    )
+    if not variant:
+        raise HTTPException(status_code=404, detail="선택한 문안을 찾을 수 없습니다.")
+
+    # 2) variant가 속한 request(payload)를 사용
+    req_row = await AdRepo.get_request(db, request_id=variant.request_id, user_id=current_user.id)
+    if not req_row or not req_row.payload:
+        raise HTTPException(status_code=400, detail="해당 문안의 요청(payload)을 찾을 수 없습니다.")
+    payload = req_row.payload
 
     store_name = (payload.get("store_name") or "").strip()
     area_keywords = payload.get("area_keywords") or []
@@ -104,15 +112,7 @@ async def choose_and_publish(
     if not store_name or not area_keywords:
         raise HTTPException(status_code=400, detail="payload에 store_name/area_keywords가 없습니다.")
 
-    variant = await AdRepo.get_variant_for_user(
-        db,
-        user_id=current_user.id,
-        variant_id=req.variant_id,
-        request_id=latest.id,
-    )
-    if not variant:
-        raise HTTPException(status_code=404, detail="선택한 문안을 찾을 수 없습니다(요청 불일치).")
-
+    # 3) caption 결정: 요청값 > variant 저장값 > 마지막 선택값
     content = (req.content or getattr(variant, "content", "") or "").strip()
     if not content:
         chosen = await AdRepo.get_choice(db, user_id=current_user.id)
@@ -122,7 +122,7 @@ async def choose_and_publish(
     if len(content) > 2200:
         content = content[:2190].rstrip() + "…"
 
-    # 3) 선택 반영
+    # 4) 선택 반영
     try:
         await AdRepo.choose(db, user_id=current_user.id, variant_id=req.variant_id, content=content)
         await db.commit()
@@ -130,7 +130,7 @@ async def choose_and_publish(
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"choose failed: {e}")
 
-    # 4) 커버 합성
+    # 5) 커버 합성
     final_image_keys = list(req.image_keys)
     try:
         comp_in = ComposeInput(
@@ -145,7 +145,7 @@ async def choose_and_publish(
     except Exception as e:
         print(f"[choose-publish] compose failed, keep originals: {e}", flush=True)
 
-    # 5) collaborators
+    # 6) collaborators
     auto_collabs = [instagram_id] if instagram_id else []
     if req.collaborators:
         auto_collabs = list({*auto_collabs, *[c.strip() for c in req.collaborators if c and c.strip()]})

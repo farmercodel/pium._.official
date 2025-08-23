@@ -98,3 +98,13 @@ class AdRepo:
             q = q.where(AdVariant.request_id == request_id)  # ✅ 최신 요청에 소속된 variant만
         res = await db.execute(q)
         return res.scalar_one_or_none()
+    
+    @staticmethod
+    async def get_request(session: AsyncSession, *, request_id: int, user_id: int):
+        q = (
+            select(AdRequest)
+            .where(AdRequest.id == request_id, AdRequest.user_id == user_id)
+            .limit(1)
+        )
+        res = await session.execute(q)
+        return res.scalar_one_or_none()

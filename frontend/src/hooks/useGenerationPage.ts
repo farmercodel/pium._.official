@@ -3,7 +3,14 @@ import { useLocation } from "react-router-dom";
 import { api } from "../api/api";
 import useNavigation from "./useNavigation";
 
-export type PromotionIdea = { id: string; title: string; summary: string; tags: string[]; };
+export type PromotionIdea = {
+  id: string;               // UI용 고유키(쪼갠 경우엔 i-j 등 사용 가능)
+  title: string;
+  summary: string;          // 화면에 보일 부분 캡션(쪼갠 텍스트 or 원문)
+  tags: string[];
+  __variantId?: string | number; // 서버가 아는 variant_id (원본, 타입 보존)
+  __raw?: string;           // 서버가 저장한 원문 텍스트(변형/trim X)
+};
 
 // API 응답 타입 정의
 interface GenerateResponse {
@@ -37,80 +44,100 @@ const toRelFromUrl = (u: string) => {
     const parts = url.pathname.split("/").filter(Boolean);
     if (parts.length >= 2) parts.shift(); // bucket 제거
     return parts.join("/");
-  } catch { return ""; }
+  } catch {
+    return "";
+  }
 };
 
 /** ===== 붙어온 캡션 분리 & 매핑 보강 ===== */
 const splitConcatenated = (raw: string): string[] => {
   if (!raw) return [];
   // 명시 마커 우선
-  let parts = raw.split(/<<<VARIANT_END>>>|<<VARIANT_END>>|<VARIANT_END>/g)
-                 .map(s => s.trim()).filter(Boolean);
+  let parts = raw
+    .split(/<<<VARIANT_END>>>|<<VARIANT_END>>|<VARIANT_END>/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (parts.length > 1) return parts;
 
   // "캡션 1/2/3" 라벨
-  parts = raw.split(/(?:^|\n)캡션\s*[①1]\s*|(?:^|\n)캡션\s*[②2]\s*|(?:^|\n)캡션\s*[③3]\s*/g)
-             .map(s => s.trim()).filter(Boolean);
+  parts = raw
+    .split(
+      /(?:^|\n)캡션\s*[①1]\s*|(?:^|\n)캡션\s*[②2]\s*|(?:^|\n)캡션\s*[③3]\s*/g
+    )
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (parts.length > 1) return parts;
 
   // "1. / 2. / 3." 불릿 (라인 시작 기준)
-  parts = raw.split(/(?:^|\n)[#\-*]?\s*(?:1\.|2\.|3\.)\s+/g)
-             .map(s => s.trim()).filter(Boolean);
+  parts = raw
+    .split(/(?:^|\n)[#\-*]?\s*(?:1\.|2\.|3\.)\s+/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   return parts.length > 1 ? parts : [raw.trim()];
 };
 
 const normalizeTags = (tags: unknown): string[] =>
-  Array.isArray(tags) ? tags.map(String).filter(Boolean).map(t => t.startsWith("#") ? t : `#${t}`) : [];
+  Array.isArray(tags)
+    ? tags
+        .map(String)
+        .filter(Boolean)
+        .map((t) => (t.startsWith("#") ? t : `#${t}`))
+    : [];
 
+/** 서버 id를 잃지 않도록 매핑 */
 const mapVariantsToIdeas = (variants?: unknown[]): PromotionIdea[] => {
-  if (!variants || !Array.isArray(variants)) return [];
+  if (!Array.isArray(variants) || !variants.length) return [];
 
-  // 문자열 배열로 온 경우
-  if (variants.length && typeof variants[0] === "string") {
+  // 문자열 배열인 경우 (서버 variant_id 없음 → 선택 불가)
+  if (typeof variants[0] === "string") {
     return (variants as string[]).flatMap((blob, i) =>
-      splitConcatenated(blob).map((t, j) => ({
-        id: `${i}-${j}-${t.slice(0,12)}`,
+      splitConcatenated(blob).map((part, j) => ({
+        id: `${i}-${j}`, // UI용
         title: `AI 제안 ${j + 1}`,
-        summary: t,
+        summary: part, // 화면 표시용(부분)
         tags: [],
+        __variantId: undefined, // 서버 id 없음 → 선택 차단
+        __raw: blob, // 서버 체크용 원문(변형 X)
       }))
     );
   }
 
-  // 객체 1개인데 내부가 blob인 경우
-  if (variants.length === 1) {
+  // 객체 1개 + 내부 blob
+  if (variants.length === 1 && typeof variants[0] === "object" && variants[0] !== null) {
     const v = variants[0] as Record<string, unknown>;
-    const text = String(v.summary ?? v.text ?? v.content ?? v.copy ?? v.body ?? "");
-    const parts = splitConcatenated(text);
+    const raw = String(v.summary ?? v.text ?? v.content ?? v.copy ?? v.body ?? "");
+    const baseId = (v.id ?? v.variant_id ?? v.uuid ?? "v0") as string | number;
+    const parts = splitConcatenated(raw);
     if (parts.length > 1) {
       const tags = normalizeTags(v.tags ?? v.hashtags ?? v.hash_tags);
-      return parts.map((t, idx) => ({
-        id: `${String(v.id ?? v.variant_id ?? v.uuid ?? "v0")}-${idx}`,
+      return parts.map((p, idx) => ({
+        id: `${String(baseId)}-${idx}`,
         title: `AI 제안 ${idx + 1}`,
-        summary: t,
+        summary: p,
         tags,
+        __variantId: baseId, // 서버 id 보존
+        __raw: raw, // 원문 전체
       }));
     }
   }
 
   // 정상 객체 배열
-  return variants.map((v: unknown, i: number) => {
-    if (typeof v === 'object' && v !== null) {
+  return (variants as unknown[]).map((v, i) => {
+    if (typeof v === "object" && v !== null) {
       const obj = v as Record<string, unknown>;
+      const raw = String(obj.summary ?? obj.text ?? obj.content ?? obj.copy ?? obj.body ?? "");
+      const serverId = (obj.variant_id ?? obj.id ?? obj.uuid ?? i) as string | number;
       return {
         id: String(obj.id ?? obj.variant_id ?? obj.uuid ?? obj.key ?? i),
         title: String(obj.title ?? obj.headline ?? obj.name ?? `AI 제안 ${i + 1}`),
-        summary: String(obj.summary ?? obj.text ?? obj.content ?? obj.copy ?? obj.body ?? ""),
+        summary: raw, // 화면에도 원문을 그대로 보여줄 수 있음
         tags: normalizeTags(obj.tags ?? obj.hashtags ?? obj.hash_tags),
+        __variantId: serverId, // 서버 id 보존(타입 유지)
+        __raw: raw,
       };
     }
-    return {
-      id: String(i),
-      title: `AI 제안 ${i + 1}`,
-      summary: "",
-      tags: [],
-    };
+    return { id: String(i), title: `AI 제안 ${i + 1}`, summary: "", tags: [] };
   });
 };
 
@@ -120,42 +147,57 @@ const getPublishContext = () => {
     const raw = sessionStorage.getItem(STORAGE.publishCtx);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (typeof parsed === 'object' && parsed !== null) {
+      if (typeof parsed === "object" && parsed !== null) {
         return {
-          store_name: typeof parsed.store_name === 'string' ? parsed.store_name : '',
-          area_keywords: Array.isArray(parsed.area_keywords) ? parsed.area_keywords.filter((item: unknown): item is string => typeof item === 'string') : [],
-          instagram_id: typeof parsed.instagram_id === 'string' ? parsed.instagram_id : '',
+          store_name: typeof parsed.store_name === "string" ? parsed.store_name : "",
+          area_keywords: Array.isArray(parsed.area_keywords)
+            ? parsed.area_keywords.filter((item: unknown): item is string => typeof item === "string")
+            : [],
+          instagram_id: typeof parsed.instagram_id === "string" ? parsed.instagram_id : "",
         };
       }
     }
   } catch (error) {
-    console.error('[getPublishContext] Error parsing publishCtx:', error);
+    console.error("[getPublishContext] Error parsing publishCtx:", error);
   }
-  
+
   try {
     const raw = sessionStorage.getItem(STORAGE.payload);
     if (raw) {
       const p = JSON.parse(raw);
-      if (typeof p === 'object' && p !== null) {
-        const store_name = typeof p.store_name === 'string' ? p.store_name : 
-                          typeof p.storeName === 'string' ? p.storeName : "";
-        const instagram_id = (typeof p.instagram_id === 'string' ? p.instagram_id : 
-                             typeof p.instagram === 'string' ? p.instagram : "").replace(/^@/, "");
-        
+      if (typeof p === "object" && p !== null) {
+        const store_name =
+          typeof p.store_name === "string"
+            ? p.store_name
+            : typeof p.storeName === "string"
+            ? p.storeName
+            : "";
+        const instagram_id = (typeof p.instagram_id === "string"
+          ? p.instagram_id
+          : typeof p.instagram === "string"
+          ? p.instagram
+          : ""
+        ).replace(/^@/, "");
+
         let area_keywords: string[] = [];
         if (Array.isArray(p.area_keywords)) {
-          area_keywords = p.area_keywords.filter((item: unknown): item is string => typeof item === 'string');
+          area_keywords = p.area_keywords.filter(
+            (item: unknown): item is string => typeof item === "string"
+          );
         }
-        if (!area_keywords.length && typeof p.regionKeyword === 'string') {
-          area_keywords = p.regionKeyword.split(/[,/|\s]+/).map((s: string) => s.trim()).filter(Boolean);
+        if (!area_keywords.length && typeof p.regionKeyword === "string") {
+          area_keywords = p.regionKeyword
+            .split(/[,/|\s]+/)
+            .map((s: string) => s.trim())
+            .filter(Boolean);
         }
         return { store_name, area_keywords, instagram_id };
       }
     }
   } catch (error) {
-    console.error('[getPublishContext] Error parsing payload:', error);
+    console.error("[getPublishContext] Error parsing payload:", error);
   }
-  
+
   return { store_name: "", area_keywords: [], instagram_id: "" };
 };
 
@@ -169,23 +211,27 @@ const getImageKeys = (): string[] => {
       }
     }
   } catch (error) {
-    console.error('[getImageKeys] Error parsing imgKeys:', error);
+    console.error("[getImageKeys] Error parsing imgKeys:", error);
   }
-  
+
   try {
     const raw = sessionStorage.getItem(STORAGE.payload);
     if (raw) {
       const p = JSON.parse(raw);
-      if (typeof p === 'object' && p !== null) {
+      if (typeof p === "object" && p !== null) {
         const src = p?.image_keys ?? p?.images ?? p?.uploaded ?? [];
         if (Array.isArray(src) && src.length) {
           return src
             .map((x: unknown) => {
-              if (typeof x === 'object' && x !== null) {
+              if (typeof x === "object" && x !== null) {
                 const obj = x as Record<string, unknown>;
-                return obj?.rel ?? obj?.key ?? (typeof obj?.url === 'string' ? toRelFromUrl(obj.url) : '');
+                return (
+                  (obj?.rel as string | undefined) ??
+                  (obj?.key as string | undefined) ??
+                  (typeof obj?.url === "string" ? toRelFromUrl(obj.url) : "")
+                );
               }
-              return typeof x === 'string' ? toRelFromUrl(x) : '';
+              return typeof x === "string" ? toRelFromUrl(x) : "";
             })
             .map(String)
             .filter(Boolean);
@@ -193,23 +239,27 @@ const getImageKeys = (): string[] => {
       }
     }
   } catch (error) {
-    console.error('[getImageKeys] Error parsing payload:', error);
+    console.error("[getImageKeys] Error parsing payload:", error);
   }
-  
+
   try {
     const raw = sessionStorage.getItem(STORAGE.result);
     if (raw) {
       const r = JSON.parse(raw);
-      if (typeof r === 'object' && r !== null) {
+      if (typeof r === "object" && r !== null) {
         const src = r?.images ?? [];
         if (Array.isArray(src) && src.length) {
           return src
             .map((x: unknown) => {
-              if (typeof x === 'object' && x !== null) {
+              if (typeof x === "object" && x !== null) {
                 const obj = x as Record<string, unknown>;
-                return obj?.rel ?? obj?.key ?? (typeof obj?.url === 'string' ? toRelFromUrl(obj.url) : '');
+                return (
+                  (obj?.rel as string | undefined) ??
+                  (obj?.key as string | undefined) ??
+                  (typeof obj?.url === "string" ? toRelFromUrl(obj.url) : "")
+                );
               }
-              return typeof x === 'string' ? toRelFromUrl(x) : '';
+              return typeof x === "string" ? toRelFromUrl(x) : "";
             })
             .map(String)
             .filter(Boolean);
@@ -217,9 +267,9 @@ const getImageKeys = (): string[] => {
       }
     }
   } catch (error) {
-    console.error('[getImageKeys] Error parsing result:', error);
+    console.error("[getImageKeys] Error parsing result:", error);
   }
-  
+
   return [];
 };
 
@@ -231,23 +281,35 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
   const [publishingId, setPublishingId] = useState<string | null>(null);
   const { goToPreview } = useNavigation();
 
-  const selectedIdea = useMemo(() => list.find((i) => i.id === selectedId) || null, [list, selectedId]);
+  const selectedIdea = useMemo(
+    () => list.find((i) => i.id === selectedId) || null,
+    [list, selectedId]
+  );
 
   // 초기 로드: props → location.state → sessionStorage (+여러 키 대응)
   const initializeData = () => {
-    if (ideas?.length) { setList(ideas); return; }
+    if (ideas?.length) {
+      setList(ideas);
+      return;
+    }
 
     const fromState = location?.state as Record<string, unknown> | undefined;
-    const rawVariants =
-      fromState?.variants ??
-      fromState?.captions ??
-      fromState?.ideas;
+    const rawVariants = fromState?.variants ?? fromState?.captions ?? fromState?.ideas;
 
     const mapped = mapVariantsToIdeas(Array.isArray(rawVariants) ? rawVariants : undefined);
     if (mapped.length) {
       setList(mapped);
-      try { sessionStorage.setItem(STORAGE.result, JSON.stringify(fromState)); } catch (error) {
-        console.error('[useEffect] Error setting sessionStorage:', error);
+      try {
+        // variants에 객체 + id/variant_id가 있을 때만 저장
+        const vs = Array.isArray(rawVariants) ? rawVariants : [];
+        const hasServerIds = vs.some(
+          (v) => typeof v === "object" && v && ("id" in (v as any) || "variant_id" in (v as any))
+        );
+        if (hasServerIds) {
+          sessionStorage.setItem(STORAGE.result, JSON.stringify(fromState));
+        }
+      } catch (e) {
+        console.error("[initializeData] skip caching from state:", e);
       }
       return;
     }
@@ -257,17 +319,14 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
       const cached = sessionStorage.getItem(STORAGE.result);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (typeof parsed === 'object' && parsed !== null) {
-          const v2 =
-            parsed?.variants ??
-            parsed?.captions ??
-            parsed?.ideas;
+        if (typeof parsed === "object" && parsed !== null) {
+          const v2 = parsed?.variants ?? parsed?.captions ?? parsed?.ideas;
           const m2 = mapVariantsToIdeas(Array.isArray(v2) ? v2 : undefined);
           if (m2.length) setList(m2);
         }
       }
     } catch (error) {
-      console.error('[useEffect] Error parsing cached result:', error);
+      console.error("[initializeData] Error parsing cached result:", error);
     }
   };
 
@@ -276,47 +335,59 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
     setSelectedId(idea.id);
 
     const token = localStorage.getItem("access_token");
-    if (!token) { alert("로그인 후 이용 가능합니다."); return; }
+    if (!token) {
+      alert("로그인 후 이용 가능합니다.");
+      return;
+    }
 
-    const { store_name, area_keywords, instagram_id } = getPublishContext();
+    // 서버 variant_id가 없는 경우(문자열 배열 등)는 선택 차단
+    if (!("__variantId" in idea) || idea.__variantId === undefined || idea.__variantId === null) {
+      alert("이 문안에는 서버의 variant_id가 없어 게시할 수 없습니다. 다시 생성 후 선택해주세요.");
+      return;
+    }
+
+    const { instagram_id } = getPublishContext();
     const image_keys = getImageKeys();
     if (!image_keys.length) {
       alert("업로드된 이미지가 없습니다. 이미지 업로드 후 다시 시도해주세요.");
       return;
     }
 
-    const body = {
-      variant_id: idea.id,
-      content: idea.summary,
-      image_keys,
-      collaborators: instagram_id ? [instagram_id.replace(/^@/, "")] : [],
-      dry_run: false,
-      store_name,
-      area_keywords,
-    };
+    const variant_id = idea.__variantId;      // 서버가 아는 id 우선 (타입 보존)
+    const content = idea.__raw ?? idea.summary; // 서버 저장 원문 우선(부분/trim X)
 
     try {
       setPublishingId(idea.id);
-      await api.post("/api/choose-publish", body, { timeout: 120_000 }); // 여유 있는 타임아웃
+      await api.post(
+        "/api/choose-publish",
+        {
+          variant_id,
+          content,
+          image_keys,
+          collaborators: instagram_id ? [instagram_id.replace(/^@/, "")] : [],
+          dry_run: false,
+        },
+        { timeout: 120_000 }
+      );
       alert("인스타그램 게시 요청이 완료되었습니다.");
       goToPreview();
     } catch (error: unknown) {
-      console.error('[handleSelect] Error:', error);
-      
+      console.error("[handleSelect] Error:", error);
+
       let errorMessage = "게시 요청에 실패했습니다.";
-      if (error && typeof error === 'object' && 'response' in error) {
+      if (error && typeof error === "object" && "response" in error) {
         const errorObj = error as ApiErrorResponse;
         if (errorObj.response?.data?.detail) {
           errorMessage = errorObj.response.data.detail;
         }
-      } else if (error && typeof error === 'string') {
+      } else if (error && typeof error === "string") {
         errorMessage = error;
-      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message: string }).message === 'string') {
+      } else if (error && typeof error === "object" && "message" in error && typeof (error as { message: string }).message === "string") {
         errorMessage = (error as { message: string }).message;
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       alert(errorMessage);
     } finally {
       setPublishingId(null);
@@ -329,42 +400,44 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
       // 기본: 이전 payload로 재생성
       const raw = sessionStorage.getItem(STORAGE.payload);
       if (!raw) throw new Error("최근 생성 요청 페이로드가 없습니다.");
-      
+
       const payload = JSON.parse(raw);
-      if (typeof payload !== 'object' || payload === null) {
+      if (typeof payload !== "object" || payload === null) {
         throw new Error("페이로드 형식이 올바르지 않습니다.");
       }
-      
+
       const response = await api.post("/api/generate", payload, { timeout: 90_000 });
       const responseData = response?.data as GenerateResponse;
-      
-      try { sessionStorage.setItem(STORAGE.result, JSON.stringify(responseData)); } catch (error) {
-        console.error('[handleRegenerate] Error setting sessionStorage:', error);
+
+      try {
+        sessionStorage.setItem(STORAGE.result, JSON.stringify(responseData));
+      } catch (error) {
+        console.error("[handleRegenerate] Error setting sessionStorage:", error);
       }
-      
+
       const mapped = mapVariantsToIdeas(
-        responseData?.variants ?? 
-        responseData?.data?.variants ?? 
-        responseData?.captions ?? 
-        responseData?.data?.captions
+        responseData?.variants ?? responseData?.data?.variants ?? responseData?.captions ?? responseData?.data?.captions
       );
-      
+
       if (!mapped.length) throw new Error("생성 결과가 비어있습니다.");
-      setList(mapped); setSelectedId(null);
+      setList(mapped);
+      setSelectedId(null);
     } catch (error: unknown) {
-      console.error('[handleRegenerate] Error:', error);
-      
+      console.error("[handleRegenerate] Error:", error);
+
       let errorMessage = "다시 생성에 실패했습니다.";
-      if (error && typeof error === 'string') {
+      if (error && typeof error === "string") {
         errorMessage = error;
-      } else if (error && typeof error === 'object' && 'message' in error && typeof (error as { message: string }).message === 'string') {
+      } else if (error && typeof error === "object" && "message" in error && typeof (error as { message: string }).message === "string") {
         errorMessage = (error as { message: string }).message;
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       alert(errorMessage);
-    } finally { setRegenLoading(false); }
+    } finally {
+      setRegenLoading(false);
+    }
   };
 
   return {
@@ -378,3 +451,5 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
     handleRegenerate,
   };
 };
+
+export default useGenerationPage;
