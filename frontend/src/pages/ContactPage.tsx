@@ -1,6 +1,13 @@
 import type { JSX } from "react";
 import { useState } from "react";
 import { api } from "../api/api"; // axios 인스턴스
+import { motion } from "framer-motion";
+import { 
+  useAnimationProps, 
+  container, 
+  flyUp, 
+  fade
+} from "../hooks/useAnimation";
 
 export const ContactPage = (): JSX.Element => {
   const [name, setName] = useState("");
@@ -8,6 +15,7 @@ export const ContactPage = (): JSX.Element => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const { heroAnim } = useAnimationProps();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +33,32 @@ export const ContactPage = (): JSX.Element => {
   };
 
   return (
-    <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">문의하기</h1>
+    <main className="font-sans">
+    <section className="relative w-full bg-[#F9FAEA]">
+      <motion.div
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12"
+        variants={container}
+        {...heroAnim}
+      >
+        <div className="text-center">
+          <motion.h1
+            className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900"
+            variants={flyUp}
+          >
+            문의하기
+          </motion.h1>
+          <motion.p
+            className="mt-2 text-sm sm:text-base text-gray-600"
+            variants={fade}
+          >
+            서비스 사용 중 어려움 혹은 문제가 발생했다면 문의해 주세요.
+          </motion.p>
+        </div>
+      </motion.div>
+    </section>
+      <br />
+
+    <section className="max-w-3xl mx-auto p-6">
       {success && <p className="text-green-600 mb-4">문의가 성공적으로 전송되었습니다!</p>}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
@@ -55,11 +87,12 @@ export const ContactPage = (): JSX.Element => {
         <button
           type="submit"
           disabled={loading}
-          className="bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700"
+          className="bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white py-2 rounded hover:bg-emerald-700"
         >
           {loading ? "전송 중..." : "문의 보내기"}
         </button>
       </form>
+      </section>
     </main>
   );
 };
