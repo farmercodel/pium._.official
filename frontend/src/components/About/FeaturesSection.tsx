@@ -39,7 +39,8 @@ const IconCircle = ({ iconSrc, icon }: { iconSrc?: string; icon?: JSX.Element })
         className="
           grid h-full w-full place-items-center rounded-full text-white
           ring-1 ring-emerald-900/30 shadow
-          bg-gradient-to-br from-emerald-300 via-emerald-400 to-teal-600
+          bg-[linear-gradient(to_bottom_right,_#cfe89b_0%,_#8fd77e_52%,_#19c6d3_100%)]
+
         "
       >
         {icon ? (

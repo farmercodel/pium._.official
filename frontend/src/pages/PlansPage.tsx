@@ -127,7 +127,7 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
         </motion.span>
       )}
 
-      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-emerald-300 via-emerald-400 to-teal-600 text-white shadow mb-4">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[linear-gradient(to_bottom_right,_#cfe89b_0%,_#8fd77e_52%,_#19c6d3_100%)] text-white shadow mb-4">
         {icon}
       </div>
 
@@ -155,7 +155,7 @@ const PlanCard = ({ plan, icon, selected, onSelect, onAction, ctaDisabled, ctaLo
           onClick={(e) => { e.stopPropagation(); onAction(); }}
           disabled={ctaDisabled}
           aria-busy={ctaLoading}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:opacity-60"
           {...useLiftInteractions()}
         >
           {ctaLoading ? "진행중..." : plan.cta}
@@ -242,7 +242,7 @@ export const PricingPage = (): JSX.Element => {
         reduceMotion={!!reduce}
       />
 
-      <section className="relative w-full bg-emerald-50/60">
+      <section className="relative w-full bg-[#F9FAEA]">
         <motion.div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20" variants={container} {...heroAnim}>
           <header className="text-center">
             <motion.h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900" variants={flyUp}>이용 플랜</motion.h1>

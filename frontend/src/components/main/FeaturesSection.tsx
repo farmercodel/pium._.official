@@ -43,7 +43,7 @@ const FeatureCard = ({ feature, interactions }: FeatureCardProps) => {
               inline-flex h-12 w-12 items-center justify-center rounded-full
               ring-1 ring-white/10
               shadow-[0_8px_20px_rgba(185,232,116,0.22)]
-              bg-[radial-gradient(closest-side,_#f1f4c1,_#d5de7e_60%,_#b9e874)]
+              bg-[linear-gradient(to_bottom_right,_#cfe89b_0%,_#8fd77e_52%,_#19c6d3_100%)]
               lg:h-16 lg:w-16
             "
           >
