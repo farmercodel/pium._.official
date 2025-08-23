@@ -1,98 +1,161 @@
-import { useState, useEffect } from "react"
-import PageLayout from "../components/common/PageLayout"
-import InputSection from "../components/survey/InputSection"
-import PreviewCardSection from "../components/survey/PreviewCardSection"
-import useNavigation from "../hooks/useNavigation"
+import type { JSX } from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
 
-{/** 질문지 답변 입력 페이지 */}
-const SurveyPage = () => {
-    const [activeTab, setActiveTab] = useState<'input' | 'preview'>('input')
-    
-    // 모든 입력 데이터를 하나의 객체로 관리
-    const [formData, setFormData] = useState<Record<string, string>>(() => {
-        // SurveyPage에 처음 진입할 때는 항상 초기화
-        return {}
-    })
+import useNavigation from "../hooks/useNavigation";
+import { useFileUpload } from "../hooks/useFileUpload";
+import { useFormSubmission } from "../hooks/useFormSubmission";
+import { useScrollToTop } from "../hooks/useScrollToTop";
+import { 
+  useLiftInteractions, 
+  useAnimationProps, 
+  container, 
+  flyUp, 
+  fade
+} from "../hooks/useAnimation";
+import { BasicInfoSection } from "../components/survey/BasicInfoSection";
+import { StoreIntroSection } from "../components/survey/StoreIntroSection";
+import { AdditionalInfoSection } from "../components/survey/AdditionalInfoSection";
+import { SubmitButton } from "../components/survey/SubmitButton";
+import type { SurveyFormValues } from "../types/SurveymapFormData";
 
-    // 입력 데이터 변경 핸들러
-    const handleInputChange = (title: string, value: string) => {
-        setFormData(prev => {
-            const newData = { ...prev, [title]: value }
-            // 로컬 스토리지에 저장
-            localStorage.setItem('surveyFormData', JSON.stringify(newData))
-            return newData
-        })
+export type SubmitFn = (values: SurveyFormValues, files: File[]) => Promise<void> | void;
+
+export const SurveyPage = ({ onSubmit }: { onSubmit?: SubmitFn }): JSX.Element => {
+  const interactions = useLiftInteractions();
+  const { reduce, heroAnim, inViewAnim } = useAnimationProps();
+  const { goToGeneration } = useNavigation();
+  const [address, setAddress] = useState("");
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
+
+  // 파일 업로드 훅 사용
+  const {
+    selectedFiles,
+    previews,
+    dropActive,
+    formatBytes,
+    handleFileChange,
+    handleDrop,
+    handleDragOver,
+    handleDragLeave,
+    removeFileAt,
+  } = useFileUpload();
+
+  const { submitting, handleFormSubmit } = useFormSubmission(onSubmit);
+
+  // 폼 제출 핸들러
+  const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      if (onSubmit) {
+        // 사용자 정의 onSubmit이 있는 경우
+        const form = e.currentTarget;
+        const fd = new FormData(form);
+        const values: SurveyFormValues = {
+          storeName: String(fd.get("storeName") || ""),
+          regionKeyword: String(fd.get("regionKeyword") || ""),
+          address: String(fd.get("address") || ""),
+          priceRange: String(fd.get("priceRange") || ""),
+          category: String(fd.get("category") || ""),
+          hours: String(fd.get("hours") || ""),
+          intro: String(fd.get("intro") || ""),
+          refLink: String(fd.get("refLink") || ""),
+          serviceKeywords: String(fd.get("serviceKeywords") || ""),
+          target: String(fd.get("target") || ""),
+          instagram: String(fd.get("instagram") || ""),
+          promotion: String(fd.get("promotion") || ""),
+        };
+        
+        console.log('사용자 정의 onSubmit 호출 - 폼 데이터:', values);
+        console.log('선택된 파일 개수:', selectedFiles.length);
+        
+        await onSubmit(values, selectedFiles);
+      } else {
+        // 기본 제출 로직 (API 호출 후 결과 페이지로 이동)
+        console.log('기본 폼 제출 로직 실행 - 파일 개수:', selectedFiles.length);
+        
+        // 폼 데이터 미리 확인
+        const form = e.currentTarget;
+        const fd = new FormData(form);
+        console.log('폼 데이터 확인:');
+        console.log('- storeName:', fd.get("storeName"));
+        console.log('- regionKeyword:', fd.get("regionKeyword"));
+        console.log('- address:', fd.get("address"));
+        console.log('- priceRange:', fd.get("priceRange"));
+        console.log('- category:', fd.get("category"));
+        console.log('- hours:', fd.get("hours"));
+        console.log('- intro:', fd.get("intro"));
+        console.log('- refLink:', fd.get("refLink"));
+        console.log('- serviceKeywords:', fd.get("serviceKeywords"));
+        console.log('- target:', fd.get("target"));
+        console.log('- instagram:', fd.get("instagram"));
+        console.log('- promotion:', fd.get("promotion"));
+        
+        const result = await handleFormSubmit(e, selectedFiles);
+        if (result) {
+          console.log('폼 제출 성공, 결과 페이지로 이동:', result);
+          goToGeneration(result);
+        } else {
+          console.warn('폼 제출 결과가 없습니다.');
+        }
+      }
+    } catch (error) {
+      console.error('폼 제출 실패:', error);
+      // 에러는 이미 handleFormSubmit에서 처리됨
     }
+  };
 
-    // 폼 초기화 함수
-    const resetForm = () => {
-        setFormData({})
-        localStorage.removeItem('surveyFormData')
-    }
+  return (
+    <main className="font-sans">
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+        {/* 헤더: fly-up + stagger */}
+        <motion.header className="text-center" variants={container} {...heroAnim}>
+          <motion.h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900" variants={flyUp}>
+            가게 정보 등록
+          </motion.h1>
+          <motion.p className="mt-3 text-gray-600 text-sm sm:text-base" variants={fade}>
+            AI 홍보 콘텐츠 생성을 위해 기본 정보를 입력해 주세요.
+          </motion.p>
+        </motion.header>
 
-    // 로컬 스토리지에 자동 저장
-    useEffect(() => {
-        localStorage.setItem('surveyFormData', JSON.stringify(formData))
-    }, [formData])
+        <form className="mt-10 space-y-10" onSubmit={onSubmitHandler}>
+          {/* 기본 정보 */}
+          <BasicInfoSection 
+            address={address}
+            setAddress={setAddress}
+            heroAnim={heroAnim}
+          />
 
-    const { goToGeneration } = useNavigation()
-    
-    return (
-        <PageLayout className="h-[calc(100vh-72px-132px)] overflow-hidden">
-            {/* 모바일 탭 헤더 */}
-            <div className="md:hidden flex border-b border-gray-200 bg-white sticky top-0 z-10">
-                <button
-                    onClick={() => setActiveTab('input')}
-                    className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                        activeTab === 'input'
-                            ? 'text-green-600 border-b-2 border-green-600'
-                            : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                    질문지
-                </button>
-                <button
-                    onClick={() => setActiveTab('preview')}
-                    className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                        activeTab === 'preview'
-                            ? 'text-green-600 border-b-2 border-green-600'
-                            : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                    프리뷰
-                </button>
-            </div>
+          {/* 가게 소개 */}
+          <StoreIntroSection 
+            reduce={reduce ?? false}
+            selectedFiles={selectedFiles}
+            previews={previews}
+            dropActive={dropActive}
+            formatBytes={formatBytes}
+            handleFileChange={handleFileChange}
+            handleDrop={handleDrop}
+            handleDragOver={handleDragOver}
+            handleDragLeave={handleDragLeave}
+            removeFileAt={removeFileAt}
+          />
 
-            {/* 데스크톱 레이아웃 */}
-            <div className="hidden md:grid md:grid-cols-5 gap-6 w-[95%] lg:w-[80%] mx-auto h-full pt-4">
-                <InputSection 
-                    formData={formData}
-                    onInputChange={handleInputChange}
-                />
-                <PreviewCardSection 
-                    formData={formData} 
-                    onReset={resetForm}
-                    onSubmit={goToGeneration}
-                />
-            </div>
+          {/* 추가 정보 */}
+          <AdditionalInfoSection 
+            inViewAnim={inViewAnim}
+          />
 
-            {/* 모바일 탭 콘텐츠 */}
-            <div className="grid grid-cols-1 md:hidden w-[90%] mx-auto h-[calc(100vh-72px-132px-60px)] pt-4">
-                {activeTab === 'input' ? (
-                    <InputSection 
-                        formData={formData}
-                        onInputChange={handleInputChange}
-                    />
-                ) : (
-                    <PreviewCardSection 
-                        formData={formData} 
-                        onReset={resetForm}
-                        onSubmit={goToGeneration}
-                    />
-                )}
-            </div>
-        </PageLayout>
-    )
-}
+          {/* CTA */}
+          <SubmitButton 
+            submitting={submitting}
+            interactions={interactions}
+            reduce={reduce ?? false}
+          />
+        </form>
+      </section>
+    </main>
+  );
+};
 
-export default SurveyPage
+export default SurveyPage;

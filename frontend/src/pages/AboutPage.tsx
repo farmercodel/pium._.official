@@ -1,6 +1,13 @@
-import PageLayout from "../components/common/PageLayout"
-import About from "../../public/about2.jpg"
+import type { JSX } from "react";
+import { useAboutPage } from "../hooks/useAboutPage";
+import { useScrollToTop } from "../hooks/useScrollToTop";
+import { HeroSection } from "../components/about/HeroSection";
+import { ProjectIntroSection } from "../components/about/ProjectIntroSection";
+import { FeaturesSection } from "../components/about/FeaturesSection";
+import { TeamSection } from "../components/about/TeamSection";
+import { CTASection } from "../components/about/CTASection";
 
+<<<<<<< HEAD
 // 팀원 데이터
 const teamMember = [
   {
@@ -46,78 +53,23 @@ const teamMember = [
     photo: "/public/TeamMember/siyeon.jpg"
   }
 ]
+=======
+export const AboutPage = ({ team }: { team?: ReturnType<typeof useAboutPage>['teamMembers'] }): JSX.Element => {
+  const { teamMembers, projectIntroData, featureData, heroAnim, inViewAnim } = useAboutPage(team);
+  
+  // 페이지 이동 시 스크롤을 맨 위로
+  useScrollToTop();
+>>>>>>> c232118cc9cae7a25b358ad3a7d5b5a4b55eb65d
 
-const AboutPage = () => {
   return (
-    <PageLayout>
-      {/* Pretendard 웹폰트 적용 */}
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css"
-      />
-      {/* About 페이지 전체 폰트 적용 */}
-      <div className="font-sans">
-        <div className="flex flex-col lg:flex-row items-stretch justify-center gap-y-8 gap-x-14 max-w-[1100px] mx-auto">
-          <div className="max-w-[500px] text-center lg:text-left h-[500px] flex flex-col justify-center">
-            <h1 className="text-[50px] font-bold mb-4">Project</h1>
-            <h3 className="text-[17px] text-gray-700 leading-relaxed">
-              피움은 지역 소상공인의 디지털 마케팅 진입 장벽을 낮추는 AI 기반 웹 서비스입니다.<br />
-              많은 가게가 존재하지만, 소비자는 모든 가게를 알기 어렵고, 좋은 상품과 서비스가 알려지지 않는 경우가 많습니다.<br />
-              홍보 마케팅은 소상공인의 생존 전략이지만 경험 부족으로 어려움을 겪거나 사기 피해를 당하기도 합니다.<br />
-              피움은 사용자가 가게 정보를 입력하면 <br />
-              AI가 자동으로 홍보 글, 해시태그, 콘텐츠를 생성하고, 인스타그램 등 주요 플랫폼에 쉽게 게시할 수 있도록 지원하여 <br />
-              누구나 빠르고 안전하게 가게를 홍보할 수 있게 돕습니다.
-            </h3>
-          </div>
+    <main className="font-sans">
+      <HeroSection heroAnim={heroAnim} />
+      <ProjectIntroSection projectIntroData={projectIntroData} inViewAnim={inViewAnim} />
+      <FeaturesSection featureData={featureData} inViewAnim={inViewAnim} />
+      <TeamSection teamMembers={teamMembers} inViewAnim={inViewAnim} />
+      <CTASection inViewAnim={inViewAnim} />
+    </main>
+  );
+};
 
-          {/* 오른쪽 이미지 */}
-          <img
-            src={About}
-            alt="Photo"
-            className="w-[600px] lg:w-[450px] h-[500px] object-cover mt-[60px]"
-          />
-        </div>
-        <h4 className="text-[40px] font-bold mt-20 mb-10 text-left"></h4>
-        <h4 className="text-[40px] font-bold mt-20 mb-10 text-center">
-          Team member introduction
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 mb-20">
-          {teamMember.map((member, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-2xl shadow-md hover:shadow-lg transition transform hover:scale-105 p-6 flex flex-col items-center"
-            >
-              <div className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden bg-gray-100 mb-4">
-                {member.photo ? (
-                  <img
-                    src={member.photo}
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-xl">👤</span>
-                )}
-              </div>
-
-              {/* 이름 + 역할 */}
-              <h2 className="text-lg font-bold text-center">{member.name}</h2>
-              <p className="text-sm text-gray-500 text-center">{member.role}</p>
-
-              {/* 이메일 */}
-              <p className="text-xs text-gray-400 text-center mt-1">
-                {member.email}
-              </p>
-
-              {/* 설명 */}
-              <p className="text-sm text-gray-600 text-center mt-3">
-                {member.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </PageLayout>
-  )
-}
-
-export default AboutPage
+export default AboutPage;

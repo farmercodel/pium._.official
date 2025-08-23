@@ -23,12 +23,12 @@ const MAIN_NAVIGATION_ITEMS = [
         navigationText: 'ai',
     },
     {
-        name: 'Preview',
-        navigationText: 'preview',
+        name: 'Plans',
+        navigationText: 'plans',
     },
     {
-        name: 'Marketplace',
-        navigationText: 'main',
+        name: 'Preview',
+        navigationText: 'preview',
     },
     {
         name: 'About',
@@ -61,8 +61,8 @@ const POPUP_NAVIGATION_ITEMS = [
 
 const POPUP_ACTION_ITEMS = [
     { 
-        name: 'Watch demo', 
-        navigationText: 'main', 
+        name: 'modal test', 
+        navigationText: 'modal', 
         icon: PlayCircleIcon 
     },
     { 

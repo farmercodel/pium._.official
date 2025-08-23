@@ -17,27 +17,20 @@ $$;
 -- 데이터베이스 소유권 설정
 ALTER DATABASE pium_db OWNER TO pium_user;
 
--- 기본 스키마 생성
+-- 대상 DB로 접속
 \c pium_db;
 
--- 사용자 테이블 예시 (임시)
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- 스키마 초기화(개발용): 테이블은 ORM/Alembic이 생성
+DROP SCHEMA IF EXISTS public CASCADE;
+CREATE SCHEMA public AUTHORIZATION pium_user;
 
--- 테스트 데이터 삽입 (임시)
-INSERT INTO users (username, email) VALUES 
-    ('test_user1', 'test1@pium.com'),
-    ('test_user2', 'test2@pium.com')
-ON CONFLICT (username) DO NOTHING;
+-- 권한 부여
+GRANT ALL PRIVILEGES ON SCHEMA public TO pium_user;
 
--- 테이블 권한 설정
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pium_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pium_user;
+-- 향후 생성될 객체에 대한 기본 권한 (안전장치)
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO pium_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO pium_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO pium_user;
 
 -- 성공 메시지
 SELECT 'Database initialization completed successfully!' as status;

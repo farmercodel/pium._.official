@@ -10,7 +10,7 @@ import React from 'react'
 
 interface ButtonProps {
     children: React.ReactNode;
-    variant?: 'custom' | 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' | 'noneBorder'
+    variant?: 'custom' | 'primary' | 'secondary' | 'warning' | 'dimmed' | 'danger'
     size?: 'custom' | 'small' | 'medium' | 'large'
     className?: string
     onClick?: () => void
@@ -30,16 +30,15 @@ const Button = ({
     fullWidth = false,
 }: ButtonProps) => {
 
-    const baseClasses = 'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
+    const baseClasses = 'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50'
 
     const variantClasses = {
         custom: "",
-        primary: "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500",
-        secondary: "bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500",
-        danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
-        ghost: "bg-transparent hover:bg-gray-100 text-gray-700 border border-gray-300 focus:ring-gray-500",
-        success: "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500",
-        noneBorder: "bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-500",
+        primary: "bg-[#b8d885] hover:bg-[#a2be75] text-white focus:ring-[#caed92] cursor-pointer",
+        secondary: "bg-[#b8d885] hover:bg-[#a2be75] text-white focus:ring-[#caed92] cursor-pointer",
+        warning: "bg-[#e7e478] hover:bg-[#cbc96a] text-white focus:ring-[#fefb84] cursor-pointer",
+        dimmed: "bg-[#c8d1a9] text-white cursor-not-allowed",
+        danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 cursor-pointer",
     }
 
     const sizeClasses = {
@@ -53,16 +52,16 @@ const Button = ({
 
     return (
         <button
-        type={type}
-        className={`
+            type={type}
+            className={`
             ${baseClasses}
             ${variantClasses[variant]}
             ${sizeClasses[size]}
             ${widthClass}
             ${className}
         `}
-        onClick={onClick}
-        disabled={disabled}
+            onClick={onClick}
+            disabled={disabled}
         >
             {children}
         </button>

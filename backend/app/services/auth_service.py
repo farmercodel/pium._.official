@@ -26,6 +26,23 @@ class AuthService:
         self.db = db
         self.user_repo = UserRepository(db)
 
+    def ensure_admin_seed(self) -> None:
+        """
+        앱 시작 시 'admin@gmail.com' 어드민 계정을 멱등하게 보장.
+        이미 있으면 에러로 죽지 않고, 관리자 플래그만 보정합니다.
+        """
+        try:
+            self.register_user(email="admin@gmail.com", password="admin", is_admin=True)
+        except ValueError as e:
+            if "이미 사용 중인 이메일" in str(e):
+                # 필요하면 관리자 승격 보정
+                u = self.user_repo.get_by_email("admin@gmail.com")
+                if u and not u.is_admin:
+                    u.is_admin = True
+                    self.db.commit()
+            else:
+                raise
+
     # -------------------------------
     # 회원가입
     # -------------------------------
