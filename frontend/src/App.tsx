@@ -18,7 +18,7 @@ import Layout from "./components/layout/Layout";
 
 // 모달을 사용하는 App 컴포넌트
 const AppContent = () => {
-  const { isOpen, content, title, size, closeOnBackdrop, closeModal } = useModal();
+  const { isOpen, content, title, closeModal, resetModal } = useModal();
 
   return (
     <Router>
@@ -38,14 +38,16 @@ const AppContent = () => {
 
       {/* Modal */}
       <Modal
-        isOpen={isOpen}
+        open={isOpen}
         onClose={closeModal}
-        title={title}
-        size={size}
-        closeOnBackdrop={closeOnBackdrop}
-      >
-        {content}
-      </Modal>
+        title={title || "제목 없음"}
+        desc={content as string}
+        confirmText="확인"
+        cancelText="닫기"
+        onConfirm={resetModal}
+        variant="success"
+        reduceMotion={false}
+      />
     </Router>
   );
 };

@@ -184,7 +184,7 @@ export function Modal({
                   relative inline-flex items-center gap-2 justify-center rounded-full px-6 py-3
                   font-semibold text-white
                   focus:outline-none focus-visible:ring-2 ${ring}
-                  bg-[linear-gradient(90deg,#34D399_0%,#06B6D4_100%)]
+                  bg-gradient-to-r ${grad}
                   shadow-[0_8px_18px_rgba(6,182,212,0.28)]
                   hover:brightness-105 active:scale-[0.99] transition
                 `}
