@@ -21,7 +21,7 @@ export const HeroSection = ({ heroAnim }: HeroSectionProps) => {
             프로젝트 소개
           </motion.h1>
           <motion.p className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto" variants={fade}>
-            피움은 지역 소상공인의 마케팅을 돕는 AI 서비스입니다. <br />
+            PIUM은 지역 소상공인의 마케팅을 돕는 AI 서비스입니다. <br />
           </motion.p>
 
           <motion.div className="mt-5" variants={fade}>
