@@ -58,7 +58,7 @@ function PreviewCard({ item, version }: { item: PreviewDef; version: number }) {
       {/* 헤더 */}
       <motion.div className="mb-3 flex items-center justify-between" variants={fade}>
         <div className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-emerald-50 text-emerald-600 shadow"><InstagramIcon /></span>
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-[#F9FAEA] text-emerald-500 shadow"><InstagramIcon /></span>
           <div className="leading-tight">
             <p className="text-sm font-semibold text-gray-800">{item.title}</p>
             <p className="text-xs text-gray-500">

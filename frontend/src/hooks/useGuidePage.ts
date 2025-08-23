@@ -22,29 +22,29 @@ export const useGuidePage = () => {
       idx: 3,
       title: "인스타그램 피드 게시",
       desc: "홍보 콘텐츠 시안 3가지 중 마음에 드는 시안 한 가지를 선택하면 인스타그램에 자동 게시됩니다. 가게 인스타그램 계정과 공동 소유자로 인스타그램 게시글을 업로드하고 싶다면 반드시 가게 정보에 인스타그램 계정을 입력하세요.",
-      label: "즉시 활용 가능",
+      label: "SNS 게시 자동화",
       labelIcon: "/assets/check-gradient.svg"
     }
   ];
 
   const features = [
     {
-      icon: "/assets/빠른.svg",
+      icon: "/assets/feature-speed.svg",
       title: "빠른 생성 속도",
       desc: "몇 초 만에 고품질 콘텐츠를 생성합니다"
     },
     {
-      icon: "/assets/스타일.svg",
+      icon: "/assets/feature-sparkles.svg",
       title: "다양한 스타일",
       desc: "업종과 목적에 맞는 다양한 톤앤매너"
     },
     {
-      icon: "/assets/모바일.svg",
+      icon: "/assets/feature-phone.svg",
       title: "모바일 최적화",
       desc: "언제 어디서나 편리하게 이용 가능"
     },
     {
-      icon: "/assets/보안.svg",
+      icon: "/assets/feature-shield.svg",
       title: "안전한 보안",
       desc: "고객 정보와 데이터를 안전하게 보호"
     }

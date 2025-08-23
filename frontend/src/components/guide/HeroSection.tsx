@@ -56,7 +56,6 @@ export const HeroSection = ({ reduce }: HeroSectionProps) => {
                   bg-[linear-gradient(90deg,#7cdb3e_0%,#d5ed7e_45%,#c0d663_100%)]
                   bg-clip-text text-transparent
                   font-extrabold
-                  [-webkit-text-stroke:0.7px_rgba(213,237,126,0.55)]
               "
               >
                 PIUM
