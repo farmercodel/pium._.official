@@ -80,3 +80,5 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc), # 최초 생성 시 현재 시간
         onupdate=lambda: datetime.now(timezone.utc) # 업데이트 시 시간 갱신
     )
+    
+    inquiries = relationship("Inquiry", back_populates="user")
