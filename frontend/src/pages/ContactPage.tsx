@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../api/api"; // axios 인스턴스
 import { motion } from "framer-motion";
 import {
@@ -23,7 +23,7 @@ export const ContactPage = (): JSX.Element => {
   const { heroAnim } = useAnimationProps();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // 파일 사이즈 사람 친화적 표기
+  // 파일 사이즈 표기
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 B";
     const k = 1024;
@@ -32,44 +32,50 @@ export const ContactPage = (): JSX.Element => {
     return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
   };
 
-  // 이미지 미리보기 URL 생성/정리
+  // files가 바뀔 때마다 미리보기 생성/정리
   useEffect(() => {
-    // 기존 URL revoke
-    return () => {
-      previews.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [previews]);
-
-  const makePreviews = (fs: File[]) => {
-    // 이미지가 아니면 미리보기(null) 대신 빈 문자열
-    const urls = fs.map((f) =>
+    const urls = files.map((f) =>
       f.type.startsWith("image/") ? URL.createObjectURL(f) : ""
     );
-    setPreviews((prev) => {
-      prev.forEach((u) => URL.revokeObjectURL(u));
-      return urls;
-    });
-  };
+    setPreviews(urls);
+    return () => {
+      urls.forEach((u) => u && URL.revokeObjectURL(u));
+    };
+  }, [files]);
 
-  // 공통: 파일 목록에서 허용/제외 처리
+  // 파일 정규화: 용량 검사 + 누적 + 중복 제거
   const normalizeFiles = (list: FileList | File[]) => {
-    const arr = Array.from(list);
-    const overSized = arr.filter((f) => f.size > MAX_FILE_SIZE);
-    if (overSized.length > 0) {
+    const incoming = Array.from(list);
+
+    const overSized = incoming.filter((f) => f.size > MAX_FILE_SIZE);
+    if (overSized.length) {
       alert(
         `파일당 최대 10MB만 업로드할 수 있어요.\n초과 파일: ${overSized
           .map((f) => f.name)
           .join(", ")}`
       );
     }
-    const accepted = arr.filter((f) => f.size <= MAX_FILE_SIZE);
-    setFiles(accepted);
-    makePreviews(accepted);
+
+    const accepted = incoming.filter((f) => f.size <= MAX_FILE_SIZE);
+
+    setFiles((prev) => {
+      const merged = [...prev, ...accepted];
+      const seen = new Set<string>();
+      const deduped: File[] = [];
+      for (const f of merged) {
+        const key = `${f.name}_${f.size}_${f.lastModified}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          deduped.push(f);
+        }
+      }
+      return deduped;
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    normalizeFiles(e.target.files);
+    normalizeFiles(e.target.files); // 누적
   };
 
   const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
@@ -77,7 +83,7 @@ export const ContactPage = (): JSX.Element => {
     e.stopPropagation();
     setDropActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      normalizeFiles(e.dataTransfer.files);
+      normalizeFiles(e.dataTransfer.files); // 누적
       e.dataTransfer.clearData();
     }
   };
@@ -95,10 +101,7 @@ export const ContactPage = (): JSX.Element => {
   };
 
   const removeFileAt = (idx: number) => {
-    const next = files.filter((_, i) => i !== idx);
-    const nextPrev = previews.filter((_, i) => i !== idx);
-    setFiles(next);
-    setPreviews(nextPrev);
+    setFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,7 +123,6 @@ export const ContactPage = (): JSX.Element => {
       setName("");
       setMessage("");
       setFiles([]);
-      setPreviews([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       console.error(err);
@@ -216,7 +218,7 @@ export const ContactPage = (): JSX.Element => {
                 />
               </div>
 
-              {/* 파일 드래그&드롭 존 (이미지 기준) */}
+              {/* 파일 드래그&드롭 존 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   이미지 업로드
@@ -227,12 +229,11 @@ export const ContactPage = (): JSX.Element => {
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
-                  className={`mt-2 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center cursor-pointer transition
-                    ${
-                      dropActive
-                        ? "border-emerald-300 bg-emerald-50"
-                        : "border-gray-300 hover:border-emerald-300"
-                    }`}
+                  className={`mt-2 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center cursor-pointer transition ${
+                    dropActive
+                      ? "border-emerald-300 bg-emerald-50"
+                      : "border-gray-300 hover:border-emerald-300"
+                  }`}
                   animate={
                     dropActive
                       ? {
