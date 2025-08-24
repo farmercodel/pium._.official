@@ -43,7 +43,7 @@ const stylesByVariant: Record<
     },
     // 필요하면 노란 경고, 빨간 위험도 그대로 사용 가능
     warning: {
-        grad: "from-amber-400 via-yellow-400 to-lime-400",
+        grad: "from-amber-500 via-orange-400 to-yellow-500",
         ring: "ring-amber-300",
         glow: "rgba(245,158,11,0.30), rgba(234,179,8,0.18), rgba(132,204,22,0.10)",
         icon: "text-amber-600",
@@ -143,21 +143,38 @@ export function Modal({
                                         {iconSrc ? (
                                             <img src={iconSrc} alt="" className="h-7 w-7" aria-hidden />
                                         ) : (
-                                            // 기본 경고 아이콘(삼각형) — 에메랄드 톤
-                                            <svg
-                                                className={`h-7 w-7 ${icon}`}
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth={1.8}
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                aria-hidden
-                                            >
-                                                <path d="M12 9v4" />
-                                                <path d="M12 17h.01" />
-                                                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                                            </svg>
+                                            // 기본 아이콘 — variant에 따라 다르게
+                                            variant === "success" ? (
+                                                // success: 체크 아이콘
+                                                <svg
+                                                    className={`h-7 w-7 ${icon}`}
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth={1.8}
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    aria-hidden
+                                                >
+                                                    <path d="M20 6L9 17l-5-5" />
+                                                </svg>
+                                            ) : (
+                                                // 기타 variant: 경고 아이콘(삼각형)
+                                                <svg
+                                                    className={`h-7 w-7 ${icon}`}
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth={1.8}
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    aria-hidden
+                                                >
+                                                    <path d="M12 9v4" />
+                                                    <path d="M12 17h.01" />
+                                                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                                </svg>
+                                            )
                                         )}
                                     </div>
                                 </div>
