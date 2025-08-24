@@ -288,7 +288,7 @@ function Header() {
             <VideoModal
                 open={videoModalOpen}
                 onClose={() => setVideoModalOpen(false)}
-                videoSrc="/videos/demo_video.mov"
+                videoSrc="/videos/demo_video.webm"
                 title="Demo Video"
             />
         </div>
