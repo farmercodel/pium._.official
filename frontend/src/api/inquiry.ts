@@ -1,4 +1,12 @@
 // src/api/api.ts
+// import { api } from "./api";
+// import type { InquiryResponse } from "../types/inquiry";
+
+// export async function inquiry(payload: InquiryResponse) {
+//   const { data } = await api.post("/inquiries", payload);
+//   return data;
+// }
+
 import axios from "axios";
 
 export const api = axios.create({
