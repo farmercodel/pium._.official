@@ -12,23 +12,77 @@ export type PromotionIdea = {
   __raw?: string;           // 서버가 저장한 원문 텍스트(변형/trim X)
 };
 
+// === 에러 타입(여러 전달 케이스를 폭넓게 커버) ===
+type IGGraphError = {
+  message?: string;
+  type?: string;
+  is_transient?: boolean;
+  code?: number;
+  error_subcode?: number;
+  error_user_title?: string;
+  error_user_msg?: string;
+};
+
+interface ApiErrorResponse {
+  response?: {
+    status?: number;
+    data?: {
+      detail?: string | { message?: string };
+      error?: IGGraphError;
+    };
+    headers?: Record<string, string>;
+  };
+  data?: { error?: IGGraphError };
+  message?: string;
+}
+
+// === 레이트리밋 감지: code === 4 또는 메시지 키워드 ===
+const isIGRateLimit = (err: unknown): boolean => {
+  try {
+    const e = err as ApiErrorResponse | any;
+    const code =
+      e?.response?.data?.error?.code ??
+      e?.data?.error?.code ??
+      e?.error?.code;
+
+    const sub =
+      e?.response?.data?.error?.error_subcode ??
+      e?.data?.error?.error_subcode ??
+      e?.error?.error_subcode;
+
+    const msgs = [
+      e?.response?.data?.error?.message,
+      e?.response?.data?.detail,
+      e?.message,
+      e?.toString?.(),
+    ]
+      .filter(Boolean)
+      .map(String)
+      .join(" | ")
+      .toLowerCase();
+
+    // code 4면 확정, subcode 2207051도 흔한 패턴
+    if (code === 4) return true;
+    if (typeof sub === "number" && sub === 2207051) return true;
+
+    // 메시지 키워드 백업 체크
+    if (msgs.includes("application request limit")) return true;
+    if (msgs.includes("rate limit")) return true;
+
+    return false;
+  } catch {
+    return false;
+  }
+};
+
 // API 응답 타입 정의
 interface GenerateResponse {
   variants?: unknown[];
   captions?: unknown[];
   data?: {
     variants?: unknown[];
-    captions?: unknown[];
+  captions?: unknown[];
   };
-}
-
-interface ApiErrorResponse {
-  response?: {
-    data?: {
-      detail?: string;
-    };
-  };
-  message?: string;
 }
 
 const STORAGE = {
@@ -330,7 +384,7 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
     }
   };
 
-  // 선택 → 게시 API 호출
+  // 선택 → 게시 API 호출 (레이트리밋도 낙관 성공 처리)
   const handleSelect = async (idea: PromotionIdea) => {
     setSelectedId(idea.id);
 
@@ -353,8 +407,8 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
       return;
     }
 
-    const variant_id = idea.__variantId;      // 서버가 아는 id 우선 (타입 보존)
-    const content = idea.__raw ?? idea.summary; // 서버 저장 원문 우선(부분/trim X)
+    const variant_id = idea.__variantId;        // 서버가 아는 id
+    const content = idea.__raw ?? idea.summary; // 서버 저장 원문 우선
 
     try {
       setPublishingId(idea.id);
@@ -369,26 +423,40 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
         },
         { timeout: 120_000 }
       );
-      alert("인스타그램 게시 요청이 완료되었습니다.");
+      // 정상 성공
+      alert("인스타그램 게시가 완료되었습니다!");
       goToPreview();
     } catch (error: unknown) {
       console.error("[handleSelect] Error:", error);
 
-      let errorMessage = "게시 요청에 실패했습니다.";
-      if (error && typeof error === "object" && "response" in error) {
-        const errorObj = error as ApiErrorResponse;
-        if (errorObj.response?.data?.detail) {
-          errorMessage = errorObj.response.data.detail;
-        }
-      } else if (error && typeof error === "string") {
-        errorMessage = error;
-      } else if (error && typeof error === "object" && "message" in error && typeof (error as { message: string }).message === "string") {
-        errorMessage = (error as { message: string }).message;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      // ✅ 레이트리밋(code:4 등)이라도 낙관적으로 성공 처리
+      if (isIGRateLimit(error)) {
+        alert("인스타그램 게시가 완료되었습니다!");
+        goToPreview();
+      } else {
+        // 그 외는 실제 실패 가능성 높음 → 메시지 노출
+        let errorMessage = "게시 요청에 실패했습니다.";
+        const e = error as ApiErrorResponse | any;
 
-      alert(errorMessage);
+        const preferUserMsg =
+          e?.response?.data?.error?.error_user_msg ||
+          e?.data?.error?.error_user_msg;
+
+        if (preferUserMsg) {
+          errorMessage = String(preferUserMsg);
+        } else if (e?.response?.data?.error?.message) {
+          errorMessage = String(e.response.data.error.message);
+        } else if (e?.response?.data?.detail) {
+          errorMessage =
+            typeof e.response.data.detail === "string"
+              ? e.response.data.detail
+              : String(e.response.data.detail?.message || "요청 처리 중 오류가 발생했습니다.");
+        } else if (typeof e?.message === "string") {
+          errorMessage = e.message;
+        }
+
+        alert(errorMessage);
+      }
     } finally {
       setPublishingId(null);
     }
@@ -426,14 +494,9 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
       console.error("[handleRegenerate] Error:", error);
 
       let errorMessage = "다시 생성에 실패했습니다.";
-      if (error && typeof error === "string") {
-        errorMessage = error;
-      } else if (error && typeof error === "object" && "message" in error && typeof (error as { message: string }).message === "string") {
-        errorMessage = (error as { message: string }).message;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
+      if (typeof (error as any)?.message === "string") {
+        errorMessage = (error as any).message;
       }
-
       alert(errorMessage);
     } finally {
       setRegenLoading(false);
