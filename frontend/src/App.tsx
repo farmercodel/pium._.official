@@ -16,6 +16,7 @@ import SignUpPage from "./pages/SignUpPage";
 import Protected from "./routes/Protected";
 import Layout from "./components/layout/Layout";
 import ContactPage from "./pages/ContactPage";
+import ContactAdminPage from "./pages/ContactAdminPage";
 
 // 모달을 사용하는 App 컴포넌트
 const AppContent = () => {
@@ -35,6 +36,7 @@ const AppContent = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/contact" element = {<ContactPage />} />
+          <Route path="/admin" element = {<ContactAdminPage />} />
         </Routes>
       </Layout>
 
