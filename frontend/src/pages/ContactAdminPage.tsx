@@ -148,7 +148,7 @@ export const ContactAdminPage = (): JSX.Element => {
     if (!open) return;
     setSending(true);
     try {
-      const res = await api.post<Inquiry>(`/inquiries/${open.id}/answer`, { answer: answerText });
+      const res = await api.post<Inquiry>(`/api/inquiries/${open.id}/answer`, { answer: answerText });
       // 목록의 해당 항목 갱신
       setList((prev) => prev.map((x) => (x.id === res.data.id ? res.data : x)));
       setOpen(res.data);

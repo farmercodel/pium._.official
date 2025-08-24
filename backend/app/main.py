@@ -13,6 +13,7 @@ from app.repository.user_repository import UserRepository
 from app.api.tosspayments import router as toss_router
 from app.api.inquiries import router as inquiries_router
 
+
 app = FastAPI(title="Pium API", version="1.0.0")
 
 origins = [
