@@ -6,6 +6,9 @@ import { useScrollToTop } from "../hooks/useScrollToTop";
 import { HeaderSection } from "../components/generation/HeaderSection";
 import { IdeasSection } from "../components/generation/IdeasSection";
 import { ActionsSection } from "../components/generation/ActionsSection";
+import { Modal } from "../components/common/Modal";
+import { useAnimationProps } from "../hooks/useAnimation";
+import useNavigation from "../hooks/useNavigation";
 
 export type PromoGenerateProps = {
   ideas?: ReturnType<typeof useGenerationPage>["list"];
@@ -26,9 +29,14 @@ export const PromoGeneratePage = ({
     publishingId,
     selectedIdea,
     initializeData,
+    modalOpen,
+    modalMessage,
+    modalTitle,
+    setModalOpen,
     handleSelect: internalHandleSelect,
     handleRegenerate: internalHandleRegenerate,
   } = useGenerationPage(ideas);
+  const { goToPreview } = useNavigation();
 
   // 외부(onRegenerate) 경로 로딩 상태
   const [externalLoading, setExternalLoading] = useState(false);
@@ -66,8 +74,30 @@ export const PromoGeneratePage = ({
     }
   };
 
+  const handleModalConfirm = () => {
+    setModalOpen(false);
+
+    // 성공 시에만 프리뷰 페이지로 이동
+    if (modalTitle === "게시 완료") {
+      goToPreview();
+    }
+  };
+
+  const { reduce } = useAnimationProps();
+
   return (
     <main className="font-sans">
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleModalConfirm}
+        title={modalTitle}
+        desc={modalMessage}
+        confirmText={modalTitle === "게시 완료" ? "프리뷰로 이동" : "확인"}
+        cancelText="닫기"
+        variant={modalTitle === "게시 완료" ? "success" : "danger"}
+        reduceMotion={!!reduce}
+      />
       <section className="relative w-full bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
           <HeaderSection ideaCount={list.length} />
