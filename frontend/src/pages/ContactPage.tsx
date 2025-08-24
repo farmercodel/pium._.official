@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { api } from "../api/api"; // axios 인스턴스
 import { motion } from "framer-motion";
 import { useAnimationProps, container, flyUp, fade } from "../hooks/useAnimation";
@@ -33,9 +33,10 @@ export const ContactPage = (): JSX.Element => {
     const k = 1024;
     const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+    return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
   };
 
+  // 이미지 미리보기 URL 관리
   useEffect(() => {
     const urls = files.map((f) => (f.type.startsWith("image/") ? URL.createObjectURL(f) : ""));
     setPreviews(urls);
@@ -44,7 +45,7 @@ export const ContactPage = (): JSX.Element => {
     };
   }, [files]);
 
-  /** 파일 검증 + 누적 + 중복제거 + 타입필터(JPG/PNG만 허용) */
+  /** 파일 검증 + 누적 + 중복제거 + 타입/용량 필터(JPG/PNG, 10MB) */
   const normalizeFiles = (list: FileList | File[]) => {
     const incoming = Array.from(list);
 
@@ -93,7 +94,10 @@ export const ContactPage = (): JSX.Element => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     normalizeFiles(e.target.files);
+    // 같은 파일 다시 선택 가능하도록 리셋
+    e.target.value = "";
   };
+
   const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -103,64 +107,91 @@ export const ContactPage = (): JSX.Element => {
       e.dataTransfer.clearData();
     }
   };
+
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDropActive(true);
   };
+
   const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDropActive(false);
   };
+
   const removeFileAt = (idx: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  /** 업로드 실패를 별도로 식별하기 위한 helper */
-const explainAxiosError = (err: any, context: "upload" | "create") => {
-  const res = err?.response;
-  if (!res) return "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
-  const detail = typeof res.data?.detail === "string"
-    ? res.data.detail
-    : JSON.stringify(res.data?.detail ?? {});
-  if (res.status === 401) return "로그인이 필요합니다.";
-  if (res.status === 403) return "권한이 없습니다.";
-  if (context === "upload") {
-    if (res.status === 413) return "파일이 서버 제한 용량을 초과합니다.";
-    if (res.status === 415) return "지원하지 않는 파일 형식입니다.";
-    if (res.status >= 500) return `파일 저장 서버 오류: ${detail}`;
-    return `파일 업로드 실패: ${detail}`;
-  }
-  if (res.status >= 500) return `서버 오류: ${detail}`;
-  return `문의 저장 실패: ${detail}`;
-};
-
-  const uploadAll = async (): Promise<UploadedFile[]> => {
-  if (files.length === 0) return [];
-  const form = new FormData();
-  files.forEach((f) => form.append("files", f));
-
-  const res = await api.post<{ ok: boolean; files: UploadedFile[] }>(
-    "/files/upload",  // 여기 경로 그대로 유지
-    form,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-      params: { subdir: "inquiries" },
+  /** 업로드/생성 실패 메시지 헬퍼 */
+  const explainAxiosError = (err: any, context: "upload" | "create") => {
+    const res = err?.response;
+    if (!res) return "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+    const detail =
+      typeof res.data?.detail === "string"
+        ? res.data.detail
+        : JSON.stringify(res.data?.detail ?? {});
+    if (res.status === 401) return "로그인이 필요합니다.";
+    if (res.status === 403) return "권한이 없습니다.";
+    if (context === "upload") {
+      if (res.status === 413) return "파일이 서버 제한 용량을 초과합니다.";
+      if (res.status === 415) return "지원하지 않는 파일 형식입니다.";
+      if (res.status >= 500) return `파일 저장 서버 오류: ${detail}`;
+      return `파일 업로드 실패: ${detail}`;
     }
-  );
+    if (res.status >= 500) return `서버 오류: ${detail}`;
+    return `문의 저장 실패: ${detail}`;
+  };
 
-  if (!res.data?.ok) throw new Error("파일 업로드 실패");
-  return res.data.files || [];
-};
+  /** 파일 모두 업로드 */
+  const uploadAll = async (): Promise<UploadedFile[]> => {
+    if (files.length === 0) return [];
+    const form = new FormData();
+    // 서버가 기대하는 필드명이 "files"인지 확인하세요. (예: Multer에서 .array("files"))
+    files.forEach((f) => form.append("files", f));
+    
+    // 1) 공통 프리픽스와 업로드 경로를 상수로 두는 걸 추천
+    const API_PREFIX = "/api"; // 또는 import.meta.env.VITE_API_PREFIX ?? "/api"
+    const UPLOAD_URL = `${API_PREFIX}/files/upload`; // ✅ 슬래시 포함!
+
+    // 2) 사용처
+    const res = await api.post<{ ok?: boolean; files?: UploadedFile[] } | UploadedFile[]>(
+      UPLOAD_URL,
+      form,
+      { params: { subdir: "inquiries" } }
+    );
+
+    // 응답 포맷을 다양한 경우에 대응 (ok/files 또는 배열)
+    if (!(res.status >= 200 && res.status < 300)) {
+      throw new Error("파일 업로드 실패");
+    }
+
+    // 케이스 A: { ok, files }
+    if (res.data && (res.data as any).files) {
+      const d = res.data as { ok?: boolean; files?: UploadedFile[] };
+      if (d.ok === false) throw new Error("파일 업로드 실패");
+      return Array.isArray(d.files) ? d.files : [];
+    }
+
+    // 케이스 B: 바로 배열 반환
+    if (Array.isArray(res.data)) {
+      return res.data as UploadedFile[];
+    }
+
+    // 케이스 C: 예기치 않은 스키마
+    return [];
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (loading) return;
-  if (!message.trim() && files.length === 0) {
-    alert("문의 내용 또는 파일을 입력해 주세요.");
-    return;
-  }
+    e.preventDefault();
+    if (loading) return;
+
+    // 메시지/파일 최소 하나는 있어야 함
+    if (!message.trim() && files.length === 0) {
+      alert("문의 내용 또는 파일을 입력해 주세요.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -184,16 +215,18 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
       }
 
       // 3) 문의 생성
-     try {
-      await api.post("/inquiries/", { question: payload }, {
-      headers: { "Content-Type": "application/json" }
-    });
-    } catch (err: any) {
-      alert(explainAxiosError(err, "create"));
-      return;
-    }
+      try {
+        await api.post(
+          "/api/inquiries/",
+          { question: payload },
+          { headers: { "Content-Type": "application/json" } }
+        );
+      } catch (err: any) {
+        alert(explainAxiosError(err, "create"));
+        return;
+      }
 
-
+      // 4) 성공 처리
       setSuccess(true);
       setMessage("");
       setFiles([]);
@@ -243,10 +276,13 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
                   placeholder="문의 내용을 자세히 적어주세요."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  required
+                  required={files.length === 0} // ✅ 파일이 없을 때만 필수
                   rows={6}
                   className="mt-2 w-full border border-gray-300 px-4 py-3 rounded-xl bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300 resize-none"
                 />
+                {files.length > 0 && (
+                  <p className="mt-1 text-xs text-gray-500">파일이 선택되어 있어 메시지는 선택사항입니다.</p>
+                )}
               </div>
 
               {/* 파일 드래그&드롭 존 */}
