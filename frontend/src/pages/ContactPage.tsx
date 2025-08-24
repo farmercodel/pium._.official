@@ -153,12 +153,12 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading) return;
-    if (!message.trim() && files.length === 0) {
-      alert("문의 내용 또는 파일을 입력해 주세요.");
-      return;
-    }
+  e.preventDefault();
+  if (loading) return;
+  if (!message.trim() && files.length === 0) {
+    alert("문의 내용 또는 파일을 입력해 주세요.");
+    return;
+  }
 
     setLoading(true);
     try {
@@ -182,12 +182,15 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
       }
 
       // 3) 문의 생성
-      try {
-        await api.post("/inquiries", { question: payload });
-      } catch (err: any) {
-        alert(explainAxiosError(err, "create"));
-        return;
-      }
+     try {
+      await api.post("http://localhost:8000/api/inquiries/", { question: payload }, {
+      headers: { "Content-Type": "application/json" }
+    });
+    } catch (err: any) {
+      alert(explainAxiosError(err, "create"));
+      return;
+    }
+
 
       setSuccess(true);
       setMessage("");
