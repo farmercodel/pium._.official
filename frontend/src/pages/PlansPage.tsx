@@ -195,6 +195,8 @@ const FaqItem = ({ q, a }: { q: string; a: string }) => {
 };
 
 export const PricingPage = (): JSX.Element => {
+  const hasToken = !!localStorage.getItem("access_token");
+
   const [selected, setSelected] = useState<Plan["id"]>("basic");
   const [loading, setLoading] = useState<Plan["id"] | null>(null);
 
@@ -204,7 +206,7 @@ export const PricingPage = (): JSX.Element => {
 
   const { heroAnim, inViewAnim, reduce } = useAnimationProps();
   const { sdkReady, startBillingEnroll } = useTossPayments();
-  const { goToSurvey } = useNavigation();
+  const { goToSurvey, goToLogin } = useNavigation();
 
   useUrlParams();
   useScrollToTop();
@@ -238,11 +240,15 @@ export const PricingPage = (): JSX.Element => {
         onClose={() => setErrorOpen(false)}
         onConfirm={() => {
           setErrorOpen(false);
-          if (selected !== "free") handleBillingEnroll(selected);
+          if (!hasToken) {
+            goToLogin();
+          } else {
+            if (selected !== "free") handleBillingEnroll(selected);
+          }
         }}
         title="정기 결제 등록에 실패했습니다."
         desc={errorMessage}
-        confirmText="다시 시도"  // 왼쪽(Primary)
+        confirmText={hasToken ? "다시 시도" : "로그인"} // 왼쪽(Primary)
         cancelText="닫기"        // 오른쪽(Secondary)
         variant="success"        // ✅ 에메랄드 보더/아이콘 (또는 이 줄 삭제해서 기본값 사용)
         reduceMotion={!!reduce}
