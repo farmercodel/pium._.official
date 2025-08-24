@@ -137,20 +137,22 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
 };
 
   const uploadAll = async (): Promise<UploadedFile[]> => {
-    if (files.length === 0) return [];
-    const form = new FormData();
-    files.forEach((f) => form.append("files", f));
-    const res = await api.post<{ ok: boolean; files: UploadedFile[] }>(
-      "/files/upload",
-      form,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-        params: { subdir: "inquiries" },
-      }
-    );
-    if (!res.data?.ok) throw new Error("파일 업로드 실패");
-    return res.data.files || [];
-  };
+  if (files.length === 0) return [];
+  const form = new FormData();
+  files.forEach((f) => form.append("files", f));
+
+  const res = await api.post<{ ok: boolean; files: UploadedFile[] }>(
+    "/files/upload",  // 여기 경로 그대로 유지
+    form,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+      params: { subdir: "inquiries" },
+    }
+  );
+
+  if (!res.data?.ok) throw new Error("파일 업로드 실패");
+  return res.data.files || [];
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -183,7 +185,7 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
 
       // 3) 문의 생성
      try {
-      await api.post("http://localhost:8000/api/inquiries/", { question: payload }, {
+      await api.post("/api/inquiries/", { question: payload }, {
       headers: { "Content-Type": "application/json" }
     });
     } catch (err: any) {
