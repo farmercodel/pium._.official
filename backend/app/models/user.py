@@ -81,4 +81,5 @@ class User(Base):
         onupdate=lambda: datetime.now(timezone.utc) # 업데이트 시 시간 갱신
     )
     
+    #문의하기에서 필요
     inquiries = relationship("Inquiry", back_populates="user")

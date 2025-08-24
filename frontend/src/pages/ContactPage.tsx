@@ -162,6 +162,7 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
 
     setLoading(true);
     try {
+<<<<<<< HEAD
       // 1) 파일 업로드 (있을 경우)
       let uploaded: UploadedFile[] = [];
       try {
@@ -190,7 +191,6 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
       alert(explainAxiosError(err, "create"));
       return;
     }
-
 
       setSuccess(true);
       setMessage("");
