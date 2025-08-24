@@ -29,7 +29,7 @@ docker-compose ps
 
 echo.
 echo ✅ Pium 프로젝트가 성공적으로 시작되었습니다!
-echo 🌐 Frontend: http://localhost:3000
+echo 🌐 Frontend: http://localhost:5173
 echo 🔧 Backend: http://localhost:8000
 echo 📚 Backend API 문서: http://localhost:8000/docs
 echo.
