@@ -183,7 +183,7 @@ const explainAxiosError = (err: any, context: "upload" | "create") => {
 
       // 3) 문의 생성
      try {
-      await api.post("http://localhost:8000/api/inquiries/", { question: payload }, {
+      await api.post("/api/inquiries/", { question: payload }, {
       headers: { "Content-Type": "application/json" }
     });
     } catch (err: any) {
