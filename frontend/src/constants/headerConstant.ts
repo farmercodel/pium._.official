@@ -1,18 +1,12 @@
 import {
     DocumentChartBarIcon,
     BookOpenIcon,
-/*
-    ArrowPathIcon,
-    FingerPrintIcon,
-    SquaresPlusIcon,
-*/
 } from '@heroicons/react/24/outline'
 
 import { PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 
 const LOGO_ITEMS = {
     name: 'LOGO',
-    // 임시 uiia cat image
     url: 'assets/logo.png',
     alt: 'PIUM_LOGO'
 } as const
@@ -62,7 +56,7 @@ const POPUP_NAVIGATION_ITEMS = [
 const POPUP_ACTION_ITEMS = [
     { 
         name: 'Watch demo', 
-        navigationText: 'main', 
+        navigationText: 'watchDemo', 
         icon: PlayCircleIcon 
     },
     { 

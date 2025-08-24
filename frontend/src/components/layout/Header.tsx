@@ -15,11 +15,13 @@ import {
 
 import Button from '../common/Button';
 import { api } from '../../api/api';
+import { VideoModal } from '../common/VideoModal';
 
 type Me = { id: number; email: string; is_active: boolean };
 
 function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [videoModalOpen, setVideoModalOpen] = useState(false);
     const [user, setUser] = useState<Me | null>(null);
     const [authChecked, setAuthChecked] = useState(false);
 
@@ -49,6 +51,7 @@ function Header() {
         login: goToLogin, 
         'sign up': goToSignUp,
         plans: goToPlans,
+        watchDemo: () => setVideoModalOpen(true),
     } as const;
 
     const AUTH_BTN = {
@@ -280,6 +283,14 @@ function Header() {
                     </DialogPanel>
                 </Dialog>
             </header>
+
+            {/* Video Modal */}
+            <VideoModal
+                open={videoModalOpen}
+                onClose={() => setVideoModalOpen(false)}
+                videoSrc="/videos/demo_video.mov"
+                title="Demo Video"
+            />
         </div>
     );
 }
