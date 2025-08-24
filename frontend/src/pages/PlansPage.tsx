@@ -250,7 +250,7 @@ export const PricingPage = (): JSX.Element => {
         desc={errorMessage}
         confirmText={hasToken ? "다시 시도" : "로그인"} // 왼쪽(Primary)
         cancelText="닫기"        // 오른쪽(Secondary)
-        variant="success"        // ✅ 에메랄드 보더/아이콘 (또는 이 줄 삭제해서 기본값 사용)
+        variant="warning"        // ✅ 에메랄드 보더/아이콘 (또는 이 줄 삭제해서 기본값 사용)
         reduceMotion={!!reduce}
       />
 
