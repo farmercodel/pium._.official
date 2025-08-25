@@ -147,12 +147,16 @@ async def upload_files(
 
 @router.get("/files/presigned-get")
 def presigned_get(key: str, expires: int = 600, current_user = Depends(get_current_user)):
+    # current_user 확인용 로그
+    print("current_user:", current_user)
+
     if not all([S3_BUCKET, S3_REGION, S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY]):
         raise HTTPException(500, "S3 env not set")
-
-    user_prefix = f"user-{current_user.id}/"
-    if not key.startswith(user_prefix):
-        raise HTTPException(403, "권한이 없습니다.")
+    
+    if not current_user.is_admin:
+        user_prefix = f"user-{current_user.id}/"
+        if not key.startswith(user_prefix):
+            raise HTTPException(403, "권한이 없습니다.")
 
     service = "s3"
     algorithm = "AWS4-HMAC-SHA256"
@@ -196,4 +200,8 @@ def presigned_get(key: str, expires: int = 600, current_user = Depends(get_curre
 
     final_qs = canonical_query + f"&X-Amz-Signature={signature}"
     url = f"{S3_ENDPOINT}{path}?{final_qs}"
+    
+    # presigned URL 로그
+    print("presigned URL:", url)
+
     return {"url": url, "expires_in": expires}

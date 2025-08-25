@@ -215,6 +215,25 @@ export const ContactPage = (): JSX.Element => {
 
     setLoading(true);
     try {
+      const form = new FormData();
+      form.append("question", message.trim());
+      files.forEach(f => form.append("files", f));
+
+      await api.post("/api/inquiries/", form, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      //성공처리
+      setSuccess(true);
+      setMessage("");
+      setFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err: any) {
+      alert(explainAxiosError(err, "create"));
+    } finally {
+      setLoading(false);
+    }
+  };
       // 1) 파일 업로드 (있을 경우)
       let uploaded: UploadedFile[] = [];
       try {

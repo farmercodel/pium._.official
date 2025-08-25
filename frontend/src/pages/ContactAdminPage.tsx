@@ -95,7 +95,7 @@ export const ContactAdminPage = (): JSX.Element => {
   const fetchList = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/inquiries");
+      const res = await api.get("http://localhost:8000/api/inquiries");
 
       // axios 인스턴스가 data를 이미 리턴하는 경우(res가 배열일 수도), 
       // 혹은 { data: [...] } / { items: [...] } 등 모든 케이스를 흡수
@@ -164,11 +164,12 @@ export const ContactAdminPage = (): JSX.Element => {
 
   // Presigned GET
   const openPresigned = async (rel: string) => {
-    try {
-      const res = await api.get<{ url: string; expires_in: number }>("/files/presigned-get", {
+    try {                                                                 //이부분 수정
+      const res = await api.get<{ url: string; expires_in: number }>("http://localhost:8000/api/files/presigned-get", {
         params: { key: rel, expires: 600 },
       });
-      const url = res.data?.url;
+      const url = res.data?.url;;
+      console.log(url);
       if (url) window.open(url, "_blank", "noopener,noreferrer");
     } catch (e) {
       console.error(e);
