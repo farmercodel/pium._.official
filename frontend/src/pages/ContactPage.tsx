@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { api } from "../api/api"; // axios 인스턴스
 import { motion } from "framer-motion";
 import { useAnimationProps, container, flyUp, fade } from "../hooks/useAnimation";
+import { Modal } from "../components/common/Modal";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME = ["image/jpeg", "image/png"];
@@ -24,6 +25,11 @@ export const ContactPage = (): JSX.Element => {
   const [dropActive, setDropActive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalContent, setModalContent] = useState("");
+  const [modalVariant, setModalVariant] = useState<"success" | "warning" | "danger" | "info">("success");
 
   const { heroAnim } = useAnimationProps();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -54,11 +60,15 @@ export const ContactPage = (): JSX.Element => {
       (f) => !ALLOWED_MIME.includes(f.type) && !ALLOWED_EXT.test(f.name)
     );
     if (disallowed.length) {
-      alert(
+      setModalTitle("파일 형식 오류");
+      setModalContent(
         `JPG 또는 PNG 형식만 업로드할 수 있어요.\n제외됨: ${disallowed
           .map((f) => f.name)
           .join(", ")}`
       );
+      setModalVariant("warning");
+      setModalOpen(true);
+      return;
     }
     const typeOk = incoming.filter(
       (f) => ALLOWED_MIME.includes(f.type) || ALLOWED_EXT.test(f.name)
@@ -67,11 +77,15 @@ export const ContactPage = (): JSX.Element => {
     // 2) 용량 필터
     const overSized = typeOk.filter((f) => f.size > MAX_FILE_SIZE);
     if (overSized.length) {
-      alert(
+      setModalTitle("파일 크기 초과");
+      setModalContent(
         `파일당 최대 10MB만 업로드할 수 있어요.\n초과 파일: ${overSized
           .map((f) => f.name)
           .join(", ")}`
       );
+      setModalVariant("warning");
+      setModalOpen(true);
+      return;
     }
     const accepted = typeOk.filter((f) => f.size <= MAX_FILE_SIZE);
 
@@ -125,8 +139,8 @@ export const ContactPage = (): JSX.Element => {
   };
 
   /** 업로드/생성 실패 메시지 헬퍼 */
-  const explainAxiosError = (err: any, context: "upload" | "create") => {
-    const res = err?.response;
+  const explainAxiosError = (err: unknown, context: "upload" | "create") => {
+    const res = (err as any)?.response;
     if (!res) return "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
     const detail =
       typeof res.data?.detail === "string"
@@ -189,7 +203,10 @@ export const ContactPage = (): JSX.Element => {
 
     // 메시지/파일 최소 하나는 있어야 함
     if (!message.trim() && files.length === 0) {
-      alert("문의 내용 또는 파일을 입력해 주세요.");
+      setModalTitle("문의 내용 부족");
+      setModalContent("문의 내용 또는 파일을 입력해 주세요.");
+      setModalVariant("warning");
+      setModalOpen(true);
       return;
     }
 
@@ -200,7 +217,10 @@ export const ContactPage = (): JSX.Element => {
       try {
         uploaded = await uploadAll();
       } catch (err: any) {
-        alert(explainAxiosError(err, "upload"));
+        setModalTitle("파일 업로드 실패");
+        setModalContent(explainAxiosError(err, "upload"));
+        setModalVariant("danger");
+        setModalOpen(true);
         return; // 업로드 실패 시 문의 생성 중단
       }
 
@@ -222,13 +242,20 @@ export const ContactPage = (): JSX.Element => {
           { headers: { "Content-Type": "application/json" } }
         );
       } catch (err: any) {
-        alert(explainAxiosError(err, "create"));
+        setModalTitle("문의 저장 실패");
+        setModalContent(explainAxiosError(err, "create"));
+        setModalVariant("danger");
+        setModalOpen(true);
         return;
       }
 
       // 4) 성공 처리
       setSuccess(true);
       setMessage("");
+      setModalOpen(true);
+      setModalTitle("문의 전송 완료");
+      setModalContent("문의가 성공적으로 전송되었습니다.");
+      setModalVariant("success");
       setFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } finally {
@@ -244,6 +271,14 @@ export const ContactPage = (): JSX.Element => {
 
   return (
     <main className="font-sans min-h-screen">
+      <Modal
+          open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={modalTitle}
+        desc={modalContent}
+        confirmText="확인"
+        variant={modalVariant as "success"}
+      />
       {/* 배너 */}
       <section className="w-full py-16 bg-[#F9FAEA]">
         <motion.div className="mx-auto max-w-3xl px-6 text-center" variants={container} {...heroAnim}>
