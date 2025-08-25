@@ -11,6 +11,9 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME = ["image/jpeg", "image/png"];
 const ALLOWED_EXT = /\.(jpe?g|png)$/i;
 
+// 타입가드 함수들
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
+
 type UploadedFile = {
   filename: string;
   content_type: string;
@@ -143,21 +146,30 @@ export const ContactPage = (): JSX.Element => {
 
   /** 업로드/생성 실패 메시지 헬퍼 */
   const explainAxiosError = (err: unknown, context: "upload" | "create") => {
-    const res = (err as any)?.response;
+    // Axios 에러 구조 타입가드
+    const isAxiosError = (v: unknown): v is { 
+      response?: { 
+        data?: { detail?: unknown }; 
+        status?: number 
+      } 
+    } => isRecord(v) && "response" in v;
+    
+    const res = isAxiosError(err) ? err.response : undefined;
     if (!res) return "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
-    const detail =
-      typeof res.data?.detail === "string"
-        ? res.data.detail
-        : JSON.stringify(res.data?.detail ?? {});
+    
+    const detail = isRecord(res.data) && typeof res.data.detail === "string"
+      ? res.data.detail
+      : JSON.stringify(res.data?.detail ?? {});
+      
     if (res.status === 401) return "로그인이 필요합니다. 로그인 후 다시 시도해 주세요.";
     if (res.status === 403) return "로그인이 필요합니다. 로그인 후 다시 시도해 주세요.";
     if (context === "upload") {
       if (res.status === 413) return "파일이 서버 제한 용량을 초과합니다.";
       if (res.status === 415) return "지원하지 않는 파일 형식입니다.";
-      if (res.status >= 500) return `파일 저장 서버 오류: ${detail}`;
+      if (res.status && res.status >= 500) return `파일 저장 서버 오류: ${detail}`;
       return `파일 업로드 실패: ${detail}`;
     }
-    if (res.status >= 500) return `서버 오류: ${detail}`;
+    if (res.status && res.status >= 500) return `서버 오류: ${detail}`;
     return `문의 저장 실패: ${detail}`;
   };
 
@@ -185,7 +197,7 @@ export const ContactPage = (): JSX.Element => {
     }
 
     // 케이스 A: { ok, files }
-    if (res.data && (res.data as any).files) {
+    if (res.data && isRecord(res.data) && "files" in res.data) {
       const d = res.data as { ok?: boolean; files?: UploadedFile[] };
       if (d.ok === false) throw new Error("파일 업로드 실패");
       return Array.isArray(d.files) ? d.files : [];
@@ -219,7 +231,7 @@ export const ContactPage = (): JSX.Element => {
       let uploaded: UploadedFile[] = [];
       try {
         uploaded = await uploadAll();
-      } catch (err: any) {
+      } catch (err: unknown) {
         setModalTitle("파일 업로드 실패");
         setModalContent(explainAxiosError(err, "upload"));
         setModalVariant("danger");
@@ -244,7 +256,7 @@ export const ContactPage = (): JSX.Element => {
           { question: payload },
           { headers: { "Content-Type": "application/json" } }
         );
-      } catch (err: any) {
+      } catch (err: unknown) {
         setModalTitle("문의 저장 실패");
         setModalContent(explainAxiosError(err, "create"));
         setModalVariant("danger");

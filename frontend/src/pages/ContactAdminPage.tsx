@@ -29,6 +29,9 @@ type ParsedInquiry = {
   attachments: ParsedAttachment[];
 };
 
+// 타입가드 함수
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
+
 /** 파일 확장자 기반 이미지 판별 */
 const isImageByNameOrUrl = (s?: string) =>
   !!s && /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(s);
@@ -52,7 +55,7 @@ function parseInquiry(question: string): ParsedInquiry {
 
   const attachments: ParsedAttachment[] = [];
   for (const raw of attachLines) {
-    const line = raw.replace(/^\-\s*/, "").trim();
+    const line = raw.replace(/^-/, "").trim();
 
     // presign key 추출
     const presignMatch = line.match(/presign key:\s*([^)]+)\)/i);
@@ -99,15 +102,15 @@ export const ContactAdminPage = (): JSX.Element => {
 
       // axios 인스턴스가 data를 이미 리턴하는 경우(res가 배열일 수도), 
       // 혹은 { data: [...] } / { items: [...] } 등 모든 케이스를 흡수
-      const raw = (res as any)?.data ?? res;
+      const raw = (res as { data?: unknown })?.data ?? res;
 
       const arr: Inquiry[] =
         Array.isArray(raw) ? raw :
-        Array.isArray(raw?.items) ? raw.items :
-        Array.isArray(raw?.data) ? raw.data : [];
+        (isRecord(raw) && Array.isArray(raw.items)) ? raw.items :
+        (isRecord(raw) && Array.isArray(raw.data)) ? raw.data : [];
 
       setList(arr);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
       alert("문의 목록을 불러오지 못했습니다.");
     } finally {
@@ -153,9 +156,9 @@ export const ContactAdminPage = (): JSX.Element => {
       setList((prev) => prev.map((x) => (x.id === res.data.id ? res.data : x)));
       setOpen(res.data);
       alert("답변이 저장되었습니다.");
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      if (e?.response?.status === 403) alert("관리자만 답변할 수 있습니다.");
+      if (isRecord(e) && isRecord(e.response) && e.response.status === 403) alert("관리자만 답변할 수 있습니다.");
       else alert("답변 저장 실패");
     } finally {
       setSending(false);
@@ -333,7 +336,6 @@ export const ContactAdminPage = (): JSX.Element => {
                                       className="block aspect-square overflow-hidden rounded-lg border border-gray-200"
                                       title={a.name}
                                     >
-                                      {/* eslint-disable-next-line @next/next/no-img-element */}
                                       <img src={a.url} alt={a.name ?? `image-${i}`} className="w-full h-full object-cover" />
                                     </a>
                                   ) : a.rel ? (

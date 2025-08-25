@@ -11,60 +11,48 @@ export type PromotionIdea = {
     __raw?: string;           // 서버가 저장한 원문 텍스트(변형/trim X)
 };
 
-// === 에러 타입(여러 전달 케이스를 폭넓게 커버) ===
-type IGGraphError = {
-    message?: string;
-    type?: string;
-    is_transient?: boolean;
-    code?: number;
-    error_subcode?: number;
-    error_user_title?: string;
-    error_user_msg?: string;
-};
-
-interface ApiErrorResponse {
-    response?: {
-        status?: number;
-        data?: {
-            detail?: string | { message?: string };
-            error?: IGGraphError;
-        };
-        headers?: Record<string, string>;
-    };
-    data?: { error?: IGGraphError };
-    message?: string;
-}
-
 // === 레이트리밋 감지: code === 4 또는 메시지 키워드 ===
 const isIGRateLimit = (err: unknown): boolean => {
+    const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
+
     try {
-        const e = err as ApiErrorResponse | any;
-        const code =
-            e?.response?.data?.error?.code ??
-            e?.data?.error?.code ??
-            e?.error?.code;
+        let code: number | undefined;
+        let sub: number | undefined;
+        let msgs = "";
 
-        const sub =
-            e?.response?.data?.error?.error_subcode ??
-            e?.data?.error?.error_subcode ??
-            e?.error?.error_subcode;
+        // response.data.error / data.error / error 를 순서대로 탐색
+        if (isRecord(err)) {
+            const resp = isRecord(err.response) ? err.response : undefined;
+            const respData = resp && isRecord(resp.data) ? resp.data : undefined;
+            const e1 = respData && isRecord(respData.error) ? respData.error : undefined;
 
-        const msgs = [
-            e?.response?.data?.error?.message,
-            e?.response?.data?.detail,
-            e?.message,
-            e?.toString?.(),
-        ]
-            .filter(Boolean)
-            .map(String)
-            .join(" | ")
-            .toLowerCase();
+            const data2 = isRecord(err.data) ? err.data : undefined;
+            const e2 = data2 && isRecord(data2.error) ? data2.error : undefined;
 
-        // code 4면 확정, subcode 2207051도 흔한 패턴
+            const e3 = isRecord(err.error) ? err.error : undefined;
+
+            const src = (e1 ?? e2 ?? e3) as Record<string, unknown> | undefined;
+            if (src) {
+                if (typeof src.code === "number") code = src.code;
+                if (typeof src.error_subcode === "number") sub = src.error_subcode;
+            }
+
+            const parts: string[] = [];
+            if (src && typeof src.message === "string") parts.push(src.message);
+            if (respData && typeof (respData as Record<string, unknown>).detail === "string") {
+                parts.push(String((respData as Record<string, unknown>).detail));
+            }
+            if (typeof (err as { message?: unknown }).message === "string") {
+                parts.push(String((err as { message: string }).message));
+            }
+            if (typeof (err as { toString?: () => string }).toString === "function") {
+                parts.push(String(err));
+            }
+            msgs = parts.filter(Boolean).join(" | ").toLowerCase();
+        }
+
         if (code === 4) return true;
         if (typeof sub === "number" && sub === 2207051) return true;
-
-        // 메시지 키워드 백업 체크
         if (msgs.includes("application request limit")) return true;
         if (msgs.includes("rate limit")) return true;
 
@@ -358,9 +346,9 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
             try {
                 // variants에 객체 + id/variant_id가 있을 때만 저장
                 const vs = Array.isArray(rawVariants) ? rawVariants : [];
-                const hasServerIds = vs.some(
-                    (v) => typeof v === "object" && v && ("id" in (v as any) || "variant_id" in (v as any))
-                );
+                const hasServerIds = vs.some((v) => {
+                    return typeof v === "object" && v !== null && ("id" in (v as object) || "variant_id" in (v as object));
+                });
                 if (hasServerIds) {
                     sessionStorage.setItem(STORAGE.result, JSON.stringify(fromState));
                 }
@@ -446,23 +434,36 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
             } else {
                 // 그 외는 실제 실패 가능성 높음 → 메시지 노출
                 let errorMessage = "게시 요청에 실패했습니다.";
-                const e = error as ApiErrorResponse | any;
 
-                const preferUserMsg =
-                    e?.response?.data?.error?.error_user_msg ||
-                    e?.data?.error?.error_user_msg;
+                const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
+                const getNested = (root: unknown, path: string[]): unknown => {
+                    let cur: unknown = root;
+                    for (const key of path) {
+                        if (!isRecord(cur)) return undefined;
+                        cur = cur[key];
+                    }
+                    return cur;
+                };
 
-                if (preferUserMsg) {
-                    errorMessage = String(preferUserMsg);
-                } else if (e?.response?.data?.error?.message) {
-                    errorMessage = String(e.response.data.error.message);
-                } else if (e?.response?.data?.detail) {
-                    errorMessage =
-                        typeof e.response.data.detail === "string"
-                            ? e.response.data.detail
-                            : String(e.response.data.detail?.message || "요청 처리 중 오류가 발생했습니다.");
-                } else if (typeof e?.message === "string") {
-                    errorMessage = e.message;
+                const preferUserMsg = getNested(error, ["response", "data", "error", "error_user_msg"]) ??
+                    getNested(error, ["data", "error", "error_user_msg"]);
+
+                if (typeof preferUserMsg === "string") {
+                    errorMessage = preferUserMsg;
+                } else {
+                    const apiMsg = getNested(error, ["response", "data", "error", "message"]);
+                    const detail = getNested(error, ["response", "data", "detail"]);
+                    const plainMsg = (error as { message?: unknown })?.message;
+
+                    if (typeof apiMsg === "string") {
+                        errorMessage = apiMsg;
+                    } else if (typeof detail === "string") {
+                        errorMessage = detail;
+                    } else if (typeof (detail as Record<string, unknown> | undefined)?.message === "string") {
+                        errorMessage = String((detail as Record<string, unknown>).message);
+                    } else if (typeof plainMsg === "string") {
+                        errorMessage = plainMsg;
+                    }
                 }
 
                 setModalTitle("게시 실패");
@@ -506,8 +507,8 @@ export const useGenerationPage = (ideas?: PromotionIdea[]) => {
             console.error("[handleRegenerate] Error:", error);
 
             let errorMessage = "다시 생성에 실패했습니다.";
-            if (typeof (error as any)?.message === "string") {
-                errorMessage = (error as any).message;
+            if (typeof (error as { message?: unknown })?.message === "string") {
+                errorMessage = String((error as { message: string }).message);
             }
             setModalTitle("다시 생성 실패");
             setModalMessage(errorMessage);
