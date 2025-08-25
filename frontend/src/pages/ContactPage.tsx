@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useAnimationProps, container, flyUp, fade } from "../hooks/useAnimation";
 import { Modal } from "../components/common/Modal";
 import useNavigation from "../hooks/useNavigation";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME = ["image/jpeg", "image/png"];
@@ -270,6 +271,8 @@ export const ContactPage = (): JSX.Element => {
     const t = setTimeout(() => setSuccess(false), 3000);
     return () => clearTimeout(t);
   }, [success]);
+
+  useScrollToTop();
 
   return (
     <main className="font-sans min-h-screen">
