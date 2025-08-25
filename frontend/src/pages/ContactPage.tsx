@@ -4,6 +4,7 @@ import { api } from "../api/api"; // axios 인스턴스
 import { motion } from "framer-motion";
 import { useAnimationProps, container, flyUp, fade } from "../hooks/useAnimation";
 import { Modal } from "../components/common/Modal";
+import useNavigation from "../hooks/useNavigation";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME = ["image/jpeg", "image/png"];
@@ -33,6 +34,7 @@ export const ContactPage = (): JSX.Element => {
 
   const { heroAnim } = useAnimationProps();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { goToLogin } = useNavigation();
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 B";
@@ -146,8 +148,8 @@ export const ContactPage = (): JSX.Element => {
       typeof res.data?.detail === "string"
         ? res.data.detail
         : JSON.stringify(res.data?.detail ?? {});
-    if (res.status === 401) return "로그인이 필요합니다.";
-    if (res.status === 403) return "권한이 없습니다.";
+    if (res.status === 401) return "로그인이 필요합니다. 로그인 후 다시 시도해 주세요.";
+    if (res.status === 403) return "로그인이 필요합니다. 로그인 후 다시 시도해 주세요.";
     if (context === "upload") {
       if (res.status === 413) return "파일이 서버 제한 용량을 초과합니다.";
       if (res.status === 415) return "지원하지 않는 파일 형식입니다.";
@@ -276,8 +278,13 @@ export const ContactPage = (): JSX.Element => {
         onClose={() => setModalOpen(false)}
         title={modalTitle}
         desc={modalContent}
-        confirmText="확인"
-        onConfirm={() => setModalOpen(false)}
+        confirmText={modalVariant === "danger" ? "로그인" : "확인"}
+        onConfirm={() => {
+          setModalOpen(false);
+          if (modalVariant === "danger") {
+            goToLogin();
+          }
+        }}
         variant={modalVariant as "success"}
       />
       {/* 배너 */}
