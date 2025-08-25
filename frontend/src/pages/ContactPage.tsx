@@ -29,7 +29,7 @@ export const ContactPage = (): JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalContent, setModalContent] = useState("");
-  const [modalVariant, setModalVariant] = useState<"success" | "warning" | "danger" | "info">("success");
+  const [modalVariant, setModalVariant] = useState<"success" | "warning" | "danger" | "info">("warning");
 
   const { heroAnim } = useAnimationProps();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -164,7 +164,7 @@ export const ContactPage = (): JSX.Element => {
     const form = new FormData();
     // 서버가 기대하는 필드명이 "files"인지 확인하세요. (예: Multer에서 .array("files"))
     files.forEach((f) => form.append("files", f));
-    
+
     // 1) 공통 프리픽스와 업로드 경로를 상수로 두는 걸 추천
     const API_PREFIX = "/api"; // 또는 import.meta.env.VITE_API_PREFIX ?? "/api"
     const UPLOAD_URL = `${API_PREFIX}/files/upload`; // ✅ 슬래시 포함!
@@ -272,11 +272,12 @@ export const ContactPage = (): JSX.Element => {
   return (
     <main className="font-sans min-h-screen">
       <Modal
-          open={modalOpen}
+        open={modalOpen}
         onClose={() => setModalOpen(false)}
         title={modalTitle}
         desc={modalContent}
         confirmText="확인"
+        onConfirm={() => setModalOpen(false)}
         variant={modalVariant as "success"}
       />
       {/* 배너 */}
@@ -329,9 +330,8 @@ export const ContactPage = (): JSX.Element => {
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
-                  className={`mt-2 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center cursor-pointer transition ${
-                    dropActive ? "border-emerald-300 bg-emerald-50" : "border-gray-300 hover:border-emerald-300"
-                  }`}
+                  className={`mt-2 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center cursor-pointer transition ${dropActive ? "border-emerald-300 bg-emerald-50" : "border-gray-300 hover:border-emerald-300"
+                    }`}
                   animate={
                     dropActive
                       ? { scale: 1.01, boxShadow: "0 8px 24px rgba(16,185,129,0.25)" }
