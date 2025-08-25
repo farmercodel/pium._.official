@@ -26,7 +26,7 @@ type Plan = {
 };
 
 const plans: Plan[] = [
-  { id: "free",  title: "FREE",  price: "₩0",      period: "/ 월", features: ["월 최대 1회 서비스 지원", "1가지 썸네일 템플릿 지원", "300자 이내 홍보글 생성"], cta: "시작하기" },
+  { id: "free",  title: "FREE",  price: "₩0",      period: "/ 월", features: ["첫 사용 3회 서비스 지원", "1가지 썸네일 템플릿 지원", "300자 이내 홍보글 생성"], cta: "시작하기" },
   { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "15가지 썸네일 템플릿 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원"], cta: "업그레이드", highlight: true },
   { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["월 최대 30회 서비스 지원", "30가지 썸네일 템플릿 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원", "정교한 답변"], cta: "업그레이드" },
 ];
@@ -284,7 +284,7 @@ export const PricingPage = (): JSX.Element => {
           <motion.section className="mt-14 sm:mt-16 lg:mt-20" variants={container} {...inViewAnim}>
             <motion.h2 className="text-center text-xl sm:text-2xl font-bold text-gray-800" variants={fade}>자주 묻는 질문</motion.h2>
             <motion.div className="mx-auto mt-6 max-w-3xl space-y-4" variants={container}>
-              <FaqItem q="무료로 사용할 순 없나요?" a=" 본 서비스는 월 1회 무료 홍보 피드 생성 및 인스타그램 게시 기능을 지원합니다." />
+              <FaqItem q="무료로 사용할 순 없나요?" a=" 본 서비스는 첫 사용 시 3회 무료 홍보 피드 생성 및 인스타그램 게시 기능을 지원합니다." />
               <FaqItem q="어떤 서비스를 제공 받을 수 있나요?" a=" 사용자가 가게에 대한 정보를 입력하면 AI가 자동으로 홍보글과 해시태그를 생성하고, 이를 인스타그램에 자동으로 게시할 수 있도록 지원합니다. 또한, 사용자가 게시한 첫 번째 사진 파일을 통해 템플릿 기반 썸네일 처리 기능을 제공합니다." />
               <FaqItem q="결제 방식은 어떻게 되나요?" a=" 30일 단위로 자동 갱신되는 월간 결제입니다." />
             </motion.div>
