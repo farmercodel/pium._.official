@@ -6,6 +6,7 @@ import { useAnimationProps, container, flyUp, fade } from "../hooks/useAnimation
 import { Modal } from "../components/common/Modal";
 import useNavigation from "../hooks/useNavigation";
 import { useScrollToTop } from "../hooks/useScrollToTop";
+import axios from "axios";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME = ["image/jpeg", "image/png"];
@@ -142,23 +143,52 @@ export const ContactPage = (): JSX.Element => {
   };
 
   /** 업로드/생성 실패 메시지 헬퍼 */
-  const explainAxiosError = (err: unknown, context: "upload" | "create") => {
-    const res = (err as any)?.response;
-    if (!res) return "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
-    const detail =
-      typeof res.data?.detail === "string"
-        ? res.data.detail
-        : JSON.stringify(res.data?.detail ?? {});
-    if (res.status === 401) return "로그인이 필요합니다. 로그인 후 다시 시도해 주세요.";
-    if (res.status === 403) return "로그인이 필요합니다. 로그인 후 다시 시도해 주세요.";
-    if (context === "upload") {
-      if (res.status === 413) return "파일이 서버 제한 용량을 초과합니다.";
-      if (res.status === 415) return "지원하지 않는 파일 형식입니다.";
-      if (res.status >= 500) return `파일 저장 서버 오류: ${detail}`;
-      return `파일 업로드 실패: ${detail}`;
+  const explainAxiosError = (err: unknown, context: "upload" | "create"): string => {
+    if (axios.isAxiosError(err)) {
+      const res = err.response;
+      if (!res) {
+        return "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+      }
+
+      // 서버에서 내려주는 오류 메시지 추출 (FastAPI 등에서 흔한 detail 필드 우선)
+      let detailMessage = "알 수 없는 오류가 발생했습니다.";
+      if (res.data) {
+        if (typeof res.data.detail === 'string') {
+          detailMessage = res.data.detail;
+        } else if (typeof res.data.message === 'string') { // 'message' 필드도 확인
+          detailMessage = res.data.message;
+        } else if (typeof res.data === 'string') {
+          detailMessage = res.data;
+        } else {
+          try {
+            const parsed = JSON.stringify(res.data.detail ?? res.data);
+            if (parsed !== '{}') detailMessage = parsed;
+          } catch {
+            // JSON 직렬화 실패 시 무시
+          }
+        }
+      }
+
+      if (res.status === 401 || res.status === 403) {
+        return "로그인이 필요합니다. 로그인 후 다시 시도해 주세요.";
+      }
+
+      if (context === "upload") {
+        if (res.status === 413) return "파일이 서버 제한 용량을 초과합니다. (최대 10MB)";
+        if (res.status === 415) return "지원하지 않는 파일 형식입니다. (JPG, PNG만 가능)";
+        if (res.status >= 500) return `파일 저장 중 서버 오류가 발생했습니다: ${detailMessage}`;
+        return `파일 업로드에 실패했습니다: ${detailMessage}`;
+      }
+
+      if (res.status >= 500) return `서버 오류가 발생했습니다: ${detailMessage}`;
+      return `문의 저장에 실패했습니다: ${detailMessage}`;
     }
-    if (res.status >= 500) return `서버 오류: ${detail}`;
-    return `문의 저장 실패: ${detail}`;
+
+    if (err instanceof Error) {
+      return err.message;
+    }
+
+    return "알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
   };
 
   /** 파일 모두 업로드 */
@@ -185,7 +215,7 @@ export const ContactPage = (): JSX.Element => {
     }
 
     // 케이스 A: { ok, files }
-    if (res.data && (res.data as any).files) {
+    if (res.data && 'files' in res.data) {
       const d = res.data as { ok?: boolean; files?: UploadedFile[] };
       if (d.ok === false) throw new Error("파일 업로드 실패");
       return Array.isArray(d.files) ? d.files : [];
@@ -227,22 +257,16 @@ export const ContactPage = (): JSX.Element => {
       setSuccess(true);
       setMessage("");
       setFiles([]);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (err: any) {
-      alert(explainAxiosError(err, "create"));
-    } finally {
-      setLoading(false);
-    }
-  };
       // 1) 파일 업로드 (있을 경우)
       let uploaded: UploadedFile[] = [];
       try {
         uploaded = await uploadAll();
-      } catch (err: any) {
+      } catch (err) {
         setModalTitle("파일 업로드 실패");
         setModalContent(explainAxiosError(err, "upload"));
         setModalVariant("danger");
         setModalOpen(true);
+        setLoading(false); // 로딩 중단
         return; // 업로드 실패 시 문의 생성 중단
       }
 
@@ -253,7 +277,10 @@ export const ContactPage = (): JSX.Element => {
           const urlPart = f.url ? f.url : `(presign key: ${f.rel})`;
           return `- ${urlPart} (${f.filename}, ${formatBytes(f.size)})`;
         });
-        payload += `\n\n[첨부파일]\n${attachLines.join("\n")}`;
+        payload += `
+
+[첨부파일]
+${attachLines.join("\n")}`;
       }
 
       // 3) 문의 생성
@@ -263,11 +290,12 @@ export const ContactPage = (): JSX.Element => {
           { question: payload },
           { headers: { "Content-Type": "application/json" } }
         );
-      } catch (err: any) {
+      } catch (err) {
         setModalTitle("문의 저장 실패");
         setModalContent(explainAxiosError(err, "create"));
         setModalVariant("danger");
         setModalOpen(true);
+        setLoading(false); // 로딩 중단
         return;
       }
 

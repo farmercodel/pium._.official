@@ -11,6 +11,9 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))  # backend/ 를 sys.path에 추가
 from app.db.database import Base
 import app.models.ad  # 모델 모듈 import해서 Base.metadata에 테이블 등록
+import app.models.user
+import app.models.inquiry
+import app.models.inquiry_file
 
 # 이 줄은 Alembic 기본 로깅
 config = context.config
