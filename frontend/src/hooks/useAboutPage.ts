@@ -14,7 +14,7 @@ export const defaultTeamMembers: TeamMember[] = [
   {
     name: "오인화",
     role: "Backend, King",
-    description: "아무것도 잘 풀리지 않지만 허공을 향해 따봉을 날리는 따봉도치",
+    description: "아무것도 잘 된 게 없지만 허공을 향해 따봉을 날리는 따봉도치",
     email: "givemehome@kakao.com",
     photo: "TeamMember/Inwha.jpg",
   },
@@ -23,6 +23,7 @@ export const defaultTeamMembers: TeamMember[] = [
     role: "Frontend, 채채주인",
     email: "leeys4903@naver.com",
     description: "텅장 시간부자 vs 통장 시간거지",
+    photo: "TeamMember/chaechae.jpg"
   },
   {
     name: "김태연",
