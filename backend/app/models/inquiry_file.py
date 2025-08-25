@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP
+from sqlalchemy import Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP, text
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
@@ -11,6 +11,6 @@ class InquiryFile(Base):
     url = Column(String(1024), nullable=False)
     content_type = Column(String(100))
     size = Column(BigInteger)
-    created_at = Column(TIMESTAMP, server_default="CURRENT_TIMESTAMP")
+    created_at = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))
 
     inquiry = relationship("Inquiry", back_populates="files")

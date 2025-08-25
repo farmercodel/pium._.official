@@ -8,7 +8,7 @@ from app.models.user import User
 from app.schemas.inquiry_schemas import InquiryCreate, InquiryAnswer, InquiryResponse
 from app.repository.inquiry_repo import InquiryRepository
 from app.api.auth import get_current_user
-from app.repository.inquiriy_file_repo import InquiryFileRepository  # 로그인 유저 가져오기
+from app.repository.inquiry_file_repo import InquiryFileRepository  # 로그인 유저 가져오기
 
 router = APIRouter(prefix="/inquiries", tags=["Inquiries"])
 
@@ -29,22 +29,34 @@ async def create_inquiry(
 
     # 2) 파일 업로드 처리
     uploaded_files = []
+    UPLOAD_DIRECTORY = "app/uploads"
+    if not os.path.exists(UPLOAD_DIRECTORY):
+        os.makedirs(UPLOAD_DIRECTORY)
+
     for f in files:
-        # 여기서 실제 서버나 S3 등에 업로드 후 url 생성
-        url = f"/uploads/{f.filename}"  # 예시, 실제 URL은 업로드 위치에 따라 달라짐
+        file_extension = os.path.splitext(f.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        file_location = os.path.join(UPLOAD_DIRECTORY, unique_filename)
+        with open(file_location, "wb+") as file_object:
+            file_object.write(f.file.read())
+        
+        url = f"/uploads/{unique_filename}" # Use the unique filename for the URL
         uploaded_files.append(file_repo.create(
             inquiry_id=inquiry.id,
             filename=f.filename,
             content_type=f.content_type,
-            size=f.spool_max_size,
+            size=f.size,
             url=url
         ))
 
-    return {
-        "inquiry_id": inquiry.id,
-        "question": inquiry.question,
-        "files": [{"filename": f.filename, "url": f.url} for f in uploaded_files]
-    }
+    return InquiryResponse(
+        id=inquiry.id,
+        user_id=inquiry.user_id,
+        question=inquiry.question,
+        answer=inquiry.answer,
+        created_at=inquiry.created_at,
+        answered_at=inquiry.answered_at
+    )
 
 # 문의 목록 조회
 @router.get("/", response_model=List[InquiryResponse])

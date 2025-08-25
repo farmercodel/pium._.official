@@ -8,7 +8,7 @@ class Inquiry(Base):
     __tablename__ = "inquiries"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     question = Column(Text, nullable=False)
     answer = Column(Text, nullable=True)  # 관리자가 답변 달면 저장됨
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
