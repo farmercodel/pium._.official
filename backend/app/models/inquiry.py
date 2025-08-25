@@ -15,3 +15,4 @@ class Inquiry(Base):
     answered_at = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="inquiries")
+    files = relationship("InquiryFile", back_populates="inquiry")

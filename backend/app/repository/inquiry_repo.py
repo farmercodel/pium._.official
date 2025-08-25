@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 from app.models.inquiry import Inquiry
 from sqlalchemy.orm import Session
+from app.models.inquiry_file import InquiryFile
 
 class InquiryRepository:
     def __init__(self, db: Session):

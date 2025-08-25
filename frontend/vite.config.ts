@@ -12,7 +12,8 @@ export default defineConfig({
     host: true,
     port: 5173,     
     proxy: {
-      '/api':   { target: 'http://backend:8000', changeOrigin: true },
+      //임의로 localhost
+      '/api':   { target: 'http://localhost:8000', changeOrigin: true },
       '/health':{ target: 'http://backend:8000', changeOrigin: true },
     },
   },
