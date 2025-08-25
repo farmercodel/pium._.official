@@ -26,7 +26,7 @@ type Plan = {
 };
 
 const plans: Plan[] = [
-  { id: "free",  title: "FREE",  price: "₩0",      period: "/ 월", features: ["첫 사용 3회 서비스 지원", "1가지 썸네일 템플릿 지원", "300자 이내 홍보글 생성"], cta: "시작하기" },
+  { id: "free",  title: "FREE",  price: "₩0",      period: "/ 월", features: ["처음 3회 무료 서비스 지원", "1가지 썸네일 템플릿 지원", "300자 이내 홍보글 생성"], cta: "시작하기" },
   { id: "basic", title: "BASIC", price: "₩5,500",  period: "/ 월", features: ["월 최대 10회 서비스 지원", "15가지 썸네일 템플릿 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원"], cta: "업그레이드", highlight: true },
   { id: "pro",   title: "PRO",   price: "₩9,900",  period: "/ 월", features: ["월 최대 30회 서비스 지원", "30가지 썸네일 템플릿 지원", "홍보글 글자수 지정 기능 지원", "답변 톤 선택 기능 지원", "정교한 답변"], cta: "업그레이드" },
 ];
