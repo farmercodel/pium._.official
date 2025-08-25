@@ -48,16 +48,16 @@ function Header() {
         admin: goToAdmin,
         generation: goToGeneration,
         result: goToResult,
-        login: goToLogin, 
+        login: goToLogin,
         'sign up': goToSignUp,
         plans: goToPlans,
         watchDemo: () => setVideoModalOpen(true),
     } as const;
 
     const AUTH_BTN = {
-    primary: "w-full rounded-xl bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),_0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200",
-    secondary: "w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm",
-    logout: "w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm"
+        primary: "w-full rounded-xl bg-[linear-gradient(90deg,#cfe89b_0%,#8fd77e_52%,#19c6d3_100%)] text-white font-semibold shadow-[0_10px_15px_rgba(0,0,0,0.1),_0_4px_6px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200",
+        secondary: "w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm",
+        logout: "w-full rounded-xl bg-white text-emerald-700 ring-1 ring-gray-200 hover:ring-emerald-200 shadow-sm"
     } as const;
 
 
@@ -146,7 +146,7 @@ function Header() {
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50">
+                                        <div className="grid divide-x divide-gray-900/5 bg-gray-50">
                                             {POPUP_ACTION_ITEMS.map((item) => (
                                                 <div key={item.name}
                                                     onClick={() => handleItemClick(item.navigationText as keyof typeof navigationMap, close)}
@@ -247,35 +247,35 @@ function Header() {
 
                                     {/* Mobile 하단 Auth */}
                                     {authChecked && (
-                                    <div className="mt-4 -mx-3 px-3 flex flex-col gap-2">
-                                        {user ? (
-                                        <Button
-                                            variant="custom"
-                                            className={AUTH_BTN.logout}
-                                            onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                                        >
-                                            로그아웃
-                                        </Button>
-                                        ) : (
-                                        <>
-                                            <Button
-                                            variant="custom"
-                                            className={AUTH_BTN.primary}
-                                            onClick={() => { handleItemClick('login'); setMobileMenuOpen(false); }}
-                                            >
-                                            Login
-                                            </Button>
+                                        <div className="mt-4 -mx-3 px-3 flex flex-col gap-2">
+                                            {user ? (
+                                                <Button
+                                                    variant="custom"
+                                                    className={AUTH_BTN.logout}
+                                                    onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                                                >
+                                                    로그아웃
+                                                </Button>
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        variant="custom"
+                                                        className={AUTH_BTN.primary}
+                                                        onClick={() => { handleItemClick('login'); setMobileMenuOpen(false); }}
+                                                    >
+                                                        Login
+                                                    </Button>
 
-                                            <Button
-                                            variant="custom"
-                                            className={AUTH_BTN.secondary}
-                                            onClick={() => { handleItemClick('sign up'); setMobileMenuOpen(false); }}
-                                            >
-                                            Sign Up
-                                            </Button>
-                                        </>
-                                        )}
-                                    </div>
+                                                    <Button
+                                                        variant="custom"
+                                                        className={AUTH_BTN.secondary}
+                                                        onClick={() => { handleItemClick('sign up'); setMobileMenuOpen(false); }}
+                                                    >
+                                                        Sign Up
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </div>

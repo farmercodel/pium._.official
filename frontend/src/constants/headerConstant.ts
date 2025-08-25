@@ -3,7 +3,7 @@ import {
     BookOpenIcon,
 } from '@heroicons/react/24/outline'
 
-import { PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
+import { PlayCircleIcon } from '@heroicons/react/20/solid'
 
 const LOGO_ITEMS = {
     name: 'LOGO',
@@ -58,11 +58,6 @@ const POPUP_ACTION_ITEMS = [
         name: 'Watch demo', 
         navigationText: 'watchDemo', 
         icon: PlayCircleIcon 
-    },
-    { 
-        name: 'Contact sales', 
-        navigationText: 'main', 
-        icon: PhoneIcon 
     },
 ] as const
 
